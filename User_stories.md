@@ -39,3 +39,43 @@ Acceptance criteria:
 - User can post a comment on a book.
 - Comments show the author username and timestamp.
 - All users can view comments on the book detail page.
+
+## US-05: Create a Personal Reading List
+
+As a reader, I want to save books to my personal reading list so that I can keep track of books I want to read or am currently reading.
+
+Acceptance criteria:
+
+- User can add a book to their personal reading list.
+- User can remove a book from their personal reading list.
+- The reading list is visible from the user’s account or profile page.
+
+## US-06: Search for Books
+
+As a reader, I want to search for books by title or author so that I can quickly find books I am interested in.
+
+Acceptance criteria:
+
+- User can enter a keyword into a search bar.
+- The system returns books with matching titles or authors.
+- User can open a book detail page from the search results.
+
+## US-07: Explore the Website Without Logging In
+
+As a visitor, I want to explore the website without logging in so that I can understand its purpose and features before creating an account.
+
+Acceptance criteria:
+
+- Visitor can access public pages such as the home page and shared library without logging in.
+- Visitor can view basic book information and community content that is publicly available.
+- Visitor can clearly see options to sign up or log in when they want to interact with the website.
+
+## US-08: Create an Account and Log In
+
+As a new user, I want to create an account and log in so that I can save my reading activity and interact with the community.
+
+Acceptance criteria:
+
+- User can register with a username, email, and password.
+- User can log in with valid account details.
+- After logging in, the user can access features that require an account, such as liking, rating, and commenting.S
