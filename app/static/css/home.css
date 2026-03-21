@@ -1,0 +1,266 @@
+/* Hero */
+.hero-section {
+    text-align: center;
+    padding: 32px 0 8px;
+}
+
+.hero-content {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    color: #000000;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #232121;
+    margin: 0;
+}
+
+/* Section titles */
+.section-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.section-icon {
+    font-size: 1.1rem;
+    color: #10b981;
+    line-height: 1;
+}
+
+.section-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #000000;
+    margin: 0;
+}
+
+/* Trending grid */
+.trending-books-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+}
+
+.trending-book-card {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.trending-book-card:hover {
+    transform: translateY(-4px);
+}
+
+.book-cover-wrapper {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: #171717;
+    margin-bottom: 10px;
+}
+
+.book-cover {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.book-meta {
+    padding: 0 2px;
+}
+
+.book-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 6px;
+    line-height: 1.4;
+}
+
+.book-author {
+    font-size: 0.82rem;
+    color: #a3a3a3;
+    margin: 0;
+}
+
+/* Bottom two-column layout */
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.most-read-column,
+.reviews-column {
+    min-width: 0;
+}
+
+/* Most Read cards */
+.most-read-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.most-read-card {
+    background-color: #171717;
+    border: 1px solid #262626;
+    border-radius: 16px;
+    padding: 18px 20px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.most-read-card:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+}
+
+.most-read-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+}
+
+.rank-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #404040;
+    min-width: 44px;
+    line-height: 1;
+}
+
+.most-read-info {
+    flex: 1;
+}
+
+.book-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.book-stats span {
+    font-size: 0.85rem;
+    color: #a3a3a3;
+}
+
+/* Review cards */
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.review-card {
+    background-color: #171717;
+    border: 1px solid #262626;
+    border-radius: 16px;
+    padding: 18px 20px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.review-card:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    transform: translateY(-2px);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.review-user-info {
+    min-width: 0;
+}
+
+.review-username {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 4px;
+}
+
+.review-book-title {
+    font-size: 0.85rem;
+    color: #a3a3a3;
+    margin: 0;
+}
+
+.review-stars {
+    font-size: 0.9rem;
+    color: #facc15;
+    white-space: nowrap;
+}
+
+.review-text {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #d4d4d4;
+    margin: 0 0 10px;
+}
+
+.review-time {
+    font-size: 0.78rem;
+    color: #737373;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .trending-books-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .bottom-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .home-page {
+        padding: 32px 20px 48px;
+    }
+
+    .trending-books-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    .most-read-card,
+    .review-card {
+        padding: 16px;
+    }
+}
