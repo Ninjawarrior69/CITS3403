@@ -78,4 +78,44 @@ Acceptance criteria:
 
 - User can register with a username, email, and password.
 - User can log in with valid account details.
-- After logging in, the user can access features that require an account, such as liking, rating, and commenting.S
+- After logging in, the user can access features that require an account, such as liking, rating, and commenting.
+
+## US-09: Follow Other Users
+
+As a user, I want to be able to follow other users so that I can easily view my friends and favourite users profiles. 
+
+Acceptance criteria:
+
+- User can follow other users through their profile.
+- User can view following list to easily access these accounts.
+- User can remove or block unwanted followers. 
+
+## US-10: Edit Profile
+
+As a user, I want to be able to edit my profile at any time so that I can keep it up to date. 
+
+Acceptance criteria: 
+
+- User can change edit features such as name, email, bio, picture. 
+- User can change password.
+- User can change which favourite books are displayed on their profile.
+
+## US-11: View Reading Statistics
+
+As a user, I want to be able to view statistics for each of my bookshelves. 
+
+Acceptance criteria:
+
+- Number of books in Read, Currently Reading, To Be Read, Did Not Finish shelves displayed on profile.
+- Users can click on these sections to access full list of books.
+- Number will update as books are added and removed from shelves.
+
+## US-12: Display Favourite Books on Profile
+
+As a user, I want to be able to display my favourite books on my profile to show current interests. 
+
+Acceptance criteria:
+
+- User can add top 4 favourite books to profile.
+- Books will be under Favourite Books section header.
+- Can be edited at any time to reflect current favourites.
