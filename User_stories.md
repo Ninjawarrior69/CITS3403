@@ -119,3 +119,13 @@ Acceptance criteria:
 - User can add top 4 favourite books to profile.
 - Books will be under Favourite Books section header.
 - Can be edited at any time to reflect current favourites.
+
+## US-13: Track Reading Progress
+
+As a user, I want to be able to keep track of what page I am up to for books I am currently reading. 
+
+Acceptance criteria:
+
+- Progress bar is displayed for currently reading books.
+- Page number can be entered to track progress.
+- Book length will be retrieved from API to calculate progress percentage. 
