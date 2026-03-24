@@ -39,3 +39,93 @@ Acceptance criteria:
 - User can post a comment on a book.
 - Comments show the author username and timestamp.
 - All users can view comments on the book detail page.
+
+## US-05: Create a Personal Reading List
+
+As a reader, I want to save books to my personal reading list so that I can keep track of books I want to read or am currently reading.
+
+Acceptance criteria:
+
+- User can add a book to their personal reading list.
+- User can remove a book from their personal reading list.
+- The reading list is visible from the user’s account or profile page.
+
+## US-06: Search for Books
+
+As a reader, I want to search for books by title or author so that I can quickly find books I am interested in.
+
+Acceptance criteria:
+
+- User can enter a keyword into a search bar.
+- The system returns books with matching titles or authors.
+- User can open a book detail page from the search results.
+
+## US-07: Explore the Website Without Logging In
+
+As a visitor, I want to explore the website without logging in so that I can understand its purpose and features before creating an account.
+
+Acceptance criteria:
+
+- Visitor can access public pages such as the home page and shared library without logging in.
+- Visitor can view basic book information and community content that is publicly available.
+- Visitor can clearly see options to sign up or log in when they want to interact with the website.
+
+## US-08: Create an Account and Log In
+
+As a new user, I want to create an account and log in so that I can save my reading activity and interact with the community.
+
+Acceptance criteria:
+
+- User can register with a username, email, and password.
+- User can log in with valid account details.
+- After logging in, the user can access features that require an account, such as liking, rating, and commenting.
+
+## US-09: Follow Other Users
+
+As a user, I want to be able to follow other users so that I can easily view my friends and favourite users profiles. 
+
+Acceptance criteria:
+
+- User can follow other users through their profile.
+- User can view following list to easily access these accounts.
+- User can remove or block unwanted followers. 
+
+## US-10: Edit Profile
+
+As a user, I want to be able to edit my profile at any time so that I can keep it up to date. 
+
+Acceptance criteria: 
+
+- User can change edit features such as name, email, bio, picture. 
+- User can change password.
+- User can change which favourite books are displayed on their profile.
+
+## US-11: View Reading Statistics
+
+As a user, I want to be able to view statistics for each of my bookshelves. 
+
+Acceptance criteria:
+
+- Number of books in Read, Currently Reading, To Be Read, Did Not Finish shelves displayed on profile.
+- Users can click on these sections to access full list of books.
+- Number will update as books are added and removed from shelves.
+
+## US-12: Display Favourite Books on Profile
+
+As a user, I want to be able to display my favourite books on my profile to show current interests. 
+
+Acceptance criteria:
+
+- User can add top 4 favourite books to profile.
+- Books will be under Favourite Books section header.
+- Can be edited at any time to reflect current favourites.
+
+## US-13: Track Reading Progress
+
+As a user, I want to be able to keep track of what page I am up to for books I am currently reading. 
+
+Acceptance criteria:
+
+- Progress bar is displayed for currently reading books.
+- Page number can be entered to track progress.
+- Book length will be retrieved from API to calculate progress percentage. 
