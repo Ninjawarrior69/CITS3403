@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+  </head>
+  <body>
+    <main>
+      <section>
+        <nav aria-label="Authentication pages">
+          <a href="login.html" aria-current="page">Sign In</a>
+          <a href="signup.html">Sign Up</a>
+        </nav>
+
+        <h1>Sign In</h1>
+
+        <form action="#" method="post">
+          <div>
+            <label for="login-identifier">Email or Username</label>
+            <input
+              id="login-identifier"
+              type="text"
+              name="identifier"
+              placeholder="Enter your email or username"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="login-password">Password</label>
+            <input
+              id="login-password"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <p>
+            <a href="#">Forgot password?</a>
+          </p>
+
+          <button type="submit">Sign In</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
