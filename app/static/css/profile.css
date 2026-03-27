@@ -81,3 +81,11 @@ p, span, hr {
     background-color: #768E78;
     color: #3D2F2A;
 }
+
+.btn-follow {
+    background: none;
+    border: none;
+    color: #3D2F2A;
+    padding: 0;
+    margin-right: 20px;
+}
