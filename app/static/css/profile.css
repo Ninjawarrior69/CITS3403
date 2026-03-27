@@ -1,0 +1,83 @@
+body {
+    background-color: #F6EFD8;
+}
+
+a {
+    color:#000000;
+    text-decoration: none;
+}
+
+.read-icon {
+    color: #E79897;
+    font-size: 1.25rem;
+}
+
+.cr-icon {
+    color: #DB9673;
+    font-size: 1.25rem;
+}
+
+.tbr-icon {
+    color: #768E78;
+    font-size: 1.25rem;
+}
+
+.dnf-icon {
+    color: #E79897;
+    font-size: 1.25rem;
+}
+
+p, span, hr {
+    color: #3D2F2A;
+}
+
+.star {
+    color: #FCAC83;
+}
+
+/* Container size */
+.container {
+    max-width: 1100px;
+    padding-left: 40px; 
+    padding-right: 40px;
+}
+
+/* Stats containers */
+.stats {
+    text-align: left;
+    color: #000000;
+    padding: 20px;
+    height: 140px;
+    border-radius: 8px;
+}
+
+/* Profile pic placeholder */
+.profile-pic-placeholder {
+    width: 175px;
+    height: 175px;
+    border-radius: 50%;
+    background-color: #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: inline-block;
+    object-fit: cover;
+}
+
+/* Book placeholders */
+.book-card {
+    width: 100%;
+    height: 330px;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+.mini-book-card {
+    width: 145px;
+    height: 220px;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+.btn-primary {
+    background-color: #768E78;
+    color: #3D2F2A;
+}
