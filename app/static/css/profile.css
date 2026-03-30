@@ -1,3 +1,15 @@
+.btn-primary {
+    background-color: #768E784D;
+    color: #3D2F2A;
+    border-color: #768E78;
+}
+
+.btn-primary-active,
+.btn-primary:hover {
+    background-color: #768E78 !important;
+    border-color: #768E78 !important;
+}
+
 /* Rating star */
 .star {
     color: #FCAC83;
@@ -44,6 +56,16 @@
     object-fit: cover;
 }
 
+.mini-profile-pic-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: inline-block;
+    object-fit: cover;
+}
+
 /* Book placeholders */
 .book-card {
     width: 100%;
@@ -55,6 +77,13 @@
 .mini-book-card {
     width: 145px;
     height: 220px;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+.mini-book-card-edit {
+    width: 100%;
+    aspect-ratio: 2/3;
     background-color: #e5e5e5;
     border-radius: 8px;
 }
@@ -72,4 +101,74 @@
 .edit-icon {
     font-size: 0.8em;
     opacity: 0.7;
+}
+
+/* Camera button */
+.edit-pic-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background-color: #E79897;
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.edit-pic-btn:hover {
+    background-color: #d87c7b;
+}
+
+.profile-form label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    border-radius: 8px;
+    background-color: #f5efe0;
+    border-color: #3D2F2A4D;
+    padding: 10px;
+    height: 35px;
+    width: 300px;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    justify-content: end;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#modal-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
 }
