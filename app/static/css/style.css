@@ -20,3 +20,26 @@ a {
 p, hr {
     color: #3D2F2A;
 }
+
+.navbar {
+    background-color: #768E78;
+    color: #F6EFD8;
+}
+
+.site-name {
+    font-family: 'Afacad', sans-serif;
+    color: #F6EFD8;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #768E784D;
+    color: #3D2F2A;
+    border-color: #768E78;
+}
+
+.btn-primary-active,
+.btn-primary:hover {
+    background-color: #768E78 !important;
+    border-color: #768E78 !important;
+}
