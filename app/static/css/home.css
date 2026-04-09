@@ -1,21 +1,12 @@
 /* Page base */
-body {
-    background-color:#F6EFD8 ;
-    color: #3d2f2a;
-    font-family: 'Inter';
-    margin: 0;
-    padding: 0;
-}
-
 .home-page {
-    background-color: #F6EFD8;
     max-width: 1440px;
     margin: 0 auto;
     padding: 48px 80px 72px;
     box-sizing: border-box;
 }
 
-section {
+.home-page section {
     margin-bottom: 72px;
 }
 
@@ -31,7 +22,6 @@ section {
 }
 
 .hero-title {
-    font-family: 'Inter';
     font-size: 3rem;
     font-weight: 500;
     line-height: 1.2;
@@ -61,7 +51,6 @@ section {
 }
 
 .section-title {
-    font-family: 'Inter';
     font-size: 1.7rem;
     font-weight: 700;
     color: #000000;
@@ -141,7 +130,7 @@ section {
 .most-read-card {
     display: flex;
     align-items: flex-start;
-    gap: 18xp;
+    gap: 18px;
     background-color: rgba(252, 172, 131, 0.18);
     border: 1px solid rgba(61, 47, 42, 0.08);
     border-radius: 16px;
