@@ -22,3 +22,23 @@
 .auth-card .btn {
   color: var(--black);
 }
+
+.auth-card {
+  width: min(100%, 440px) !important;
+  border-radius: 0.5rem;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+.auth-page {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--primary-yellow);
+}
+
+.auth-page .primary-yellow-bg {
+  background-color: transparent;
+}
