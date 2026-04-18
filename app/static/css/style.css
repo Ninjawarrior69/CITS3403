@@ -1,3 +1,47 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --primary-yellow: #f6efd8;
+  --secondary-green: #768e78;
+  --black: #000;
+}
+
+/* Global Colours */
+.primary-yellow-bg {
+  background-color: var(--primary-yellow);
+}
+
+.primary-green-bg {
+  background-color: var(--secondary-green);
+}
+
+.auth-card,
+.auth-card .form-label,
+.auth-card .nav-link,
+.auth-card a,
+.auth-card .btn {
+  color: var(--black);
+}
+
+.auth-card {
+  width: min(100%, 440px) !important;
+  border-radius: 0.5rem;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+.auth-page {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--primary-yellow);
+}
+
+.auth-page .primary-yellow-bg {
+  background-color: transparent;
+}
 body {
     background-color: #F6EFD8;
     font-family: 'Inter', sans-serif;
