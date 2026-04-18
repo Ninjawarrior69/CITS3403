@@ -1,0 +1,143 @@
+.btn-follow {
+    background: none;
+    border: none;
+    color: #3D2F2A;
+    padding: 0;
+    margin-right: 20px;
+}
+
+/* Rating star */
+.star {
+    color: #FCAC83;
+}
+
+/* Stats card icons */
+.read-icon {
+    color: #E79897;
+    font-size: 1.25rem;
+}
+
+.cr-icon {
+    color: #DB9673;
+    font-size: 1.25rem;
+}
+
+.tbr-icon {
+    color: #97916F;
+    font-size: 1.25rem;
+}
+
+.dnf-icon {
+    color: #E79897;
+    font-size: 1.25rem;
+}
+
+/* Stats card */
+.stats {
+    text-align: left;
+    color: #000000;
+    padding: 20px;
+    height: 140px;
+    border-radius: 8px;
+}
+
+/* Profile pic placeholder */
+.profile-pic-placeholder {
+    width: 175px;
+    height: 175px;
+    border-radius: 50%;
+    background-color: #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: inline-block;
+    object-fit: cover;
+}
+
+.mini-profile-pic-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #ddd;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: inline-block;
+    object-fit: cover;
+}
+
+/* Book placeholders */
+.book-card {
+    width: 100%;
+    height: 330px;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+.mini-book-card {
+    width: 145px;
+    height: 220px;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+.mini-book-card-edit {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+/* Edit profile icon */
+.edit-icon {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.profile-form label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.form-control {
+    border-radius: 8px;
+    background-color: #f5efe0;
+    border-color: #3D2F2A4D;
+    padding: 10px;
+    height: 35px;
+    width: 350px;
+}
+
+.books-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    justify-content: end;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 300px;
+    border-radius: 8px;
+}
+
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#modal-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}

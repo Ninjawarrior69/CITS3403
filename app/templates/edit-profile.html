@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Edit Profile</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+        <link rel="stylesheet" href="../static/css/style.css">
+        <link rel="stylesheet" href="../static/css/profile.css">
+    </head>
+    <body>
+        <div class="container py-5">
+            <h4 class="mb-2">Edit Profile</h4>
+            <br>
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Edit Image -->
+                    <div class="mini-profile-pic-placeholder mx-auto">
+                    </div>
+                    <!-- Details -->
+                    <div class="profile-form mt-4 text-start">
+                        <label>Name</label>
+                        <input class="form-control mb-3">
+                        <label>Username</label>
+                        <input class="form-control mb-3">
+                        <label>Bio</label>
+                        <textarea class="form-control mb-3"></textarea>
+                        <label>Email Address</label>
+                        <input class="form-control mb-3">
+                        <button class="btn btn-primary btn-sm mt-3">Save Changes</button>
+                    </div>
+                </div>
+                <div class="col-md-5 ms-auto">
+                    <!-- Favourite Books -->
+                    <div>
+                        <label class="mb-2">Favourite Books</label>
+                        <div class="books-grid">
+                            <div class="mini-book-card-edit"></div>
+                            <div class="mini-book-card-edit"></div>
+                            <div class="mini-book-card-edit"></div>
+                            <div class="mini-book-card-edit"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
