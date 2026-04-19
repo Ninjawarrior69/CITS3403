@@ -1,8 +1,9 @@
 # CITS3403 Group Project
 
-## Overview 
+## Overview
 
-## Team 
+## Team
+
 <div>
   <table text-align: center;>
     <tr>
@@ -29,5 +30,20 @@
 </div>
 
 ## Run Application
+
+1. Create/activate a virtual environment.
+2. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Start the Flask development server:
+
+```bash
+python run.py
+```
+
+4. Open http://127.0.0.1:5000 in your browser.
 
 ## Run Tests
