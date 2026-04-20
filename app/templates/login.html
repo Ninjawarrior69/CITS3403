@@ -25,10 +25,13 @@
       <section class="auth-card card shadow-sm w-50 mx-auto primary-green-bg">
         <div class="card-body p-4 p-md-5">
           <nav class="nav nav-fill auth-tabs" aria-label="Authentication pages">
-            <a class="nav-link active" href="login.html" aria-current="page"
+            <a
+              class="nav-link active"
+              href="{{ url_for('login') }}"
+              aria-current="page"
               >Sign In</a
             >
-            <a class="nav-link" href="signup.html">Sign Up</a>
+            <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
           </nav>
 
           <h1 class="visually-hidden">Sign In</h1>
