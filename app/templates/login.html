@@ -26,6 +26,14 @@
     >
       <section class="auth-card card shadow-sm w-50 mx-auto">
         <div class="card-body p-4 p-md-5">
+          <nav class="nav nav-fill auth-tabs" aria-label="Authentication pages">
+            <a
+              class="nav-link active"
+              href="{{ url_for('login') }}"
+              aria-current="page"
+              >Sign In</a
+            >
+            <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
             <div class="heading">
                 <h3><a class="site-name" href="home.html">BookWorm</a></h3>
                 <p style="color:#6B5D56">Welcome back! Sign in to continue</p>

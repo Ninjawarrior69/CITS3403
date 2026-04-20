@@ -32,6 +32,14 @@
           <nav class="nav nav-fill auth-tabs login-box" aria-label="Authentication pages">
             <a class="nav-link signup-left" href="login.html">Sign In</a>
             <a class="nav-link active signup-right" href="signup.html" aria-current="page">Sign Up</a>
+          <nav class="nav nav-fill auth-tabs" aria-label="Authentication pages">
+            <a class="nav-link" href="{{ url_for('login') }}">Sign In</a>
+            <a
+              class="nav-link active"
+              href="{{ url_for('signup') }}"
+              aria-current="page"
+              >Sign Up</a
+            >
           </nav>
 
           <h1 class="visually-hidden">Create Account</h1>
