@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("./home.css");
+@import url("./profile.css");
 
 :root {
   --primary-yellow: #f6efd8;
@@ -43,47 +45,48 @@ body {
   background-color: transparent;
 }
 body {
-    background-color: #F6EFD8;
-    font-family: 'Inter', sans-serif;
+  background-color: #f6efd8;
+  font-family: "Inter", sans-serif;
 }
 
 /* Main content container size */
 .container {
-    max-width: 1100px;
-    padding-left: 40px; 
-    padding-right: 40px;
+  max-width: 1100px;
+  padding-left: 40px;
+  padding-right: 40px;
 }
 
 /* Hyperlink */
 a {
-    color:#000000;
-    text-decoration: none;
+  color: #000000;
+  text-decoration: none;
 }
 
 /* Text and divider */
-p, hr {
-    color: #3D2F2A;
+p,
+hr {
+  color: #3d2f2a;
 }
 
 .navbar {
-    background-color: #768E78;
-    color: #F6EFD8;
+  background-color: #768e78;
+  color: #f6efd8;
 }
 
 .site-name {
-    font-family: 'Afacad', sans-serif;
-    color: #F6EFD8;
+  font-family: "Afacad", sans-serif;
+  color: #f6efd8;
 }
 
 /* Buttons */
 .btn-primary {
-    background-color: #768E784D;
-    color: #3D2F2A;
-    border-color: #768E78;
+  background-color: #768e784d;
+  color: #3d2f2a;
+  border-color: #768e78;
 }
 
 .btn-primary-active,
 .btn-primary:hover {
-    background-color: #768E78 !important;
-    border-color: #768E78 !important;
+  background-color: #768e78 !important;
+  border-color: #768e78 !important;
 }
