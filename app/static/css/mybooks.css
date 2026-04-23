@@ -1,6 +1,7 @@
 .shelf {
     background-color: #544036;
     height: 20px;
+    width: 100%;
 }
 
 .book-card {
@@ -8,4 +9,17 @@
     height: 220px;
     background-color: #e5e5e5;
     border-radius: 8px;
+}
+
+.current-page {
+    font-weight: bold;
+}
+
+.progress {
+    width: 100%;
+    background-color: #e5e5e5;
+}
+
+.progress-bar {
+    background-color: #E79897;
 }
