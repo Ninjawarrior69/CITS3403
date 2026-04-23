@@ -18,44 +18,6 @@
   background-color: var(--secondary-green);
 }
 
-.auth-card,
-.auth-card .form-label,
-.auth-card .nav-link,
-.auth-card a,
-.auth-card .btn {
-  color: var(--darkbrown);
-}
-
-.signin-left {
-  border-radius: 10px;
-  background-color: #768E78;
-  color: #f5efe0 !important;
-}
-
-.signin-right {
-  border-radius: 10px;
-  background-color: #f5efe0;
-  color: #768E78;
-}
-
-.signup-right {
-  border-radius: 10px;
-  background-color: #768E78;
-  color: #f5efe0 !important;
-}
-
-.signup-left {
-  border-radius: 10px;
-  background-color: #f5efe0;
-  color: #768E78;
-}
-
-.auth-card {
-  width: min(100%, 440px) !important;
-  border-radius: 0.5rem;
-  background-color: #768E784D;
-}
-
 html,
 body {
   min-height: 100%;
@@ -101,7 +63,6 @@ p, hr {
 
 .site-name {
     font-family: 'Afacad', sans-serif;
-    color: #F6EFD8;
 }
 
 /* Buttons */
@@ -125,12 +86,6 @@ p, hr {
     padding: 10px;
     height: 35px;
     width: 350px;
-}
-
-.login-box {
-  background-color: #f5efe0;
-  padding: 8px;
-  border-radius: 10px;
 }
 
 .heading {
