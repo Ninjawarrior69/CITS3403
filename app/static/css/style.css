@@ -1,9 +1,12 @@
+/* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
   --primary-yellow: #f6efd8;
   --secondary-green: #768e78;
   --black: #000;
+  --darkbrown: #3D2F2A;
 }
 
 /* Global Colours */
@@ -20,12 +23,37 @@
 .auth-card .nav-link,
 .auth-card a,
 .auth-card .btn {
-  color: var(--black);
+  color: var(--darkbrown);
+}
+
+.signin-left {
+  border-radius: 10px;
+  background-color: #768E78;
+  color: #f5efe0 !important;
+}
+
+.signin-right {
+  border-radius: 10px;
+  background-color: #f5efe0;
+  color: #768E78;
+}
+
+.signup-right {
+  border-radius: 10px;
+  background-color: #768E78;
+  color: #f5efe0 !important;
+}
+
+.signup-left {
+  border-radius: 10px;
+  background-color: #f5efe0;
+  color: #768E78;
 }
 
 .auth-card {
   width: min(100%, 440px) !important;
   border-radius: 0.5rem;
+  background-color: #768E784D;
 }
 
 html,
@@ -42,6 +70,7 @@ body {
 .auth-page .primary-yellow-bg {
   background-color: transparent;
 }
+
 body {
     background-color: #F6EFD8;
     font-family: 'Inter', sans-serif;
@@ -78,7 +107,7 @@ p, hr {
 /* Buttons */
 .btn-primary {
     background-color: #768E784D;
-    color: #3D2F2A;
+    color: #3D2F2A !important;
     border-color: #768E78;
 }
 
@@ -86,4 +115,24 @@ p, hr {
 .btn-primary:hover {
     background-color: #768E78 !important;
     border-color: #768E78 !important;
+    color: #f6efd8 !important;
+}
+
+.form-control {
+    border-radius: 8px;
+    background-color: #f5efe0;
+    border-color: #3D2F2A4D;
+    padding: 10px;
+    height: 35px;
+    width: 350px;
+}
+
+.login-box {
+  background-color: #f5efe0;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.heading {
+  text-align: center;
 }

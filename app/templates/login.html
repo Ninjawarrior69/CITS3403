@@ -18,26 +18,26 @@
   </head>
   <body class="auth-page">
     <main
-      class="container py-4 min-vh-100 d-flex align-items-center justify-content-center primary-yellow-bg"
+      class="container py-5 min-vh-100 d-flex align-items-center justify-content-center"
     >
-      <section class="auth-card card shadow-sm w-50 mx-auto primary-green-bg">
+      <section class="auth-card card shadow-sm w-50 mx-auto">
         <div class="card-body p-4 p-md-5">
-          <nav class="nav nav-fill auth-tabs" aria-label="Authentication pages">
-            <a class="nav-link active" href="login.html" aria-current="page"
-              >Sign In</a
-            >
-            <a class="nav-link" href="signup.html">Sign Up</a>
+            <div class="heading">
+                <h3><a href="home.html" style="font-family: 'Afacad';">BookWorm</a></h3>
+                <p style="color:#6B5D56">Welcome back! Sign in to continue</p>
+            </div><br>
+          <nav class="nav nav-fill auth-tabs login-box" aria-label="Authentication pages">
+            <a class="nav-link active signin-left" href="login.html" aria-current="page">Sign In</a>
+            <a class="nav-link signin-right" href="signup.html">Sign Up</a>
           </nav>
 
           <h1 class="visually-hidden">Sign In</h1>
-
+          <br>
           <form class="d-grid gap-3" action="#" method="post">
             <div>
-              <label class="form-label" for="login-identifier"
-                >Email or Username</label
-              >
+              <label class="form-label" for="login-identifier">Email or Username</label>
               <input
-                class="form-control form-control-lg"
+                class="form-control w-100"
                 id="login-identifier"
                 type="text"
                 name="identifier"
@@ -46,11 +46,10 @@
                 required
               />
             </div>
-
-            <div>
+            <div class="mt-2">
               <label class="form-label" for="login-password">Password</label>
               <input
-                class="form-control form-control-lg"
+                class="form-control w-100"
                 id="login-password"
                 type="password"
                 name="password"
@@ -59,16 +58,16 @@
                 required
               />
             </div>
-
-            <p class="mb-0">
-              <a class="text-decoration-none fw-semibold" href="#"
-                >Forgot password?</a
-              >
-            </p>
-
-            <button class="btn btn-lg w-100 auth-submit" type="submit">
+            <div style="text-align: right">
+                <a class="fw-semibold" href="#">Forgot password?</a>
+            </div>
+            <br>
+            <button class="btn btn-primary btn-md w-100 auth-submit" type="submit">
               Sign In
             </button>
+            <div style="text-align: center">
+                <p>Don't have an account? <a class="fw-semibold" href="signup.html">Sign Up</a></p>
+            </div>
           </form>
         </div>
       </section>
