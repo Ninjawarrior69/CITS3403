@@ -14,8 +14,9 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}?v=20260330"
     />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}"/>
     <link rel="stylesheet" href="../static/css/style.css?v=20260330" />
-    <link rel="stylesheet" href="../static/css/login.css">
+    <link rel="stylesheet" href="../static/css/login.css"/>
   </head>
   <body class="auth-page">
     <main
@@ -28,8 +29,8 @@
                 <p style="color:#6B5D56">Welcome back! Sign in to continue</p>
             </div><br>
           <nav class="nav nav-fill auth-tabs login-box" aria-label="Authentication pages">
-            <a class="nav-link active signin-left" href="login.html" aria-current="page">Sign In</a>
-            <a class="nav-link signin-right" href="signup.html">Sign Up</a>
+            <a class="nav-link active signin-left" href="{{ url_for('login') }}" aria-current="page">Sign In</a>
+            <a class="nav-link signin-right" href="{{ url_for('signup') }}">Sign Up</a>
           </nav>
 
           <h1 class="visually-hidden">Sign In</h1>
