@@ -35,7 +35,7 @@
             >
             <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
             <div class="heading">
-                <h3><a class="site-name" href="home.html">BookWorm</a></h3>
+                <h3><a class="site-name" href="{{ url_for('home') }}">BookWorm</a></h3>
                 <p style="color:#6B5D56">Welcome back! Sign in to continue</p>
             </div><br>
           <nav class="nav nav-fill auth-tabs login-box" aria-label="Authentication pages">
@@ -78,7 +78,7 @@
               Sign In
             </button>
             <div style="text-align: center">
-                <p>Don't have an account? <a class="fw-semibold" href="signup.html">Sign Up</a></p>
+                <p>Don't have an account? <a class="fw-semibold" href="{{ url_for('signup') }}">Sign Up</a></p>
             </div>
           </form>
         </div>

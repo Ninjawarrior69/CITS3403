@@ -26,20 +26,12 @@
       <section class="auth-card card shadow-sm w-50 mx-auto primary-green-bg">
         <div class="card-body p-4 p-md-5">
           <div class="heading">
-                <h3><a class="site-name" href="home.html">BookWorm</a></h3>
+                <h3><a class="site-name" href="{{ url_for('home') }}">BookWorm</a></h3>
                 <p style="color:#6B5D56">Sign up to track your reading journey!</p>
             </div><br>
           <nav class="nav nav-fill auth-tabs login-box" aria-label="Authentication pages">
-            <a class="nav-link signup-left" href="login.html">Sign In</a>
-            <a class="nav-link active signup-right" href="signup.html" aria-current="page">Sign Up</a>
-          <nav class="nav nav-fill auth-tabs" aria-label="Authentication pages">
-            <a class="nav-link" href="{{ url_for('login') }}">Sign In</a>
-            <a
-              class="nav-link active"
-              href="{{ url_for('signup') }}"
-              aria-current="page"
-              >Sign Up</a
-            >
+            <a class="nav-link signup-left" href="{{ url_for('login') }}">Sign In</a>
+            <a class="nav-link active signup-right" href="{{ url_for('signup') }}" aria-current="page">Sign Up</a>
           </nav>
 
           <h1 class="visually-hidden">Create Account</h1>
@@ -58,7 +50,7 @@
               />
             </div>
 
-            <div>
+            <div class="mt-2">
               <label class="form-label" for="signup-email">Email</label>
               <input
                 class="form-control w-100"
@@ -71,7 +63,7 @@
               />
             </div>
 
-            <div>
+            <div class="mt-2">
               <label class="form-label" for="signup-password">Password</label>
               <input
                 class="form-control w-100"
@@ -84,7 +76,7 @@
               />
             </div>
 
-            <div>
+            <div class="mt-2">
               <label class="form-label" for="signup-password">Confirm Password</label>
               <input
                 class="form-control w-100"
@@ -101,7 +93,7 @@
               Create Account
             </button>
             <div style="text-align: center">
-                <p>Already have an account? <a class="fw-semibold" href="login.html">Sign In</a></p>
+                <p>Already have an account? <a class="fw-semibold" href="{{ url_for('login') }}">Sign In</a></p>
             </div>
           </form>
         </div>
