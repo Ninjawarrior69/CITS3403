@@ -1,0 +1,288 @@
+body {
+    background-color: #f5efe0;
+    color: #3D2F2A;
+}
+
+.book-detail-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: 2.6fr 0.7fr;
+    gap: 30px;
+}
+
+.section-card {
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #3D2F2A4D;
+    margin-bottom: 20px;
+}
+
+.book-header {
+    display: flex;
+    gap: 30px;
+}
+
+.book-cover {
+    width: 300px;
+    height: 450px;
+    background-color: #e5e5e5;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.book-info h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.author {
+    color: #3D2F2A99;
+    margin-bottom: 15px;
+}
+
+.rating {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.rating span {
+    margin-left: 8px;
+    color: #3D2F2A99;
+}
+
+.rating span,
+.stars {
+    color: #FCAC83;
+}
+
+.description {
+    line-height: 1.6;
+}
+
+.review-item {
+    margin-top: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-user {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.review-header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #3D2F2A99;
+}
+
+.sidebar {
+    position: sticky;
+    max-width: 260px;
+    top: 20px;
+    height: fit-content;
+}
+
+.sidebar-card {
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid #3D2F2A4D;
+}
+
+.sidebar-card img {
+    border-radius: 8px;
+    width: 75%;
+    display: block;
+    margin: 0 auto 10px;
+}
+
+.sidebar-card h3 {
+    font-size: 1rem;
+    margin-bottom: 3px;
+}
+
+.sidebar-card p {
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+}
+
+.primary-btn {
+    width: 100%;
+    background-color: #3D2F2A;
+    color: #ffffff;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    margin: 15px 0;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+
+.primary-btn:hover {
+    background-color: #2a211d;
+}
+
+.rate-text {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.stars-input {
+    font-size: 1.2rem;
+    color: #FCAC83;
+    margin-bottom: 10px;
+}
+
+textarea {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #3D2F2A4D;
+    padding: 10px;
+    background-color: #f5efe0;
+    resize: none;
+    height: 80px;
+}
+
+.secondary-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: #FCAC83;
+    color: #fff;
+}
+
+.secondary-btn:hover {
+    background-color: #e6956b;
+}
+
+.avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #3D2F2A;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.avatar.small {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+}
+
+.btn-follow {
+    background: none;
+    border: 1px solid #3D2F2A;
+    color: #3D2F2A;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.btn-follow:hover {
+    background-color: #768e78;
+    color: white;
+}
+
+.author-box {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.author-info p {
+    margin: 5px 0;
+}
+
+.author-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.author-name h3 {
+    margin: 0;
+}
+
+.reviews-top {
+    display: flex;
+    gap: 50px;
+    margin: 20px 0 30px;
+}
+
+.rating-left {
+    width: 180px;
+}
+
+.rating-left h1 {
+    font-size: 3.2rem;
+    margin-bottom: 5px;
+}
+
+.rating-left .stars {
+    margin-bottom: 10px;
+}
+
+.rating-left p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.rating-right {
+    flex: 1;
+}
+
+.dist-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.dist-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.dist-label {
+    width: 35px;
+    font-size: 0.9rem;
+}
+
+.dist-bar {
+    flex: 1;
+    height: 10px;
+    background-color: #e5e5e5;
+    border-radius: 999px;
+    margin: 0 12px;
+    overflow: hidden;
+}
+
+.dist-fill {
+    height: 100%;
+    background-color: #FCAC83;
+    border-radius: 999px;
+}
+
+.dist-value {
+    width: 90px;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.dist-value span {
+    color: #3D2F2A99;
+}
