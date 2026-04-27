@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{{ book.title }}</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/book_detail.css') }}">
+</head>
+
+<body>
+
+{% include "navbar.html" %}
+
+<div class="book-detail-container">
+
+    <!-- LEFT -->
+    <div class="main-content">
+
+        <!-- BOOK HEADER -->
+        <div class="section-card">
+            <div class="book-header">
+
+                <img src="https://placehold.co/300x450" class="book-cover">
+
+                <div class="book-info">
+                    <h1>{{ book.title }}</h1>
+                    <p>by {{ book.author }}</p>
+
+                    <div class="rating">
+                        {% for i in range(book.rating | int) %}★{% endfor %}
+                        {% for i in range(5 - (book.rating | int)) %}☆{% endfor %}
+                        {{ book.rating }}
+                    </div>
+
+                    <h3>About this book</h3>
+                    <p>{{ book.description }}</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- AUTHOR -->
+        <div class="section-card">
+            <h2>About the Author</h2>
+
+            <div class="author-box">
+
+                <div class="avatar">
+                    {{ book.author[0] }}
+                </div>
+
+                <div class="author-info">
+                    <div class="author-top">
+                        <div class="author-name">
+                            <h3>{{ book.author }}</h3>
+                            <button class="btn-follow">Follow</button>
+                        </div>
+                    </div>
+
+                    <p>
+                        {{ author.books if author else 0 }} books · 
+                        {{ author.followers if author else 0 }} followers
+                    </p>
+
+                    <p>
+                        {{ author.bio if author else "Author bio coming soon." }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- COMMUNITY REVIEWS -->
+        <div class="section-card">
+            <h2>Community Reviews</h2>
+
+            <div class="reviews-top">
+
+                <div class="rating-left">
+                    <h1>{{ rating_summary.average }}</h1>
+
+                    <div class="stars">
+                        {% for i in range(book.rating | int) %}★{% endfor %}
+                        {% for i in range(5 - (book.rating | int)) %}☆{% endfor %}
+                    </div>
+
+                    <p>{{ rating_summary.total }} ratings</p>
+                    <p>{{ reviews|length }} reviews</p>
+                </div>
+
+                <div class="rating-right">
+
+                    <p class="dist-title">Rating Distribution</p>
+
+                    {% for star in [5,4,3,2,1] %}
+                    <div class="dist-row">
+
+                        <div class="dist-label">
+                            {{ star }}★
+                        </div>
+
+                        <div class="dist-bar">
+                            <div class="dist-fill"
+                                 style="width: {{ rating_summary.distribution[star] }}%">
+                            </div>
+                        </div>
+
+                        <div class="dist-value">
+                            {{ rating_summary.distribution[star] }}%
+                            <span>
+                                ({{ (rating_summary.total * rating_summary.distribution[star] // 100) }})
+                            </span>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <!-- REVIEW LIST -->
+            <div class="review-list">
+
+                {% for review in reviews %}
+                <div class="review-item">
+
+                    <div class="review-header">
+                        <div class="review-user">
+
+                            <div class="avatar small">
+                                {{ review.username[0] }}
+                            </div>
+
+                            <div>
+                                <strong>{{ review.username }}</strong>
+                                <p>{{ review.time }}</p>
+                            </div>
+
+                        </div>
+
+                        <button class="btn-follow">Follow</button>
+                    </div>
+
+                    <div class="stars">
+                        {% for i in range(review.stars) %}★{% endfor %}
+                        {% for i in range(5 - review.stars) %}☆{% endfor %}
+                    </div>
+
+                    <p>{{ review.text }}</p>
+
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="sidebar">
+
+        <div class="sidebar-card">
+
+            <img src="https://placehold.co/200x300">
+
+            <h3>{{ book.title }}</h3>
+            <p>by {{ book.author }}</p>
+
+            <div class="rating">
+                {% for i in range(book.rating | int) %}★{% endfor %}
+                {% for i in range(5 - (book.rating | int)) %}☆{% endfor %}
+                {{ book.rating }}
+            </div>
+
+            <button class="primary-btn">Want to Read</button>
+
+            <p>Rate this book:</p>
+            <div class="stars-input">☆☆☆☆☆</div>
+
+            <textarea placeholder="Write your review..."></textarea>
+
+            <button class="secondary-btn">Post Review</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
