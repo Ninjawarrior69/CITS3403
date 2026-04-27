@@ -1,0 +1,43 @@
+.auth-card,
+.auth-card .form-label,
+.auth-card .nav-link,
+.auth-card a,
+.auth-card .btn {
+  color: var(--darkbrown);
+}
+
+.auth-card {
+  width: min(100%, 440px) !important;
+  border-radius: 0.5rem;
+  background-color: #768E784D;
+}
+
+.signin-left {
+  border-radius: 10px;
+  background-color: #768E78;
+  color: #f5efe0 !important;
+}
+
+.signin-right {
+  border-radius: 10px;
+  background-color: #f5efe0;
+  color: #768E78;
+}
+
+.signup-right {
+  border-radius: 10px;
+  background-color: #768E78;
+  color: #f5efe0 !important;
+}
+
+.signup-left {
+  border-radius: 10px;
+  background-color: #f5efe0;
+  color: #768E78;
+}
+
+.login-box {
+  background-color: #f5efe0;
+  padding: 8px;
+  border-radius: 10px;
+}
