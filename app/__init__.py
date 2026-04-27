@@ -14,6 +14,9 @@ def create_app() -> Flask:
 	login_manager.login_view = "login"
 	csrf.init_app(app)
 
+	# Import models so Flask-Migrate can detect schema metadata.
+	from app import models  # noqa: F401
+
 	# Register routes after app creation to avoid circular imports.
 	from app.routes import register_routes
 
