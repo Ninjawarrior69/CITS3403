@@ -38,20 +38,22 @@
         <div class="trending-books-grid">
           {% if trending_books %}
             {% for book in trending_books[:6] %}
-              <article class="trending-book-card">
-                <div class="book-cover-wrapper">
-                  <img
-                    src="https://placehold.co/220x330?text=Book+Cover"
-                    alt="Book cover"
-                    class="book-cover"
-                  />
-                </div>
+              <a href="{{ url_for('book_detail', book_id=book.id) }}" class="book-link">
+                <article class="trending-book-card">
+                  <div class="book-cover-wrapper">
+                    <img
+                      src="https://placehold.co/220x330?text=Book+Cover"
+                      alt="Book cover"
+                      class="book-cover"
+                    />
+                  </div>
 
-                <div class="book-meta">
-                  <h3 class="book-title">{{ book.title }}</h3>
-                  <p class="book-author">{{ book.author }}</p>
-                </div>
-              </article>
+                  <div class="book-meta">
+                    <h3 class="book-title">{{ book.title }}</h3>
+                    <p class="book-author">{{ book.author }}</p>
+                  </div>
+                </article>
+              </a>
             {% endfor %}
           {% else %}
             <p>No books yet</p>
@@ -73,20 +75,22 @@
             <div class="most-read-list">
               {% if most_read_books %}
                 {% for book in most_read_books[:5] %}
-                  <article class="most-read-card">
-                    <div class="rank-number">#{{ loop.index }}</div>
+                  <a href="{{ url_for('book_detail', book_id=book.id) }}" class="book-link">
+                    <article class="most-read-card">
+                      <div class="rank-number">#{{ loop.index }}</div>
 
-                    <div class="most-read-info">
-                      <h3 class="book-title">{{ book.title }}</h3>
-                      <p class="book-author">{{ book.author }}</p>
+                      <div class="most-read-info">
+                        <h3 class="book-title">{{ book.title }}</h3>
+                        <p class="book-author">{{ book.author }}</p>
 
-                      <div class="book-stats">
-                        <span class="rating">★ {{ book.rating }}</span>
-                        <span class="reads">👁 {{ book.reads }}</span>
-                        <span class="comments">💬 {{ book.comments }}</span>
+                        <div class="book-stats">
+                          <span class="rating">★ {{ book.rating }}</span>
+                          <span class="reads">👁 {{ book.reads }}</span>
+                          <span class="comments">💬 {{ book.comments }}</span>
+                        </div>
                       </div>
-                    </div>
-                  </article>
+                    </article>
+                  </a>
                 {% endfor %}
               {% else %}
                 <p>No data yet</p>
@@ -109,11 +113,23 @@
                     <div class="review-header">
                       <div class="review-user-info">
                         <h3 class="review-username">{{ review.username }}</h3>
-                        <p class="review-book-title">{{ review.book_title }}</p>
+
+                        {% if review.book_id %}
+                          <a href="{{ url_for('book_detail', book_id=review.book_id) }}" class="review-book-link">
+                            <p class="review-book-title">{{ review.book_title }}</p>
+                          </a>
+                        {% else %}
+                          <p class="review-book-title">{{ review.book_title }}</p>
+                        {% endif %}
                       </div>
 
                       <div class="review-stars">
-                        {{ review.stars }}
+                        {% for i in range(review.stars) %}
+                          ★
+                        {% endfor %}
+                        {% for i in range(5 - review.stars) %}
+                          ☆
+                        {% endfor %}
                       </div>
                     </div>
 
