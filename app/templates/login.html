@@ -19,8 +19,6 @@
     <link rel="stylesheet" href="../static/css/login.css"/>
   </head>
   <body class="auth-page">
-    {% include "navbar.html" %}
-
     <main
       class="container py-5 min-vh-100 d-flex align-items-center justify-content-center"
     >
@@ -62,16 +60,12 @@
                 required
               />
             </div>
-            <div style="text-align: right">
+            <div style="text-align: right; font-size: small;">
                 <a class="fw-semibold" href="#">Forgot password?</a>
             </div>
-            <br>
-            <button class="btn btn-primary btn-md w-100 auth-submit" type="submit">
+            <button class="btn btn-primary btn-md w-100 auth-submit mt-3" type="submit">
               Sign In
             </button>
-            <div style="text-align: center">
-                <p>Don't have an account? <a class="fw-semibold" href="{{ url_for('signup') }}">Sign Up</a></p>
-            </div>
           </form>
         </div>
       </section>
