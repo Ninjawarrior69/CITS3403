@@ -14,32 +14,31 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+    <link rel="stylesheet" href="../static/css/style.css?v=20260330" />
+    <link rel="stylesheet" href="../static/css/login.css">
   </head>
   <body class="auth-page">
-    {% include "navbar.html" %}
-
     <main
-      class="container py-4 min-vh-100 d-flex align-items-center justify-content-center primary-yellow-bg"
+      class="container py-5 min-vh-100 d-flex align-items-center justify-content-center primary-yellow-bg"
     >
       <section class="auth-card card shadow-sm w-50 mx-auto primary-green-bg">
         <div class="card-body p-4 p-md-5">
-          <nav class="nav nav-fill auth-tabs" aria-label="Authentication pages">
-            <a class="nav-link" href="{{ url_for('login') }}">Sign In</a>
-            <a
-              class="nav-link active"
-              href="{{ url_for('signup') }}"
-              aria-current="page"
-              >Sign Up</a
-            >
+          <div class="heading">
+                <h3><a class="site-name" href="{{ url_for('home') }}">BookWorm</a></h3>
+                <p style="color:#6B5D56">Sign up to track your reading journey!</p>
+            </div><br>
+          <nav class="nav nav-fill auth-tabs login-box" aria-label="Authentication pages">
+            <a class="nav-link signup-left" href="{{ url_for('login') }}">Sign In</a>
+            <a class="nav-link active signup-right" href="{{ url_for('signup') }}" aria-current="page">Sign Up</a>
           </nav>
 
           <h1 class="visually-hidden">Create Account</h1>
-
+          <br>
           <form class="d-grid gap-3" action="#" method="post">
             <div>
               <label class="form-label" for="signup-username">Username</label>
               <input
-                class="form-control form-control-lg"
+                class="form-control w-100"
                 id="signup-username"
                 type="text"
                 name="username"
@@ -49,10 +48,10 @@
               />
             </div>
 
-            <div>
+            <div class="mt-2">
               <label class="form-label" for="signup-email">Email</label>
               <input
-                class="form-control form-control-lg"
+                class="form-control w-100"
                 id="signup-email"
                 type="email"
                 name="email"
@@ -62,10 +61,10 @@
               />
             </div>
 
-            <div>
+            <div class="mt-2">
               <label class="form-label" for="signup-password">Password</label>
               <input
-                class="form-control form-control-lg"
+                class="form-control w-100"
                 id="signup-password"
                 type="password"
                 name="password"
@@ -75,7 +74,19 @@
               />
             </div>
 
-            <button class="btn btn-lg w-100 auth-submit" type="submit">
+            <div class="mt-2">
+              <label class="form-label" for="signup-password">Confirm Password</label>
+              <input
+                class="form-control w-100"
+                id="signup-confirm-password"
+                type="password"
+                name="confirm-password"
+                placeholder="Re-enter password"
+                autocomplete="confirm-password"
+                required
+              />
+            </div>
+            <button class="btn btn-primary btn-md w-100 auth-submit mt-3" type="submit">
               Create Account
             </button>
           </form>

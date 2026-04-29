@@ -1,9 +1,12 @@
+/* Import fonts */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
   --primary-yellow: #f6efd8;
   --secondary-green: #768e78;
   --black: #000;
+  --darkbrown: #3D2F2A;
 }
 
 /* Global Colours */
@@ -13,19 +16,6 @@
 
 .primary-green-bg {
   background-color: var(--secondary-green);
-}
-
-.auth-card,
-.auth-card .form-label,
-.auth-card .nav-link,
-.auth-card a,
-.auth-card .btn {
-  color: var(--black);
-}
-
-.auth-card {
-  width: min(100%, 440px) !important;
-  border-radius: 0.5rem;
 }
 
 html,
@@ -42,6 +32,7 @@ body {
 .auth-page .primary-yellow-bg {
   background-color: transparent;
 }
+
 body {
   background-color: #f6efd8;
   font-family: "Inter", sans-serif;
@@ -72,19 +63,32 @@ hr {
 }
 
 .site-name {
-  font-family: "Afacad", sans-serif;
-  color: #f6efd8;
+    font-family: 'Afacad', sans-serif;
 }
 
 /* Buttons */
 .btn-primary {
-  background-color: #768e784d;
-  color: #3d2f2a;
-  border-color: #768e78;
+    background-color: #768E784D;
+    color: #3D2F2A !important;
+    border-color: #768E78;
 }
 
 .btn-primary-active,
 .btn-primary:hover {
-  background-color: #768e78 !important;
-  border-color: #768e78 !important;
+    background-color: #768E78 !important;
+    border-color: #768E78 !important;
+    color: #f6efd8 !important;
+}
+
+.form-control {
+    border-radius: 8px;
+    background-color: #f5efe0;
+    border-color: #3D2F2A4D;
+    padding: 10px;
+    height: 35px;
+    width: 350px;
+}
+
+.heading {
+  text-align: center;
 }

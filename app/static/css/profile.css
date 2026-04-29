@@ -95,15 +95,6 @@
     margin-bottom: 5px;
 }
 
-.form-control {
-    border-radius: 8px;
-    background-color: #f5efe0;
-    border-color: #3D2F2A4D;
-    padding: 10px;
-    height: 35px;
-    width: 350px;
-}
-
 .books-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
