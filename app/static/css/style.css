@@ -34,8 +34,8 @@ body {
 }
 
 body {
-    background-color: #F6EFD8;
-    font-family: 'Inter', sans-serif;
+  background-color: #f6efd8;
+  font-family: "Inter", sans-serif;
 }
 
 /* Main content container size */
@@ -48,18 +48,19 @@ body {
 
 /* Hyperlink */
 a {
-    color:#000000;
-    text-decoration: none;
+  color: #000000;
+  text-decoration: none;
 }
 
 /* Text and divider */
-p, hr {
-    color: #3D2F2A;
+p,
+hr {
+  color: #3d2f2a;
 }
 
 .navbar {
-    background-color: #768E78;
-    color: #F6EFD8 !important;
+  background-color: #768e78;
+  color: #f6efd8;
 }
 
 .site-name {
