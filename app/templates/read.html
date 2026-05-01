@@ -10,13 +10,13 @@
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
         crossorigin="anonymous"
         />
-        <link rel="stylesheet" href="../static/css/style.css" />
-        <link rel="stylesheet" href="../static/css/mybooks.css" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mybooks.css') }}" />
     </head>
     <body>
         {% include "navbar.html" %}
 
-        <div class="container py-5">
+        <div class="page-container py-5">
             <h2>My Books</h2>
             <hr>
             <div class="col-md-12 d-flex gap-4">
