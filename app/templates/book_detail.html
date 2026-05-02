@@ -37,16 +37,16 @@
                     <p>by {{ book.author }}</p>
 
                     <div class="rating">
-                        {% for i in range(book.rating | int) %}★{% endfor %}
-                        {% for i in range(5 - (book.rating | int)) %}☆{% endfor %}
-                        {{ book.rating }}
+                        {% for i in range(rating_summary.average | int) %}★{% endfor %}
+                        {% for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
+                        {{ rating_summary.average }}
                     </div>
 
                     <h3>About this book</h3>
                     <p id="book-desc" class="collapsed">
                         {{ book.description }}
                     </p>
-                    
+
                     <button class="show-more-btn" onclick="toggleSection('book-desc', this)">Show More</button>
                 </div>
 
@@ -72,7 +72,7 @@
                     </div>
 
                     <p>
-                        {{ author.books if author else 0 }} books · 
+                        {{ author.books if author else 0 }} books ·
                         {{ author.followers if author else 0 }} followers
                     </p>
 
@@ -96,8 +96,8 @@
                     <h1>{{ rating_summary.average }}</h1>
 
                     <div class="stars">
-                        {% for i in range(book.rating | int) %}★{% endfor %}
-                        {% for i in range(5 - (book.rating | int)) %}☆{% endfor %}
+                        {% for i in range(rating_summary.average | int) %}★{% endfor %}
+                        {% for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
                     </div>
 
                     <p>{{ rating_summary.total }} ratings</p>
@@ -108,7 +108,7 @@
 
                     <p class="dist-title">Rating Distribution</p>
 
-                    {% for star in [5,4,3,2,1] %}
+                    {% for star in [5, 4, 3, 2, 1] %}
                     <div class="dist-row">
 
                         <div class="dist-label">
@@ -124,7 +124,7 @@
                         <div class="dist-value">
                             {{ rating_summary.distribution[star] }}%
                             <span>
-                                ({{ (rating_summary.total * rating_summary.distribution[star] // 100) }})
+                                ({{ rating_summary.total * rating_summary.distribution[star] // 100 }})
                             </span>
                         </div>
 
@@ -166,6 +166,8 @@
                     <p>{{ review.text }}</p>
 
                 </div>
+                {% else %}
+                <p>No reviews yet.</p>
                 {% endfor %}
 
             </div>
@@ -184,28 +186,64 @@
             <p>by {{ book.author }}</p>
 
             <div class="rating">
-                {% for i in range(book.rating | int) %}★{% endfor %}
-                {% for i in range(5 - (book.rating | int)) %}☆{% endfor %}
-                {{ book.rating }}
+                {% for i in range(rating_summary.average | int) %}★{% endfor %}
+                {% for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
+                {{ rating_summary.average }}
             </div>
 
-            <button class="primary-btn" onclick="toggleRead(this)">Want to Read</button>
+            <form method="POST" action="{{ url_for('toggle_want_to_read', book_id=book.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <p>Rate this book:</p>
-            <div class="rating" id="rating">
-                <span data-value="1">☆</span>
-                <span data-value="2">☆</span>
-                <span data-value="3">☆</span>
-                <span data-value="4">☆</span>
-                <span data-value="5">☆</span>
+                <button type="submit" class="primary-btn {% if want_to_read %}active{% endif %}">
+                    {% if want_to_read %}
+                        ✓ Added · {{ want_to_read_count }} readers
+                    {% else %}
+                        Want to Read
+                    {% endif %}
+                </button>
+            </form>
+
+            <!-- RATING SECTION -->
+            <div class="interaction-section">
+                <div class="rating-title-row">
+                    <p class="section-label">Rate this book</p>
+
+                    <form method="POST" action="{{ url_for('rate_book', book_id=book.id) }}" id="rating-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="stars" id="rating-stars">
+
+                        <button type="submit" class="secondary-btn save-rating-btn">Save Rating</button>
+                    </form>
+                </div>
+
+                <div class="rating" id="rating" data-current-rating="{{ user_rating }}">
+                    <span data-value="1">{% if user_rating >= 1 %}★{% else %}☆{% endif %}</span>
+                    <span data-value="2">{% if user_rating >= 2 %}★{% else %}☆{% endif %}</span>
+                    <span data-value="3">{% if user_rating >= 3 %}★{% else %}☆{% endif %}</span>
+                    <span data-value="4">{% if user_rating >= 4 %}★{% else %}☆{% endif %}</span>
+                    <span data-value="5">{% if user_rating >= 5 %}★{% else %}☆{% endif %}</span>
+                </div>
             </div>
-            
 
-            <textarea id="review-input" placeholder="Write your review..."></textarea>
+            <!-- REVIEW SECTION -->
+            <div class="interaction-section review-section">
+                <p class="section-label">Write your review</p>
 
-            <button class="secondary-btn" onclick="postReview()">Post Review</button>
+                <form method="POST" action="{{ url_for('post_review', book_id=book.id) }}" id="review-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="stars" id="review-stars">
 
-            <div id="review-list"></div>
+                    <textarea
+                        name="text"
+                        id="review-input"
+                        class="review-textarea"
+                        placeholder="Write your review..."
+                        required
+                    ></textarea>
+
+                    <button type="submit" class="secondary-btn post-review-btn">Post Review</button>
+                </form>
+            </div>
 
         </div>
 

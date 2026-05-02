@@ -14,6 +14,7 @@ class User(UserMixin, db.Model):
 
     comments = db.relationship("Comment", backref="user", lazy=True)
     ratings = db.relationship("Rating", backref="user", lazy=True)
+    want_to_reads = db.relationship("WantToRead", backref="user", lazy=True)
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
@@ -38,6 +39,13 @@ class Book(db.Model):
 
     ratings = db.relationship(
         "Rating",
+        backref="book",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    want_to_reads = db.relationship(
+        "WantToRead",
         backref="book",
         lazy=True,
         cascade="all, delete-orphan"
@@ -72,3 +80,19 @@ class Rating(db.Model):
 
     def __repr__(self) -> str:
         return f"<Rating {self.id}>"
+    
+
+class WantToRead(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.String(120), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+
+    __table_args__ = (
+        db.UniqueConstraint("book_id", "session_id", name="unique_book_session_want_to_read"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<WantToRead book={self.book_id}>"

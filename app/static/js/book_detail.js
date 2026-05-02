@@ -1,5 +1,7 @@
 console.log("JS LOADED");
 
+let selectedRating = 0;
+
 function toggleSection(id, button) {
     const section = document.getElementById(id);
 
@@ -20,86 +22,97 @@ function toggleFollow(btn) {
     }
 }
 
-// fake data
-function toggleRead(btn) {
-    if (!btn.dataset.count) {
-        const randomCount = Math.floor(Math.random() * 200) + 50;
-        btn.dataset.count = randomCount;
-    }
-
-    let count = parseInt(btn.dataset.count);
-
-    if (btn.classList.contains("active")) {
-        btn.classList.remove("active");
-        btn.innerText = "Want to Read";
-    } else {
-        btn.classList.add("active");
-        btn.innerText = `✓ Added · ${count + 1} readers`;
-    }
-}
-
-function postReview() {
-    const text = document.getElementById("review-input").value.trim();
-
-    if (text === "") {
-        alert("Please write something!");
-        return;
-    }
-
-    if (selectedRating === 0) {
-        alert("Please rate the book first!");
-        return;
-    }
-
-    const div = document.createElement("div");
-    div.classList.add("review-item");
-
-    div.innerHTML = `
-        <p><strong>You</strong> - ${"★".repeat(selectedRating)}</p>
-        <p>${text}</p>
-        <hr>
-    `;
-
-    document.getElementById("review-list").prepend(div);
-
-    document.getElementById("review-input").value = "";
-
-    selectedRating = 0;
-    showStars(0);
-}
 
 document.addEventListener("DOMContentLoaded", () => {
+    const ratingBox = document.getElementById("rating");
+    const ratingStars = document.querySelectorAll("#rating span");
 
-    let selectedRating = 0;
-    const stars = document.querySelectorAll("#rating span");
+    const ratingInput = document.getElementById("rating-stars");
+    const reviewRatingInput = document.getElementById("review-stars");
 
-    stars.forEach((star, index) => {
+    const ratingForm = document.getElementById("rating-form");
+    const reviewForm = document.getElementById("review-form");
+    const reviewInput = document.getElementById("review-input");
 
+    if (!ratingBox || ratingStars.length === 0) {
+        return;
+    }
+
+    selectedRating = Number(ratingBox.dataset.currentRating || 0);
+    
+    if (ratingInput) {
+        ratingInput.value = selectedRating;
+    }
+
+    if (reviewRatingInput) {
+        reviewRatingInput.value = selectedRating;
+    }
+
+    updateStars(selectedRating, ratingStars);
+
+    ratingStars.forEach((star) => {
         star.addEventListener("mouseenter", () => {
-            showStars(index + 1);
+            updateStars(Number(star.dataset.value), ratingStars);
         });
-
-        document.getElementById("rating").addEventListener("mouseleave", () => {
-            showStars(selectedRating);
-        });
-
 
         star.addEventListener("click", () => {
+            const clickedRating = Number(star.dataset.value);
 
-            if (selectedRating === index + 1) {
+            if (selectedRating === clickedRating) {
                 selectedRating = 0;
             } else {
-                selectedRating = index + 1;
+                selectedRating = clickedRating;
             }
 
-            showStars(selectedRating);
+            if (ratingInput) {
+                ratingInput.value = selectedRating;
+            }
+
+            if (reviewRatingInput) {
+                reviewRatingInput.value = selectedRating;
+            }
+
+            updateStars(selectedRating, ratingStars);
         });
     });
 
-    function showStars(rating) {
-        stars.forEach((s, i) => {
-            s.innerText = i < rating ? "★" : "☆";
+    ratingBox.addEventListener("mouseleave", () => {
+        updateStars(selectedRating, ratingStars);
+    });
+
+    if (ratingForm) {
+        ratingForm.addEventListener("submit", (event) => {
+            if (selectedRating === 0) {
+                event.preventDefault();
+                alert("Please choose a rating first.");
+            }
         });
     }
 
+    if (reviewForm) {
+        reviewForm.addEventListener("submit", (event) => {
+            const reviewText = reviewInput.value.trim();
+
+            if (selectedRating === 0) {
+                event.preventDefault();
+                alert("Please rate the book before posting a review.");
+                return;
+            }
+
+            if (reviewText === "") {
+                event.preventDefault();
+                alert("Please write something before posting your review.");
+            }
+        });
+    }
 });
+
+function updateStars(value, stars) {
+    stars.forEach((star) => {
+        if (Number(star.dataset.value) <= value) {
+            star.innerText = "★";
+        } else {
+            star.innerText = "☆";
+        }
+    });
+}
