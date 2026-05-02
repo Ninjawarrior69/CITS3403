@@ -1,15 +1,8 @@
 /* Page base */
 .home-page {
-<<<<<<< HEAD
     max-width: 1440px;
     margin: 0 auto;
     box-sizing: border-box;
-=======
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 48px 80px 72px;
-  box-sizing: border-box;
->>>>>>> main
 }
 
 .home-page section {
