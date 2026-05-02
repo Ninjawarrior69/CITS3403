@@ -1,13 +1,5 @@
 /* Page base */
-.home-page {
-    max-width: 1440px;
-    margin: 0 auto;
-    box-sizing: border-box;
-}
 
-.home-page section {
-  margin-bottom: 72px;
-}
 
 .book-link,
 .review-book-link {
