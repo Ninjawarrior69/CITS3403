@@ -9,6 +9,13 @@
   margin-bottom: 72px;
 }
 
+.book-link,
+.review-book-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 /* Hero */
 .hero-section {
   text-align: center;
