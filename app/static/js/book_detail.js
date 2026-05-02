@@ -1,3 +1,5 @@
+console.log("JS LOADED");
+
 function toggleSection(id, button) {
     const section = document.getElementById(id);
 
@@ -37,13 +39,67 @@ function toggleRead(btn) {
 }
 
 function postReview() {
-    const text = document.getElementById("review-text").value;
+    const text = document.getElementById("review-input").value.trim();
 
-    if (!text) return;
+    if (text === "") {
+        alert("Please write something!");
+        return;
+    }
+
+    if (selectedRating === 0) {
+        alert("Please rate the book first!");
+        return;
+    }
 
     const div = document.createElement("div");
     div.classList.add("review-item");
-    div.innerText = text;
+
+    div.innerHTML = `
+        <p><strong>You</strong> - ${"★".repeat(selectedRating)}</p>
+        <p>${text}</p>
+        <hr>
+    `;
 
     document.getElementById("review-list").prepend(div);
+
+    document.getElementById("review-input").value = "";
+
+    selectedRating = 0;
+    showStars(0);
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    let selectedRating = 0;
+    const stars = document.querySelectorAll("#rating span");
+
+    stars.forEach((star, index) => {
+
+        star.addEventListener("mouseenter", () => {
+            showStars(index + 1);
+        });
+
+        document.getElementById("rating").addEventListener("mouseleave", () => {
+            showStars(selectedRating);
+        });
+
+
+        star.addEventListener("click", () => {
+
+            if (selectedRating === index + 1) {
+                selectedRating = 0;
+            } else {
+                selectedRating = index + 1;
+            }
+
+            showStars(selectedRating);
+        });
+    });
+
+    function showStars(rating) {
+        stars.forEach((s, i) => {
+            s.innerText = i < rating ? "★" : "☆";
+        });
+    }
+
+});

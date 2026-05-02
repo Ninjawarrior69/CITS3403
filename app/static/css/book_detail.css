@@ -301,3 +301,10 @@ textarea {
 .show-more-btn:hover {
     text-decoration: underline;
 }
+
+#rating span {
+    font-size: 28px;
+    cursor: pointer;
+    color: #FCAC83;
+}
+

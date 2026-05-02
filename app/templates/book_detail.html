@@ -192,11 +192,20 @@
             <button class="primary-btn" onclick="toggleRead(this)">Want to Read</button>
 
             <p>Rate this book:</p>
-            <div class="stars-input">☆☆☆☆☆</div>
+            <div class="rating" id="rating">
+                <span data-value="1">☆</span>
+                <span data-value="2">☆</span>
+                <span data-value="3">☆</span>
+                <span data-value="4">☆</span>
+                <span data-value="5">☆</span>
+            </div>
+            
 
-            <textarea placeholder="Write your review..."></textarea>
+            <textarea id="review-input" placeholder="Write your review..."></textarea>
 
-            <button class="secondary-btn" onclick="postReview">Post Review</button>
+            <button class="secondary-btn" onclick="postReview()">Post Review</button>
+
+            <div id="review-list"></div>
 
         </div>
 
