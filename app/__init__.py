@@ -17,6 +17,11 @@ def create_app() -> Flask:
 	# Import models so Flask-Migrate can detect schema metadata.
 	from app import models  # noqa: F401
 
+	# Register user loader for Flask-Login
+	@login_manager.user_loader
+	def load_user(user_id):
+		return models.User.query.get(int(user_id))
+
 	# Register routes after app creation to avoid circular imports.
 	from app.routes import register_routes
 
