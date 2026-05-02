@@ -6,17 +6,17 @@ from app.extensions import db
 
 
 class User(UserMixin, db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	username = db.Column(db.String(80), unique=True, nullable=False)
-	email = db.Column(db.String(120), unique=True, nullable=False)
-	password_hash = db.Column(db.String(255), nullable=False)
-	created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-     
-	comments = db.relationship("Comment", backref="user", lazy=True)
-    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-	def __repr__(self) -> str:
-		return f"<User {self.username}>"
+    comments = db.relationship("Comment", backref="user", lazy=True)
+    ratings = db.relationship("Rating", backref="user", lazy=True)
+
+    def __repr__(self) -> str:
+        return f"<User {self.username}>"
 
 
 class Book(db.Model):
@@ -31,6 +31,13 @@ class Book(db.Model):
 
     comments = db.relationship(
         "Comment",
+        backref="book",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    ratings = db.relationship(
+        "Rating",
         backref="book",
         lazy=True,
         cascade="all, delete-orphan"
@@ -52,3 +59,16 @@ class Comment(db.Model):
 
     def __repr__(self) -> str:
         return f"<Comment {self.id}>"
+
+
+class Rating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), nullable=False, default="Anonymous")
+    stars = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<Rating {self.id}>"
