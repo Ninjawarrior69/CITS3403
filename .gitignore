@@ -11,3 +11,4 @@ app.db
 app.db-shm
 app.db-wal
 app.db-journal
+app-venv
