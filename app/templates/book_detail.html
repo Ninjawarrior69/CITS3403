@@ -43,7 +43,11 @@
                     </div>
 
                     <h3>About this book</h3>
-                    <p>{{ book.description }}</p>
+                    <p id="book-desc" class="collapsed">
+                        {{ book.description }}
+                    </p>
+                    
+                    <button class="show-more-btn" onclick="toggleSection('book-desc', this)">Show More</button>
                 </div>
 
             </div>
@@ -63,7 +67,7 @@
                     <div class="author-top">
                         <div class="author-name">
                             <h3>{{ book.author }}</h3>
-                            <button class="btn-follow">Follow</button>
+                            <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
                         </div>
                     </div>
 
@@ -72,9 +76,11 @@
                         {{ author.followers if author else 0 }} followers
                     </p>
 
-                    <p>
+                    <p id="author-desc" class="collapsed">
                         {{ author.bio if author else "Author bio coming soon." }}
                     </p>
+
+                    <button class="show-more-btn" onclick="toggleSection('author-desc', this)">Show More</button>
                 </div>
 
             </div>
@@ -149,7 +155,7 @@
 
                         </div>
 
-                        <button class="btn-follow">Follow</button>
+                        <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
                     </div>
 
                     <div class="stars">
@@ -183,20 +189,22 @@
                 {{ book.rating }}
             </div>
 
-            <button class="primary-btn">Want to Read</button>
+            <button class="primary-btn" onclick="toggleRead(this)">Want to Read</button>
 
             <p>Rate this book:</p>
             <div class="stars-input">☆☆☆☆☆</div>
 
             <textarea placeholder="Write your review..."></textarea>
 
-            <button class="secondary-btn">Post Review</button>
+            <button class="secondary-btn" onclick="postReview">Post Review</button>
 
         </div>
 
     </div>
 
 </div>
+
+<script src="{{ url_for('static', filename='js/book_detail.js') }}"></script>
 
 </body>
 </html>
