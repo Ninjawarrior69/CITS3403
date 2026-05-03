@@ -5,4 +5,10 @@ instance/
 .env
 .vscode/
 .DS_Store
+
+# Local SQLite database files
+app.db
+app.db-shm
+app.db-wal
+app.db-journal
 app-venv

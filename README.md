@@ -2,6 +2,9 @@
 
 ## Overview
 
+BookWorm is a reading tracker web app where users can browse books, create an account,
+and share their reading activity with others.
+
 ## Team
 
 <div>
@@ -29,21 +32,44 @@
   </table>
 </div>
 
+## Prerequisites (Linux)
+
+1. Install Python 3.10 or newer.
+2. Verify Python and pip are available:
+
+```bash
+python3 --version
+pip3 --version
+```
+
 ## Run Application
 
-1. Create/activate a virtual environment.
-2. Install dependencies:
+1. Create a virtual environment:
 
 ```bash
-pip install -r requirements.txt
+python3 -m venv venv
 ```
 
-3. Start the Flask development server:
+2. Activate the virtual environment:
 
 ```bash
-python run.py
+source venv/bin/activate
 ```
 
-4. Open http://127.0.0.1:5000 in your browser.
+3. Install dependencies:
+
+```bash
+pip3 install -r requirements.txt
+```
+
+4. Start the Flask development server:
+
+```bash
+python3 run.py
+```
+
+5. Open http://127.0.0.1:5000 in your browser.
 
 ## Run Tests
+
+Tests are not configured yet.
