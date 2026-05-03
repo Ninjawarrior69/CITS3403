@@ -356,3 +356,27 @@
 .show-more-btn:hover {
     text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+    .book-detail-container {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        margin: 20px auto;
+    }
+
+    .sidebar {
+        order: -1;
+        position: static;
+        max-width: 100%;
+    }
+
+    .book-header {
+        flex-direction: column;
+    }
+
+    .book-cover {
+        width: 100%;
+        max-width: 260px;
+        height: auto;
+    }
+}
