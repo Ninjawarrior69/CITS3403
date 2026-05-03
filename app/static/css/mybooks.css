@@ -1,0 +1,33 @@
+.shelf {
+    background-color: #544036;
+    height: 20px;
+    width: 100%;
+}
+
+.book-card {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background-color: #e5e5e5;
+    border-radius: 8px;
+}
+
+.current-page {
+    font-weight: bold;
+}
+
+.progress {
+    width: 100%;
+    background-color: #E798974D;
+}
+
+.progress-bar {
+    background-color: #E79897;
+}
+
+.modal-content {
+    background-color: #f6efd8;
+}
+
+.modal-header {
+    border-color: #3D2F2A4D;
+}
