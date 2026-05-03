@@ -92,3 +92,45 @@ hr {
 .heading {
   text-align: center;
 }
+
+.navbar-search {
+  width: 320px;
+}
+
+.navbar-search .input-group {
+  width: 100%;
+}
+
+.navbar-search .form-control {
+  width: 1%;
+  flex: 1 1 auto;
+  height: 40px;
+  border-radius: 20px 0 0 20px;
+  background-color: #f5efe0;
+  border: 1px solid #3D2F2A4D;
+  border-right: none;
+  padding: 8px 14px;
+}
+
+.navbar-search .btn-search {
+  height: 40px;
+  border-radius: 0 20px 20px 0;
+  background-color: #f5efe0;
+  color: #3D2F2A;
+  border: 1px solid #3D2F2A4D;
+  border-left: none;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+.navbar-search .btn-search:hover {
+  background-color: #e8ddc4;
+  color: #3D2F2A;
+  border-color: #3D2F2A4D;
+}
+
+@media (max-width: 991px) {
+  .navbar-search {
+    width: 100%;
+  }
+}
