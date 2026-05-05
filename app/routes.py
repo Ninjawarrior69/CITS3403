@@ -137,7 +137,24 @@ def get_display_rating(book):
 def register_routes(app: Flask) -> None:
 	@app.route("/")
 	def home():
-		return render_template("home.html")
+		seed_books_if_empty()
+		
+		# Get all books, sorted by rating (trending)
+		trending_books = Book.query.order_by(Book.rating.desc()).all()
+		
+		# Get most read books
+		most_read_books = Book.query.order_by(Book.reads.desc()).all()
+		
+		# Get recent reviews
+		comments = Comment.query.order_by(Comment.created_at.desc()).all()
+		reviews = [format_review(comment) for comment in comments]
+		
+		return render_template(
+			"home.html",
+			trending_books=trending_books,
+			most_read_books=most_read_books,
+			reviews=reviews
+		)
 
 	@app.route("/profile")
 	@app.route("/profile.html")
@@ -183,3 +200,134 @@ def register_routes(app: Flask) -> None:
 	@app.route("/my-reviews.html")
 	def my_reviews():
 		return render_template("my-reviews.html")
+	
+	@app.route("/book/<int:book_id>")
+	def book_detail(book_id):
+		book = Book.query.get_or_404(book_id)
+		
+		# Build rating summary
+		rating_summary = build_rating_summary(book)
+		
+		# Get all reviews for this book
+		comments = Comment.query.filter_by(book_id=book_id).all()
+		reviews = [format_review(comment) for comment in comments]
+		
+		# Get current user's rating
+		user_rating = 0
+		if current_user.is_authenticated:
+			rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+			if rating:
+				user_rating = rating.stars
+		
+		# Check if user has added to want to read
+		want_to_read = False
+		want_to_read_count = WantToRead.query.filter_by(book_id=book_id).count()
+		if current_user.is_authenticated:
+			want_to_read = WantToRead.query.filter_by(user_id=current_user.id, book_id=book_id).first() is not None
+		else:
+			session_id = get_session_id()
+			want_to_read = WantToRead.query.filter_by(session_id=session_id, book_id=book_id).first() is not None
+		
+		author = None
+		
+		return render_template(
+			"book_detail.html",
+			book=book,
+			author=author,
+			rating_summary=rating_summary,
+			reviews=reviews,
+			user_rating=user_rating,
+			want_to_read=want_to_read,
+			want_to_read_count=want_to_read_count
+		)
+	
+	@app.route("/book/<int:book_id>/toggle-want-to-read", methods=["POST"])
+	def toggle_want_to_read(book_id):
+		book = Book.query.get_or_404(book_id)
+		
+		if current_user.is_authenticated:
+			existing = WantToRead.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+			if existing:
+				db.session.delete(existing)
+			else:
+				want_to_read = WantToRead(user_id=current_user.id, book_id=book_id)
+				db.session.add(want_to_read)
+		else:
+			session_id = get_session_id()
+			existing = WantToRead.query.filter_by(session_id=session_id, book_id=book_id).first()
+			if existing:
+				db.session.delete(existing)
+			else:
+				want_to_read = WantToRead(session_id=session_id, book_id=book_id)
+				db.session.add(want_to_read)
+		
+		db.session.commit()
+		return redirect(url_for("book_detail", book_id=book_id))
+	
+	@app.route("/book/<int:book_id>/rate", methods=["POST"])
+	def rate_book(book_id):
+		book = Book.query.get_or_404(book_id)
+		
+		stars = request.form.get("stars", type=int)
+		if stars is None or stars < 0 or stars > 5:
+			abort(400)
+		
+		if current_user.is_authenticated:
+			existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+			if existing_rating:
+				if stars == 0:
+					db.session.delete(existing_rating)
+				else:
+					existing_rating.stars = stars
+			elif stars > 0:
+				rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
+				db.session.add(rating)
+		else:
+			session_id = get_session_id()
+			existing_rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
+			if existing_rating:
+				if stars == 0:
+					db.session.delete(existing_rating)
+				else:
+					existing_rating.stars = stars
+			elif stars > 0:
+				rating = Rating(session_id=session_id, book_id=book_id, stars=stars)
+				db.session.add(rating)
+		
+		db.session.commit()
+		return redirect(url_for("book_detail", book_id=book_id))
+	
+	@app.route("/book/<int:book_id>/review", methods=["POST"])
+	def post_review(book_id):
+		book = Book.query.get_or_404(book_id)
+		
+		text = request.form.get("text", "").strip()
+		stars = request.form.get("stars", type=int)
+		
+		if not text:
+			abort(400)
+		
+		if stars is None or stars < 1 or stars > 5:
+			abort(400)
+		
+		if current_user.is_authenticated:
+			comment = Comment(
+				user_id=current_user.id,
+				username=current_user.username,
+				book_id=book_id,
+				text=text,
+				stars=stars
+			)
+		else:
+			session_id = get_session_id()
+			comment = Comment(
+				session_id=session_id,
+				username="Anonymous",
+				book_id=book_id,
+				text=text,
+				stars=stars
+			)
+		
+		db.session.add(comment)
+		db.session.commit()
+		return redirect(url_for("book_detail", book_id=book_id))
