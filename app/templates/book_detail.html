@@ -190,13 +190,27 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
             <button
-              type="submit"
-              class="primary-btn {% if want_to_read %}active{% endif %}"
+              type="button"
+              id="openShelfModal"
+              class="primary-btn"
             >
-              {% if want_to_read %} ✓ Added · {{ want_to_read_count }} readers
-              {% else %} Want to Read {% endif %}
+              Add to Shelf
             </button>
           </form>
+
+          <div class="shelf-modal-overlay" id="shelfModal">
+            <div class="shelf-modal">
+              <div class="shelf-modal-header">
+                <h3>Choose reading status</h3>
+                <button type="button" id="closeShelfModal" class="shelf-close-btn">×</button>
+              </div>
+              <button type="button" class="shelf-option" data-status="Read">Read</button>
+              <button type="button" class="shelf-option" data-status="Currently Reading">Currently Reading</button>
+              <button type="button" class="shelf-option" data-status="To Be Read">To Be Read</button>
+              <button type="button" class="shelf-option" data-status="Did Not Finish">Did Not Finish</button>
+              <button type="button" id="removeShelf" class="remove-shelf-btn">Remove from my shelf</button>
+            </div>
+          </div>
 
           <!-- RATING SECTION -->
           <div class="interaction-section">
