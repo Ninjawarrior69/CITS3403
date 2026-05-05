@@ -45,3 +45,8 @@ def register_routes(app: Flask) -> None:
 	@app.route("/did-not-finish.html")
 	def did_not_finish():
 		return render_template("did-not-finish.html")
+	
+	@app.route("/my-reviews")
+	@app.route("/my-reviews.html")
+	def my_reviews():
+		return render_template("my-reviews.html")
