@@ -64,6 +64,7 @@ class Comment(db.Model):
 
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    session_id = db.Column(db.String(120), nullable=True)
 
     def __repr__(self) -> str:
         return f"<Comment {self.id}>"
@@ -77,6 +78,7 @@ class Rating(db.Model):
 
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    session_id = db.Column(db.String(120), nullable=True)
 
     def __repr__(self) -> str:
         return f"<Rating {self.id}>"
