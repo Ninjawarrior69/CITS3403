@@ -1,13 +1,11 @@
 /* Page base */
-.home-page {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 48px 80px 72px;
-  box-sizing: border-box;
-}
 
-.home-page section {
-  margin-bottom: 72px;
+
+.book-link,
+.review-book-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 /* Hero */
