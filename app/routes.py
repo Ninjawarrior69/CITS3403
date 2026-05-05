@@ -135,159 +135,51 @@ def get_display_rating(book):
 
 
 def register_routes(app: Flask) -> None:
+	@app.route("/")
+	def home():
+		return render_template("home.html")
 
-    @app.route("/")
-    def home():
-        seed_books_if_empty()
+	@app.route("/profile")
+	@app.route("/profile.html")
+	def profile():
+		return render_template("profile.html")
 
-        trending_books = Book.query.order_by(Book.created_at.desc()).limit(6).all()
-        most_read_books = Book.query.order_by(Book.reads.desc()).limit(5).all()
+	@app.route("/login")
+	@app.route("/login.html")
+	def login():
+		return render_template("login.html")
 
-        recent_comments = (
-            Comment.query
-            .order_by(Comment.created_at.desc())
-            .limit(4)
-            .all()
-        )
+	@app.route("/signup")
+	@app.route("/signup.html")
+	def signup():
+		return render_template("signup.html")
 
-        reviews = [format_review(comment) for comment in recent_comments]
-
-        return render_template(
-            "home.html",
-            trending_books=trending_books,
-            most_read_books=most_read_books,
-            reviews=reviews
-        )
-
-    @app.route("/profile")
-    @app.route("/profile.html")
-    def profile():
-        return render_template("profile.html")
-
-    @app.route("/login")
-    @app.route("/login.html")
-    def login():
-        return render_template("login.html")
-
-    @app.route("/signup")
-    @app.route("/signup.html")
-    def signup():
-        return render_template("signup.html")
-
-    @app.route("/edit-profile")
-    @app.route("/edit-profile.html")
-    def edit_profile():
-        return render_template("edit-profile.html")
-
-    @app.route("/book/<int:book_id>")
-    def book_detail(book_id):
-        seed_books_if_empty()
-
-        book = Book.query.get_or_404(book_id)
-
-        session_id = get_session_id()
-        
-        want_to_read = WantToRead.query.filter_by(
-            book_id=book.id,
-            session_id=session_id
-        ).first()
-        
-        want_to_read_count = WantToRead.query.filter_by(book_id=book.id).count()
-
-        author = {
-            "bio": f"{book.author} is the author of this book. More author information will be added later.",
-            "followers": 0,
-            "books": Book.query.filter_by(author=book.author).count()
-        }
-
-        reviews = [format_review(comment) for comment in book.comments]
-        rating_summary = build_rating_summary(book)
-        user_rating = session.get(f"book_{book.id}_rating", 0)
-
-        return render_template(
-            "book_detail.html",
-            book=book,
-            author=author,
-            reviews=reviews,
-            rating_summary=rating_summary,
-            user_rating=user_rating,
-            want_to_read=want_to_read is not None,
-            want_to_read_count=want_to_read_count
-        )
-
-    @app.route("/book/<int:book_id>/rate", methods=["POST"])
-    def rate_book(book_id):
-        book = Book.query.get_or_404(book_id)
-
-        try:
-            stars = int(request.form.get("stars", 0))
-        except ValueError:
-            abort(400)
-
-        if stars < 1 or stars > 5:
-            abort(400)
-
-        rating = Rating(
-            book_id=book.id,
-            username=current_user.username if current_user.is_authenticated else "Anonymous",
-            user_id=current_user.id if current_user.is_authenticated else None,
-            stars=stars
-        )
-
-        db.session.add(rating)
-        db.session.commit()
-
-        session[f"book_{book.id}_rating"] = stars
-
-        return redirect(url_for("book_detail", book_id=book.id))
-
-    @app.route("/book/<int:book_id>/review", methods=["POST"])
-    def post_review(book_id):
-        book = Book.query.get_or_404(book_id)
-
-        text = request.form.get("text", "").strip()
-
-        try:
-            stars = int(request.form.get("stars", 0))
-        except ValueError:
-            abort(400)
-
-        if not text or stars < 1 or stars > 5:
-            abort(400)
-
-        comment = Comment(
-            book_id=book.id,
-            username=current_user.username if current_user.is_authenticated else "Anonymous",
-            user_id=current_user.id if current_user.is_authenticated else None,
-            text=text,
-            stars=stars
-        )
-
-        db.session.add(comment)
-        db.session.commit()
-
-        return redirect(url_for("book_detail", book_id=book.id))
-    
-    @app.route("/book/<int:book_id>/want-to-read", methods=["POST"])
-    def toggle_want_to_read(book_id):
-        book = Book.query.get_or_404(book_id)
-        session_id = get_session_id()
-
-        existing = WantToRead.query.filter_by(
-            book_id=book.id,
-            session_id=session_id
-        ).first()
-
-        if existing:
-            db.session.delete(existing)
-        else:
-            want_to_read = WantToRead(
-                book_id=book.id,
-                session_id=session_id,
-                user_id=current_user.id if current_user.is_authenticated else None
-            )
-            db.session.add(want_to_read)
-
-        db.session.commit()
-
-        return redirect(url_for("book_detail", book_id=book.id))
+	@app.route("/edit-profile")
+	@app.route("/edit-profile.html")
+	def edit_profile():
+		return render_template("edit-profile.html")
+	
+	@app.route("/read")
+	@app.route("/read.html")
+	def read():
+		return render_template("read.html")
+	
+	@app.route("/currently-reading")
+	@app.route("/currently-reading.html")
+	def currently_reading():
+		return render_template("currently-reading.html")
+	
+	@app.route("/to-be-read")
+	@app.route("/to-be-read.html")
+	def to_be_read():
+		return render_template("to-be-read.html")
+	
+	@app.route("/did-not-finish")
+	@app.route("/did-not-finish.html")
+	def did_not_finish():
+		return render_template("did-not-finish.html")
+	
+	@app.route("/my-reviews")
+	@app.route("/my-reviews.html")
+	def my_reviews():
+		return render_template("my-reviews.html")
