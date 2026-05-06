@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.extensions import db
 
@@ -15,6 +16,14 @@ class User(UserMixin, db.Model):
     comments = db.relationship("Comment", backref="user", lazy=True)
     ratings = db.relationship("Rating", backref="user", lazy=True)
     want_to_reads = db.relationship("WantToRead", backref="user", lazy=True)
+
+    def set_password(self, password: str) -> None:
+        """Hash and set the user's password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Check if the provided password matches the hash."""
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
