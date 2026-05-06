@@ -121,7 +121,10 @@
                 <div class="dist-label">{{ star }}★</div>
 
                 <div class="dist-bar">
-                  <div class="dist-fill"></div>
+                  <div 
+                    class="dist-fill"
+                    style="width: {{ rating_summary.distribution[star] }}%;"
+                  ></div>
                 </div>
 
                 <div class="dist-value">

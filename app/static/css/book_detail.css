@@ -154,8 +154,10 @@
 
 .dist-fill {
     height: 100%;
+    width: 0;
     background-color: #FCAC83;
     border-radius: 999px;
+    transition: width 0.25s ease;
 }
 
 .dist-value {

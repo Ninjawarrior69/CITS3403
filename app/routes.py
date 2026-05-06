@@ -216,8 +216,12 @@ def register_routes(app: Flask) -> None:
 		user_rating = 0
 		if current_user.is_authenticated:
 			rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-			if rating:
-				user_rating = rating.stars
+		else:
+			session_id = get_session_id()
+			rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
+
+		if rating:
+			user_rating = rating.stars
 		
 		# Check if user has added to want to read
 		want_to_read = False
