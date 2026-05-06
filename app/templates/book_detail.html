@@ -1,258 +1,297 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>{{ book.title }}</title>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     <!-- Global CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
 
     <!-- Page CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/book_detail.css') }}">
-</head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/book_detail.css') }}"
+    />
+  </head>
 
-<body>
+  <body>
+    {% include "navbar.html" %}
 
-{% include "navbar.html" %}
-
-<div class="book-detail-container">
-
-    <!-- LEFT -->
-    <div class="main-content">
-
+    <div class="book-detail-container">
+      <!-- LEFT -->
+      <div class="main-content">
         <!-- BOOK HEADER -->
         <div class="section-card">
-            <div class="book-header">
+          <div class="book-header">
+            <img src="https://placehold.co/300x450" class="book-cover" />
 
-                <img src="https://placehold.co/300x450" class="book-cover">
+            <div class="book-info">
+              <h1>{{ book.title }}</h1>
+              <p>by {{ book.author }}</p>
 
-                <div class="book-info">
-                    <h1>{{ book.title }}</h1>
-                    <p>by {{ book.author }}</p>
+              <div class="rating">
+                {% for i in range(rating_summary.average | int) %}★{% endfor %}
+                {% for i in range(5 - (rating_summary.average | int)) %}☆{%
+                endfor %} {{ rating_summary.average }}
+              </div>
 
-                    <div class="rating">
-                        {% for i in range(rating_summary.average | int) %}★{% endfor %}
-                        {% for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
-                        {{ rating_summary.average }}
-                    </div>
+              <h3>About this book</h3>
+              <p id="book-desc" class="collapsed">{{ book.description }}</p>
 
-                    <h3>About this book</h3>
-                    <p id="book-desc" class="collapsed">
-                        {{ book.description }}
-                    </p>
-
-                    <button class="show-more-btn" onclick="toggleSection('book-desc', this)">Show More</button>
-                </div>
-
+              <button
+                class="show-more-btn"
+                onclick="toggleSection('book-desc', this)"
+              >
+                Show More
+              </button>
             </div>
+          </div>
         </div>
 
         <!-- AUTHOR -->
         <div class="section-card">
-            <h2>About the Author</h2>
+          <h2>About the Author</h2>
 
-            <div class="author-box">
+          <div class="author-box">
+            <div class="avatar">{{ book.author[0] }}</div>
 
-                <div class="avatar">
-                    {{ book.author[0] }}
+            <div class="author-info">
+              <div class="author-top">
+                <div class="author-name">
+                  <h3>{{ book.author }}</h3>
+                  <button class="btn-follow" onclick="toggleFollow(this)">
+                    Follow
+                  </button>
                 </div>
+              </div>
 
-                <div class="author-info">
-                    <div class="author-top">
-                        <div class="author-name">
-                            <h3>{{ book.author }}</h3>
-                            <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
-                        </div>
-                    </div>
+              <p>
+                {{ author.books if author else 0 }} books · {{ author.followers
+                if author else 0 }} followers
+              </p>
 
-                    <p>
-                        {{ author.books if author else 0 }} books ·
-                        {{ author.followers if author else 0 }} followers
-                    </p>
+              <p id="author-desc" class="collapsed">
+                {{ author.bio if author else "Author bio coming soon." }}
+              </p>
 
-                    <p id="author-desc" class="collapsed">
-                        {{ author.bio if author else "Author bio coming soon." }}
-                    </p>
-
-                    <button class="show-more-btn" onclick="toggleSection('author-desc', this)">Show More</button>
-                </div>
-
+              <button
+                class="show-more-btn"
+                onclick="toggleSection('author-desc', this)"
+              >
+                Show More
+              </button>
             </div>
+          </div>
         </div>
 
         <!-- COMMUNITY REVIEWS -->
         <div class="section-card">
-            <h2>Community Reviews</h2>
+          <h2>Community Reviews</h2>
 
-            <div class="reviews-top">
+          <div class="reviews-top">
+            <div class="rating-left">
+              <h1>{{ rating_summary.average }}</h1>
 
-                <div class="rating-left">
-                    <h1>{{ rating_summary.average }}</h1>
-
-                    <div class="stars">
-                        {% for i in range(rating_summary.average | int) %}★{% endfor %}
-                        {% for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
-                    </div>
-
-                    <p>{{ rating_summary.total }} ratings</p>
-                    <p>{{ reviews|length }} reviews</p>
-                </div>
-
-                <div class="rating-right">
-
-                    <p class="dist-title">Rating Distribution</p>
-
-                    {% for star in [5, 4, 3, 2, 1] %}
-                    <div class="dist-row">
-
-                        <div class="dist-label">
-                            {{ star }}★
-                        </div>
-
-                        <div class="dist-bar">
-                            <div class="dist-fill"
-                                 style="width: {{ rating_summary.distribution[star] }}%">
-                            </div>
-                        </div>
-
-                        <div class="dist-value">
-                            {{ rating_summary.distribution[star] }}%
-                            <span>
-                                ({{ rating_summary.total * rating_summary.distribution[star] // 100 }})
-                            </span>
-                        </div>
-
-                    </div>
-                    {% endfor %}
-
-                </div>
-
-            </div>
-
-            <!-- REVIEW LIST -->
-            <div class="review-list">
-
-                {% for review in reviews %}
-                <div class="review-item">
-
-                    <div class="review-header">
-                        <div class="review-user">
-
-                            <div class="avatar small">
-                                {{ review.username[0] }}
-                            </div>
-
-                            <div>
-                                <strong>{{ review.username }}</strong>
-                                <p>{{ review.time }}</p>
-                            </div>
-
-                        </div>
-
-                        <button class="btn-follow" onclick="toggleFollow(this)">Follow</button>
-                    </div>
-
-                    <div class="stars">
-                        {% for i in range(review.stars) %}★{% endfor %}
-                        {% for i in range(5 - review.stars) %}☆{% endfor %}
-                    </div>
-
-                    <p>{{ review.text }}</p>
-
-                </div>
-                {% else %}
-                <p>No reviews yet.</p>
-                {% endfor %}
-
-            </div>
-        </div>
-
-    </div>
-
-    <!-- RIGHT SIDEBAR -->
-    <div class="sidebar">
-
-        <div class="sidebar-card">
-
-            <img src="https://placehold.co/200x300">
-
-            <h3>{{ book.title }}</h3>
-            <p>by {{ book.author }}</p>
-
-            <div class="rating">
+              <div class="stars">
                 {% for i in range(rating_summary.average | int) %}★{% endfor %}
-                {% for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
-                {{ rating_summary.average }}
+                {% for i in range(5 - (rating_summary.average | int)) %}☆{%
+                endfor %}
+              </div>
+
+              <p>{{ rating_summary.total }} ratings</p>
+              <p>{{ reviews|length }} reviews</p>
             </div>
 
-            <form method="POST" action="{{ url_for('toggle_want_to_read', book_id=book.id) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="rating-right">
+              <p class="dist-title">Rating Distribution</p>
 
-                <button type="submit" class="primary-btn {% if want_to_read %}active{% endif %}">
-                    {% if want_to_read %}
-                        ✓ Added · {{ want_to_read_count }} readers
-                    {% else %}
-                        Want to Read
-                    {% endif %}
+              {% for star in [5, 4, 3, 2, 1] %}
+              <div class="dist-row">
+                <div class="dist-label">{{ star }}★</div>
+
+                <div class="dist-bar">
+                  <div class="dist-fill"></div>
+                </div>
+
+                <div class="dist-value">
+                  {{ rating_summary.distribution[star] }}%
+                  <span
+                    >({{ ((rating_summary.total *
+                    rating_summary.distribution[star]) / 100) | int }})</span
+                  >
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- REVIEW LIST -->
+          <div class="review-list">
+            {% for review in reviews %}
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-user">
+                  <div class="avatar small">{{ review.username[0] }}</div>
+
+                  <div>
+                    <strong>{{ review.username }}</strong>
+                    <p>{{ review.time }}</p>
+                  </div>
+                </div>
+
+                <button class="btn-follow" onclick="toggleFollow(this)">
+                  Follow
                 </button>
-            </form>
+              </div>
 
-            <!-- RATING SECTION -->
-            <div class="interaction-section">
-                <div class="rating-title-row">
-                    <p class="section-label">Rate this book</p>
+              <div class="stars">
+                {% for i in range(review.stars) %}★{% endfor %} {% for i in
+                range(5 - review.stars) %}☆{% endfor %}
+              </div>
 
-                    <form method="POST" action="{{ url_for('rate_book', book_id=book.id) }}" id="rating-form">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <input type="hidden" name="stars" id="rating-stars">
-
-                        <button type="submit" class="secondary-btn save-rating-btn">Save Rating</button>
-                    </form>
-                </div>
-
-                <div class="rating" id="rating" data-current-rating="{{ user_rating }}">
-                    <span data-value="1">{% if user_rating >= 1 %}★{% else %}☆{% endif %}</span>
-                    <span data-value="2">{% if user_rating >= 2 %}★{% else %}☆{% endif %}</span>
-                    <span data-value="3">{% if user_rating >= 3 %}★{% else %}☆{% endif %}</span>
-                    <span data-value="4">{% if user_rating >= 4 %}★{% else %}☆{% endif %}</span>
-                    <span data-value="5">{% if user_rating >= 5 %}★{% else %}☆{% endif %}</span>
-                </div>
+              <p>{{ review.text }}</p>
             </div>
-
-            <!-- REVIEW SECTION -->
-            <div class="interaction-section review-section">
-                <p class="section-label">Write your review</p>
-
-                <form method="POST" action="{{ url_for('post_review', book_id=book.id) }}" id="review-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="stars" id="review-stars">
-
-                    <textarea
-                        name="text"
-                        id="review-input"
-                        class="review-textarea"
-                        placeholder="Write your review..."
-                        required
-                    ></textarea>
-
-                    <button type="submit" class="secondary-btn post-review-btn">Post Review</button>
-                </form>
-            </div>
-
+            {% else %}
+            <p>No reviews yet.</p>
+            {% endfor %}
+          </div>
         </div>
+      </div>
 
+      <!-- RIGHT SIDEBAR -->
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <img src="https://placehold.co/200x300" />
+
+          <h3>{{ book.title }}</h3>
+          <p>by {{ book.author }}</p>
+
+          <div class="rating">
+            {% for i in range(rating_summary.average | int) %}★{% endfor %} {%
+            for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
+            {{ rating_summary.average }}
+          </div>
+
+          <form
+            method="POST"
+            action="{{ url_for('toggle_want_to_read', book_id=book.id) }}"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+            <button
+              type="button"
+              id="openShelfModal"
+              class="primary-btn"
+            >
+              Add to Shelf
+            </button>
+          </form>
+
+          <div class="shelf-modal-overlay" id="shelfModal">
+            <div class="shelf-modal">
+              <div class="shelf-modal-header">
+                <h3>Choose reading status</h3>
+                <button type="button" id="closeShelfModal" class="shelf-close-btn">×</button>
+              </div>
+              <button type="button" class="shelf-option" data-status="Read">Read</button>
+              <button type="button" class="shelf-option" data-status="Currently Reading">Currently Reading</button>
+              <button type="button" class="shelf-option" data-status="To Be Read">To Be Read</button>
+              <button type="button" class="shelf-option" data-status="Did Not Finish">Did Not Finish</button>
+              <button type="button" id="removeShelf" class="remove-shelf-btn">Remove from my shelf</button>
+            </div>
+          </div>
+
+          <!-- RATING SECTION -->
+          <div class="interaction-section">
+            <div class="rating-title-row">
+              <p class="section-label">Rate this book</p>
+
+              <form
+                method="POST"
+                action="{{ url_for('rate_book', book_id=book.id) }}"
+                id="rating-form"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <input type="hidden" name="stars" id="rating-stars" />
+
+                <button type="submit" class="secondary-btn save-rating-btn">
+                  Save Rating
+                </button>
+              </form>
+            </div>
+
+            <div
+              class="rating"
+              id="rating"
+              data-current-rating="{{ user_rating }}"
+            >
+              <span data-value="1"
+                >{% if user_rating >= 1 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="2"
+                >{% if user_rating >= 2 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="3"
+                >{% if user_rating >= 3 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="4"
+                >{% if user_rating >= 4 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="5"
+                >{% if user_rating >= 5 %}★{% else %}☆{% endif %}</span
+              >
+            </div>
+          </div>
+
+          <!-- REVIEW SECTION -->
+          <div class="interaction-section review-section">
+            <p class="section-label">Write your review</p>
+
+            <form
+              method="POST"
+              action="{{ url_for('post_review', book_id=book.id) }}"
+              id="review-form"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <input type="hidden" name="stars" id="review-stars" />
+
+              <textarea
+                name="text"
+                id="review-input"
+                class="review-textarea"
+                placeholder="Write your review..."
+                required
+              ></textarea>
+
+              <button type="submit" class="secondary-btn post-review-btn">
+                Post Review
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{{ url_for('static', filename='js/book_detail.js') }}"></script>
-
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/book_detail.js') }}"></script>
+  </body>
 </html>
