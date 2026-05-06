@@ -177,6 +177,7 @@
     border-bottom: 1px solid #ddd;
 }
 
+
 .review-header {
     display: flex;
     justify-content: space-between;
@@ -490,4 +491,11 @@
   background-color: var(--secondary-green);
   border-color: var(--secondary-green);
   color: var(--primary-yellow);
+}
+
+.book-info p,
+.author-info p,
+.review-item > p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
