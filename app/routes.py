@@ -4,7 +4,7 @@ from flask import Flask, render_template, abort, request, redirect, url_for, ses
 from flask_login import current_user
 
 from app.extensions import db
-from app.models import Book, Comment, Rating, WantToRead
+from app.models import Book, Comment, Rating, ShelfItem
 
 
 def seed_books_if_empty():
@@ -97,7 +97,6 @@ def format_review(comment):
 
 def build_rating_summary(book):
     all_stars = [rating.stars for rating in book.ratings]
-    all_stars += [comment.stars for comment in book.comments]
 
     total = len(all_stars)
 
@@ -105,13 +104,16 @@ def build_rating_summary(book):
         return {
             "average": book.rating,
             "total": 0,
-            "distribution": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
+            "distribution": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
+            "counts": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}
         }
 
     distribution = {}
+    counts = {}
 
     for star in [5, 4, 3, 2, 1]:
         count = all_stars.count(star)
+        counts[star] = count
         distribution[star] = round(count / total * 100)
 
     average = round(sum(all_stars) / total, 1)
@@ -119,7 +121,8 @@ def build_rating_summary(book):
     return {
         "average": average,
         "total": total,
-        "distribution": distribution
+        "distribution": distribution,
+        "counts": counts
     }
 
 def get_session_id():
@@ -223,14 +226,17 @@ def register_routes(app: Flask) -> None:
 		if rating:
 			user_rating = rating.stars
 		
-		# Check if user has added to want to read
-		want_to_read = False
-		want_to_read_count = WantToRead.query.filter_by(book_id=book_id).count()
+		# Check current shelf status
+		shelf_status = None
+
 		if current_user.is_authenticated:
-			want_to_read = WantToRead.query.filter_by(user_id=current_user.id, book_id=book_id).first() is not None
+			shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 		else:
 			session_id = get_session_id()
-			want_to_read = WantToRead.query.filter_by(session_id=session_id, book_id=book_id).first() is not None
+			shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+		
+		if shelf_item:
+			shelf_status = shelf_item.status
 		
 		author = None
 		
@@ -241,29 +247,46 @@ def register_routes(app: Flask) -> None:
 			rating_summary=rating_summary,
 			reviews=reviews,
 			user_rating=user_rating,
-			want_to_read=want_to_read,
-			want_to_read_count=want_to_read_count
+			shelf_status=shelf_status,
 		)
 	
-	@app.route("/book/<int:book_id>/toggle-want-to-read", methods=["POST"])
-	def toggle_want_to_read(book_id):
+	@app.route("/book/<int:book_id>/shelf", methods=["POST"])
+	def update_shelf_status(book_id):
 		book = Book.query.get_or_404(book_id)
+		status = request.form.get("status")
+
+		allowed_status = ["Read", "Currently Reading", "To Be Read", "Did Not Finish", "remove"]
+
+		if status not in allowed_status:
+			abort(400)
 		
 		if current_user.is_authenticated:
-			existing = WantToRead.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-			if existing:
-				db.session.delete(existing)
-			else:
-				want_to_read = WantToRead(user_id=current_user.id, book_id=book_id)
-				db.session.add(want_to_read)
+			shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 		else:
 			session_id = get_session_id()
-			existing = WantToRead.query.filter_by(session_id=session_id, book_id=book_id).first()
-			if existing:
-				db.session.delete(existing)
+			shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+		
+		if status == "remove":
+			if shelf_item:
+				db.session.delete(shelf_item)
+		else:
+			if shelf_item:
+				shelf_item.status = status
 			else:
-				want_to_read = WantToRead(session_id=session_id, book_id=book_id)
-				db.session.add(want_to_read)
+				if current_user.is_authenticated:
+					shelf_item= ShelfItem(
+						user_id=current_user.id, 
+						book_id=book_id, 
+						status=status
+					)
+				else:
+					shelf_item = ShelfItem(
+						session_id=session_id, 
+						book_id=book_id,
+						status=status
+					)
+				
+				db.session.add(shelf_item)
 		
 		db.session.commit()
 		return redirect(url_for("book_detail", book_id=book_id))
@@ -284,7 +307,7 @@ def register_routes(app: Flask) -> None:
 				else:
 					existing_rating.stars = stars
 			elif stars > 0:
-				rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
+				rating -Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
 				db.session.add(rating)
 		else:
 			session_id = get_session_id()
@@ -297,7 +320,7 @@ def register_routes(app: Flask) -> None:
 			elif stars > 0:
 				rating = Rating(session_id=session_id, book_id=book_id, stars=stars)
 				db.session.add(rating)
-		
+	
 		db.session.commit()
 		return redirect(url_for("book_detail", book_id=book_id))
 	
@@ -315,6 +338,23 @@ def register_routes(app: Flask) -> None:
 			abort(400)
 		
 		if current_user.is_authenticated:
+
+			existing_rating = Rating.query.filter_by(
+				user_id=current_user.id,
+				book_id=book_id
+			).first()
+
+			if existing_rating:
+				existing_rating.stars = stars
+			else:
+				rating = Rating(
+					user_id=current_user.id,
+					book_id=book_id,
+					stars=stars,
+					username=current_user.username
+				)
+				db.session.add(rating)
+
 			comment = Comment(
 				user_id=current_user.id,
 				username=current_user.username,
@@ -324,6 +364,22 @@ def register_routes(app: Flask) -> None:
 			)
 		else:
 			session_id = get_session_id()
+			
+			existing_rating = Rating.query.filter_by(
+				session_id=session_id,
+				book_id=book_id
+			).first()
+
+			if existing_rating:
+				existing_rating.stars = stars
+			else:
+				rating =Rating(
+					session_id=session_id,
+					book_id=book_id,
+					stars=stars
+				)
+				db.session.add(rating)
+
 			comment = Comment(
 				session_id=session_id,
 				username="Anonymous",

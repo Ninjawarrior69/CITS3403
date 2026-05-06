@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
 
     comments = db.relationship("Comment", backref="user", lazy=True)
     ratings = db.relationship("Rating", backref="user", lazy=True)
-    want_to_reads = db.relationship("WantToRead", backref="user", lazy=True)
+    shelf_items = db.relationship("ShelfItem", backref="user", lazy=True)
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
@@ -44,8 +44,8 @@ class Book(db.Model):
         cascade="all, delete-orphan"
     )
 
-    want_to_reads = db.relationship(
-        "WantToRead",
+    shelf_item = db.relationship(
+        "ShelfItem",
         backref="book",
         lazy=True,
         cascade="all, delete-orphan"
@@ -84,17 +84,21 @@ class Rating(db.Model):
         return f"<Rating {self.id}>"
     
 
-class WantToRead(db.Model):
+class ShelfItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    session_id = db.Column(db.String(120), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
+    session_id = db.Column(db.String(120), nullable=True)
+    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
+
+    status = db.Column(db.String(30), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+  
 
     __table_args__ = (
-        db.UniqueConstraint("book_id", "session_id", name="unique_book_session_want_to_read"),
+        db.UniqueConstraint("book_id", "session_id", name="unique_book_session_shelf_item"),
+        db.UniqueConstraint("book_id", "user_id", name="unique_book_user_shelf_item")
     )
 
     def __repr__(self) -> str:
-        return f"<WantToRead book={self.book_id}>"
+        return f"<ShelfItem book={self.book_id} status={self.status}>"

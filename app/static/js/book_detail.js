@@ -121,10 +121,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const openBtn = document.getElementById("openShelfModal");
   const modal = document.getElementById("shelfModal");
   const closeBtn = document.getElementById("closeShelfModal");
-  const options = document.querySelectorAll(".shelf-option");
-  const removeBtn = document.getElementById("removeShelf");
 
-  if (!openBtn || !modal || !closeBtn || !removeBtn || options.length === 0) {
+  if (!openBtn || !modal || !closeBtn) {
     return;
   }
 
@@ -140,34 +138,5 @@ document.addEventListener("DOMContentLoaded", function () {
     if (event.target === modal) {
       modal.classList.remove("show");
     }
-  });
-
-  options.forEach(function (option) {
-    option.addEventListener("click", function () {
-      options.forEach(function (btn) {
-        btn.classList.remove("active");
-        btn.textContent = btn.dataset.status;
-      });
-
-      option.classList.add("active");
-      option.textContent = "✓ " + option.dataset.status;
-
-      openBtn.textContent = "✓ " + option.dataset.status;
-      openBtn.classList.add("active");
-
-      modal.classList.remove("show");
-    });
-  });
-
-  removeBtn.addEventListener("click", function () {
-    options.forEach(function (btn) {
-      btn.classList.remove("active");
-      btn.textContent = btn.dataset.status;
-    });
-
-    openBtn.textContent = "Add to Shelf";
-    openBtn.classList.remove("active");
-
-    modal.classList.remove("show");
   });
 });
