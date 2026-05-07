@@ -1,10 +1,11 @@
 from uuid import uuid4
 
 from flask import Flask, render_template, abort, request, redirect, url_for, session
-from flask_login import current_user
+from flask_login import current_user, login_user
 
+from app.forms import LoginForm, SignupForm
 from app.extensions import db
-from app.models import Book, Comment, Rating, WantToRead
+from app.models import Book, Comment, Rating, User, WantToRead
 
 
 def seed_books_if_empty():
@@ -135,51 +136,89 @@ def get_display_rating(book):
 
 
 def register_routes(app: Flask) -> None:
-	@app.route("/")
-	def home():
-		return render_template("home.html")
+    @app.route("/")
+    def home():
+        return render_template("home.html")
 
-	@app.route("/profile")
-	@app.route("/profile.html")
-	def profile():
-		return render_template("profile.html")
+    @app.route("/profile")
+    @app.route("/profile.html")
+    def profile():
+        return render_template("profile.html")
 
-	@app.route("/login")
-	@app.route("/login.html")
-	def login():
-		return render_template("login.html")
+    @app.route("/login", methods=["GET", "POST"])
+    @app.route("/login.html", methods=["GET", "POST"])
+    def login():
+        if current_user.is_authenticated:
+            return redirect(url_for("profile"))
 
-	@app.route("/signup")
-	@app.route("/signup.html")
-	def signup():
-		return render_template("signup.html")
+        form = LoginForm()
 
-	@app.route("/edit-profile")
-	@app.route("/edit-profile.html")
-	def edit_profile():
-		return render_template("edit-profile.html")
-	
-	@app.route("/read")
-	@app.route("/read.html")
-	def read():
-		return render_template("read.html")
-	
-	@app.route("/currently-reading")
-	@app.route("/currently-reading.html")
-	def currently_reading():
-		return render_template("currently-reading.html")
-	
-	@app.route("/to-be-read")
-	@app.route("/to-be-read.html")
-	def to_be_read():
-		return render_template("to-be-read.html")
-	
-	@app.route("/did-not-finish")
-	@app.route("/did-not-finish.html")
-	def did_not_finish():
-		return render_template("did-not-finish.html")
-	
-	@app.route("/my-reviews")
-	@app.route("/my-reviews.html")
-	def my_reviews():
-		return render_template("my-reviews.html")
+        if form.validate_on_submit():
+            identifier = form.username_or_email.data.strip()
+            user = User.query.filter(
+                db.or_(
+                    User.username == identifier,
+                    User.email == identifier,
+                )
+            ).first()
+
+            if user and user.check_password(form.password.data):
+                login_user(user)
+                return redirect(url_for("profile"))
+
+            form.password.errors.append("Invalid username/email or password.")
+
+        return render_template("login.html", form=form)
+
+    @app.route("/signup", methods=["GET", "POST"])
+    @app.route("/signup.html", methods=["GET", "POST"])
+    def signup():
+        if current_user.is_authenticated:
+            return redirect(url_for("profile"))
+
+        form = SignupForm()
+
+        if form.validate_on_submit():
+            user = User(
+                username=form.username.data.strip(),
+                email=form.email.data.strip().lower(),
+            )
+            user.set_password(form.password.data)
+
+            db.session.add(user)
+            db.session.commit()
+
+            login_user(user)
+            return redirect(url_for("profile"))
+
+        return render_template("signup.html", form=form)
+
+    @app.route("/edit-profile")
+    @app.route("/edit-profile.html")
+    def edit_profile():
+        return render_template("edit-profile.html")
+
+    @app.route("/read")
+    @app.route("/read.html")
+    def read():
+        return render_template("read.html")
+
+    @app.route("/currently-reading")
+    @app.route("/currently-reading.html")
+    def currently_reading():
+        return render_template("currently-reading.html")
+
+    @app.route("/to-be-read")
+    @app.route("/to-be-read.html")
+    def to_be_read():
+        return render_template("to-be-read.html")
+
+    @app.route("/did-not-finish")
+    @app.route("/did-not-finish.html")
+    def did_not_finish():
+        return render_template("did-not-finish.html")
+
+    @app.route("/my-reviews")
+    @app.route("/my-reviews.html")
+    def my_reviews():
+        return render_template("my-reviews.html")
