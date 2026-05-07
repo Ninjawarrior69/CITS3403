@@ -99,7 +99,12 @@
                     <div class="search-result-item">
 
                         <a
-                            href="{{ url_for('book_detail', book_id=book.id) }}"
+                            href="{{ url_for(
+                                'import_book', 
+                                olid=book.openlibrary_id,
+                                title=book.title,
+                                author=book.author,
+                                cover=book.cover_url) }}"
                             class="search-result-link"
                         >
 
@@ -108,7 +113,7 @@
                             <div class="search-cover-wrapper">
 
                                 <img
-                                    src="https://placehold.co/80x110"
+                                    src="{{ book.cover_url if book.cover_url else 'https://placehold.co/80x110' }}"
                                     class="search-cover"
                                     alt="{{ book.title }}"
                                 />

@@ -23,6 +23,7 @@ class User(UserMixin, db.Model):
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    openlibrary_id = db.Column(db.String(200), unique=True, nullable=True)
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)

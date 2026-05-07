@@ -7,6 +7,7 @@ from flask import jsonify
 
 from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
+import requests
 
 
 def seed_books_if_empty():
@@ -137,6 +138,49 @@ def get_session_id():
 def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
+
+def search_open_library(query):
+	url = "https://openlibrary.org/search.json"
+
+	params = {
+		"q": query,
+		"limit": 10
+	}
+
+	response = requests.get(url, params=params)
+	data = response.json()
+	books = []
+
+	for doc in data.get("docs", []):
+
+		cover_id = doc.get("cover_i")
+
+		books.append({
+			"title": doc.get("title", "Unknown Title"),
+			"author": ", ".join(doc.get("author_name", ["Unknown"])),
+			"cover_url": f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+			if cover_id else None,
+			"openlibrary_id": doc.get("key")
+		})
+	return books
+
+
+def fetch_openlibrary_description(olid):
+
+    url = f"https://openlibrary.org{olid}.json"
+    res = requests.get(url)
+
+    if res.status_code != 200:
+        return None
+
+    data = res.json()
+
+    description = data.get("description")
+
+    if isinstance(description, dict):
+        return description.get("value")
+
+    return description
 
 
 def register_routes(app: Flask) -> None:
@@ -402,12 +446,7 @@ def register_routes(app: Flask) -> None:
 		empty_query = False
 
 		if query:
-			books = Book.query.filter(
-				or_(
-					Book.title.ilike(f"%{query}%"),
-					Book.author.ilike(f"%{query}%")
-				)
-			).all()
+			books = search_open_library(query)
 		else:
 			empty_query =True
 		
@@ -425,20 +464,39 @@ def register_routes(app: Flask) -> None:
 		if not query:
 			return jsonify([])
 		
-		books = Book.query.filter(
-			or_(
-				Book.title.ilike(f"%{query}%"),
-				Book.author.ilike(f"%{query}%")
-			)
-		).limit(5).all()
-
-		suggestions = []
-
-		for book in books:
-			suggestions.append({
-				"id": book.id,
-				"title": book.title,
-				"author": book.author
-			})
+		books = search_open_library(query, limit=5)
 		
-		return jsonify(suggestions)
+		return jsonify(books)
+	
+	@app.route("/import-book")
+	def import_book():
+		
+		openlibrary_id = request.args.get("olid")
+		title = request.args.get("title")
+		author = request.args.get("author")
+		cover_url = request.args.get("cover")
+		description = fetch_openlibrary_description(openlibrary_id)
+
+		existing_book = Book.query.filter_by(
+			openlibrary_id=openlibrary_id
+		).first()
+
+		if existing_book:
+			return redirect(
+				url_for("book_detail", book_id=existing_book.id)
+			)
+		
+		new_book = Book(
+			openlibrary_id=openlibrary_id,
+			title=title,
+			author=author,
+			cover_url=cover_url,
+			description=description
+		)
+
+		db.session.add(new_book)
+		db.session.commit()
+
+		return redirect(
+			url_for("book_detail", book_id=new_book.id)
+		)

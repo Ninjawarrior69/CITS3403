@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const item = document.createElement("a");
 
-                item.href = `/book/${book.id}`;
+                item.href = `/import-book?olid=${encodeURIComponent(book.openlibrary_id)}`;
 
                 item.classList.add("suggestion-item");
 
