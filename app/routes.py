@@ -1,9 +1,9 @@
 from uuid import uuid4
 
-from flask import Flask, render_template, abort, request, redirect, url_for, session
-from flask_login import current_user, login_user
+from flask import Flask, render_template, abort, request, redirect, url_for, session, flash
+from flask_login import current_user, login_user, login_required
 
-from app.forms import LoginForm, SignupForm
+from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
 from app.models import Book, Comment, Rating, User, WantToRead
 
@@ -193,10 +193,44 @@ def register_routes(app: Flask) -> None:
 
         return render_template("signup.html", form=form)
 
-    @app.route("/edit-profile")
-    @app.route("/edit-profile.html")
+    @app.route("/logout")
+    @login_required
+    def logout():
+        from flask_login import logout_user
+        logout_user()
+        flash("You have been logged out.", "info")
+        return redirect(url_for("home"))
+
+    @app.route("/edit-profile", methods=["GET", "POST"])
+    @app.route("/edit-profile.html", methods=["GET", "POST"])
+    @login_required
     def edit_profile():
-        return render_template("edit-profile.html")
+        form = EditProfileForm(
+            original_username=current_user.username,
+            original_email=current_user.email
+        )
+        
+        if form.validate_on_submit():
+            current_user.username = form.username.data.strip()
+            current_user.email = form.email.data.strip().lower()
+            current_user.bio = form.bio.data.strip() if form.bio.data else ""
+            
+            db.session.commit()
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("profile"))
+        
+        # If the form was submitted but failed validation, flash errors so user sees them.
+        if request.method == "POST" and not form.validate():
+            for field_name, field in form._fields.items():
+                for err in field.errors:
+                    flash(f"{field.label.text}: {err}", "danger")
+
+        elif request.method == "GET":
+            form.username.data = current_user.username
+            form.email.data = current_user.email
+            form.bio.data = current_user.bio or ""
+        
+        return render_template("edit-profile.html", form=form)
 
     @app.route("/read")
     @app.route("/read.html")
