@@ -29,6 +29,7 @@ def seed_books_if_empty():
             title="The Midnight Library",
             author="Matt Haig",
             description="A novel about choices, regrets, and the different lives a person could have lived.",
+			pages=304,
             rating=4.2,
             reads=1247
         ),
@@ -36,6 +37,7 @@ def seed_books_if_empty():
             title="Atomic Habits",
             author="James Clear",
             description="A practical book about building good habits and breaking bad ones through small daily changes.",
+			pages=320,
             rating=4.6,
             reads=2100
         ),
@@ -43,6 +45,7 @@ def seed_books_if_empty():
             title="Project Hail Mary",
             author="Andy Weir",
             description="A science fiction story about survival, problem solving, and saving humanity.",
+			pages=496,
             rating=4.5,
             reads=1680
         ),
@@ -50,6 +53,7 @@ def seed_books_if_empty():
             title="Normal People",
             author="Sally Rooney",
             description="A story about friendship, love, communication, and growing up.",
+			pages=288,
             rating=4.0,
             reads=980
         ),
@@ -57,6 +61,7 @@ def seed_books_if_empty():
             title="Dune",
             author="Frank Herbert",
             description="A classic science fiction novel about politics, power, religion, and survival on a desert planet.",
+			pages=489,
             rating=4.4,
             reads=1900
         ),
@@ -64,6 +69,7 @@ def seed_books_if_empty():
             title="Before the Coffee Gets Cold",
             author="Toshikazu Kawaguchi",
             description="A gentle story about time travel, memory, regret, and human connection.",
+			pages=208,
             rating=4.1,
             reads=870
         ),
@@ -71,6 +77,8 @@ def seed_books_if_empty():
 			title="Sunrise on the Reaping",
 			author="Suzanne Collins",
 			description="The newest book in The Hunger Games series",
+			pages=400,
+			cover_url="https://m.media-amazon.com/images/I/81RUJzM+wvL._UF894,1000_QL80_.jpg",
 			rating=4.6,
 			reads=2300
 		)
@@ -178,7 +186,19 @@ def register_routes(app: Flask) -> None:
 			most_read_books=most_read_books,
 			reviews=reviews
 		)
+	
+	@app.route("/shelf/<int:item_id>/progress", methods=["POST"])
+	def update_progress(item_id):
+		item = ShelfItem.query.get_or_404(item_id)
+		current_page = request.form.get("current_page", type=int)
 
+		if current_page is None or current_page < 0:
+			abort(400)
+
+		item.current_page = current_page
+		db.session.commit()
+
+		return redirect(url_for("currently_reading"))
 
 	@app.route("/profile")
 	@app.route("/profile.html")
@@ -224,9 +244,8 @@ def register_routes(app: Flask) -> None:
 			session_id = session_id, #user_id = current_user.id
 			status = "Currently Reading"
 		).all()
-		shelf_rows = chunked(items,6)
 		counts = get_shelf_counts(session_id)
-		return render_template("currently-reading.html", shelf_rows=shelf_rows, counts=counts)
+		return render_template("currently-reading.html", items=items, counts=counts)
 	
 	@app.route("/to-be-read")
 	@app.route("/to-be-read.html")
