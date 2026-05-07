@@ -7,41 +7,49 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    searchInput.addEventListener("input", async () => {
+    let debounceTimeout;
 
-        const query = searchInput.value.trim();
+    searchInput.addEventListener("input", () => {
 
-        if (!query) {
+        clearTimeout(debounceTimeout);
+
+        debounceTimeout = setTimeout(async () => {
+
+            const query = searchInput.value.trim();
+
+            if (!query) {
+                suggestionsBox.innerHTML = "";
+                return;
+            }
+
+            const response = await fetch(`/search-suggestions?q=${query}`);
+
+            const books = await response.json();
+
             suggestionsBox.innerHTML = "";
-            return;
-        }
 
-        const response = await fetch(`/search-suggestions?q=${query}`);
+            books.forEach(book => {
 
-        const books = await response.json();
+                const item = document.createElement("a");
 
-        suggestionsBox.innerHTML = "";
+                item.href = `/book/${book.id}`;
 
-        books.forEach(book => {
+                item.classList.add("suggestion-item");
 
-            const item = document.createElement("a");
+                const title = document.createElement("strong");
+                title.textContent = book.title;
 
-            item.href = `/book/${book.id}`;
+                const author = document.createElement("div");
+                author.textContent = book.author;
 
-            item.classList.add("suggestion-item");
+                item.appendChild(title);
+                item.appendChild(author);
 
-            const title = document.createElement("strong");
-            title.textContent = book.title;
+                suggestionsBox.appendChild(item);
 
-            const author = document.createElement("div");
-            author.textContent = book.author;
+            });
 
-            item.appendChild(title);
-            item.appendChild(author);
-
-            suggestionsBox.appendChild(item);
-
-        });
+        }, 300);
 
     });
 
