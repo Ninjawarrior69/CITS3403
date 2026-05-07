@@ -6,6 +6,13 @@
     gap: 30px;
 }
 
+.page-container {
+    display: grid;
+    grid-template-columns: 2.6fr 0.7fr;
+    gap: 30px;
+    margin-top: 40px;
+}
+
 .section-card {
     border-radius: 12px;
     padding: 25px;
@@ -358,10 +365,10 @@
 }
 
 @media (max-width: 768px) {
-    .book-detail-container {
+    .page-container {
         grid-template-columns: 1fr;
         padding: 16px;
-        margin: 20px auto;
+        margin: 20px;
     }
 
     .sidebar {
