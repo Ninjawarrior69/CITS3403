@@ -3,6 +3,7 @@ from sqlalchemy import or_
 
 from flask import Flask, render_template, abort, request, redirect, url_for, session
 from flask_login import current_user
+from flask import jsonify
 
 from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
@@ -416,3 +417,28 @@ def register_routes(app: Flask) -> None:
 			books=books,
 			empty_query=empty_query
 		)
+	
+	@app.route("/search-suggestions")
+	def search_suggestions():
+		query = request.args.get("q", "").strip()
+
+		if not query:
+			return jsonify([])
+		
+		books = Book.query.filter(
+			or_(
+				Book.title.ilike(f"%{query}%"),
+				Book.author.ilike(f"%{query}%")
+			)
+		).limit(5).all()
+
+		suggestions = []
+
+		for book in books:
+			suggestions.append({
+				"id": book.id,
+				"title": book.title,
+				"author": book.author
+			})
+		
+		return jsonify(suggestions)

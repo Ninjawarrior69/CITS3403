@@ -38,16 +38,26 @@
           action="{{ url_for('search') }}"
           method="GET"
         >
-          <div class="input-group search-box">
-            <input
-              class="form-control search"
-              type="search"
-              name="q"
-              placeholder="Search books or authors..."
-              aria-label="Search books or authors"
-            />
-            <button class="btn btn-search" type="submit"><i class="bi bi-search"></i></button>
-          </div>
+
+          <div class="search-wrapper">
+            <div class="input-group search-box">
+              <input
+                id="search-input"
+                class="form-control search"
+                type="search"
+                name="q"
+                placeholder="Search books or authors..."
+                aria-label="Search books or authors"
+              />
+
+              <button class="btn btn-search" type="submit"><i class="bi bi-search"></i></button>
+
+            </div>
+
+            <div id="search-suggestions" class="search-suggestions-box"></div>
+
+          </div>         
+
         </form>
 
         <ul class="navbar-nav mb-2 mb-lg-0">
