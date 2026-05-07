@@ -2,8 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const searchInput = document.getElementById("search-input");
     const suggestionsBox = document.getElementById("search-suggestions");
+    const searchWrapper = document.querySelector(".search-wrapper");
 
-    if (!searchInput || !suggestionsBox) {
+    if (!searchInput || !suggestionsBox || !searchWrapper) {
         return;
     }
 
@@ -28,6 +29,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
             suggestionsBox.innerHTML = "";
 
+            if (books.length === 0) {
+
+                const searchAll = document.createElement("a");
+
+                searchAll.href = `/search?q=${query}`;
+
+                searchAll.classList.add(
+                    "suggestion-item",
+                    "suggestion-search-all"
+                );
+
+                searchAll.textContent = `Search for "${query}"...`;
+
+                suggestionsBox.appendChild(searchAll);
+
+                return;
+            }
+
             books.forEach(book => {
 
                 const item = document.createElement("a");
@@ -49,7 +68,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             });
 
-        }, 300);
+        }, 200);
+
+    });
+
+    document.addEventListener("click", (event) => {
+
+        if (!searchWrapper.contains(event.target)) {
+            suggestionsBox.innerHTML = "";
+        }
 
     });
 

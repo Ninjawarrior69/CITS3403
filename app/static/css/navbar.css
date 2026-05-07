@@ -135,3 +135,9 @@
 .search-suggestions-box:empty {
   display: none;
 }
+
+.suggestion-empty {
+  padding: 12px 16px;
+  color: rgba(61, 47, 42, 0.6);
+  font-size: 0.9rem;
+}
