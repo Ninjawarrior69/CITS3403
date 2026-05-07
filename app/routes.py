@@ -138,40 +138,50 @@ def register_routes(app: Flask) -> None:
             if user and user.check_password(form.password.data):
                 login_user(user)
                 return redirect(url_for("profile"))
-            form.password.errors.append("Invalid username/email or password.")
-        return render_template("login.html", form=form)
+                    form = EditProfileForm(
+                        original_username=current_user.username,
+                        original_email=current_user.email
+                    )
+        
+                    if form.validate_on_submit():
+                        current_user.username = form.username.data.strip()
+                        current_user.email = form.email.data.strip().lower()
+                        current_user.bio = form.bio.data.strip() if form.bio.data else ""
+            
+                        db.session.commit()
+                        flash("Profile updated successfully!", "success")
+                        return redirect(url_for("profile"))
+        
+                    # If the form was submitted but failed validation, flash errors so user sees them.
+                    if request.method == "POST" and not form.validate():
+                        for field_name, field in form._fields.items():
+                            for err in field.errors:
+                                flash(f"{field.label.text}: {err}", "danger")
 
-    @app.route("/signup", methods=["GET", "POST"])
-    @app.route("/signup.html", methods=["GET", "POST"])
-    def signup():
-        if current_user.is_authenticated:
-            return redirect(url_for("profile"))
-        form = SignupForm()
-        if form.validate_on_submit():
-            user = User(username=form.username.data.strip(), email=form.email.data.strip().lower())
-            user.set_password(form.password.data)
-            db.session.add(user)
-            db.session.commit()
-            login_user(user)
-            return redirect(url_for("profile"))
-        return render_template("signup.html", form=form)
+                    elif request.method == "GET":
+                        form.username.data = current_user.username
+                        form.email.data = current_user.email
+                        form.bio.data = current_user.bio or ""
 
-    @app.route("/logout")
-    @login_required
-    def logout():
-        logout_user()
-        flash("You have been logged out.", "info")
-        return redirect(url_for("home"))
-
+                    return render_template("edit-profile.html", form=form)
     @app.route("/edit-profile", methods=["GET", "POST"])
     @app.route("/edit-profile.html", methods=["GET", "POST"])
     @login_required
     def edit_profile():
+<<<<<<< HEAD
         form = EditProfileForm(original_username=current_user.username, original_email=current_user.email)
+=======
+        form = EditProfileForm(
+            original_username=current_user.username,
+            original_email=current_user.email
+        )
+        
+>>>>>>> 7487d20 (Updated the routes for profile and edit profile page, fixed bug with DB not updating to new version)
         if form.validate_on_submit():
             current_user.username = form.username.data.strip()
             current_user.email = form.email.data.strip().lower()
             current_user.bio = form.bio.data.strip() if form.bio.data else ""
+<<<<<<< HEAD
             db.session.commit()
             flash("Profile updated successfully!", "success")
             return redirect(url_for("profile"))
@@ -179,10 +189,27 @@ def register_routes(app: Flask) -> None:
             for field in form:
                 for err in field.errors:
                     flash(f"{field.label.text}: {err}", "danger")
+=======
+            
+            db.session.commit()
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("profile"))
+        
+        # If the form was submitted but failed validation, flash errors so user sees them.
+        if request.method == "POST" and not form.validate():
+            for field_name, field in form._fields.items():
+                for err in field.errors:
+                    flash(f"{field.label.text}: {err}", "danger")
+
+>>>>>>> 7487d20 (Updated the routes for profile and edit profile page, fixed bug with DB not updating to new version)
         elif request.method == "GET":
             form.username.data = current_user.username
             form.email.data = current_user.email
             form.bio.data = current_user.bio or ""
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 7487d20 (Updated the routes for profile and edit profile page, fixed bug with DB not updating to new version)
         return render_template("edit-profile.html", form=form)
 
     @app.route("/read")
