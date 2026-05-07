@@ -30,6 +30,7 @@ def seed_books_if_empty():
             author="Matt Haig",
             description="A novel about choices, regrets, and the different lives a person could have lived.",
 			pages=304,
+			cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
             rating=4.2,
             reads=1247
         ),
@@ -38,6 +39,7 @@ def seed_books_if_empty():
             author="James Clear",
             description="A practical book about building good habits and breaking bad ones through small daily changes.",
 			pages=320,
+			cover_url="https://m.media-amazon.com/images/I/81kg51XRc1L.jpg",
             rating=4.6,
             reads=2100
         ),
@@ -46,6 +48,7 @@ def seed_books_if_empty():
             author="Andy Weir",
             description="A science fiction story about survival, problem solving, and saving humanity.",
 			pages=496,
+			cover_url="https://m.media-amazon.com/images/I/91ENQs2KLAL._AC_UF1000,1000_QL80_.jpg",
             rating=4.5,
             reads=1680
         ),
@@ -54,6 +57,7 @@ def seed_books_if_empty():
             author="Sally Rooney",
             description="A story about friendship, love, communication, and growing up.",
 			pages=288,
+			cover_url="https://m.media-amazon.com/images/I/61nFGO425OL.jpg",
             rating=4.0,
             reads=980
         ),
@@ -62,6 +66,7 @@ def seed_books_if_empty():
             author="Frank Herbert",
             description="A classic science fiction novel about politics, power, religion, and survival on a desert planet.",
 			pages=489,
+			cover_url="https://m.media-amazon.com/images/I/71oO1E-XPuL.jpg",
             rating=4.4,
             reads=1900
         ),
@@ -70,6 +75,7 @@ def seed_books_if_empty():
             author="Toshikazu Kawaguchi",
             description="A gentle story about time travel, memory, regret, and human connection.",
 			pages=208,
+			cover_url="https://m.media-amazon.com/images/I/71kW0ESYl5L.jpg",
             rating=4.1,
             reads=870
         ),
@@ -194,8 +200,18 @@ def register_routes(app: Flask) -> None:
 
 		if current_page is None or current_page < 0:
 			abort(400)
-
+		
+		if item.book.pages and current_page > item.book.pages:
+			current_page = item.book.pages
+		
 		item.current_page = current_page
+		
+		if item.book.pages and current_page >= item.book.pages:
+			item.status = "Read"
+			item.current_page = item.book.pages
+		else:
+			item.status = "Currently Reading"
+		
 		db.session.commit()
 
 		return redirect(url_for("currently_reading"))
