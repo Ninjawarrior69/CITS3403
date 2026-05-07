@@ -141,3 +141,22 @@
   color: rgba(61, 47, 42, 0.6);
   font-size: 0.9rem;
 }
+
+@media (max-width: 991px) {
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .navbar-search {
+    width: 100%;
+    margin: 16px 0;
+  }
+
+  .search-box {
+    height: 42px;
+    border-radius: 12px;
+    padding: 0 14px;
+  }
+
+}
