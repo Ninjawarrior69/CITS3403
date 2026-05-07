@@ -1,11 +1,24 @@
 from uuid import uuid4
+from itertools import islice
 
 from flask import Flask, render_template, abort, request, redirect, url_for, session
 from flask_login import current_user
+from flask_login import login_required
 
 from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
 
+def chunked(iterable, size):
+	it = iter(iterable)
+	return iter(lambda: list(islice(it, size)),[])
+
+def get_shelf_counts(session_id):
+	return {
+		"read": ShelfItem.query.filter_by(session_id=session_id, status="Read").count(),
+		"currently_reading": ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").count(),
+		"to_be_read": ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").count(),
+		"did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count()
+	}
 
 def seed_books_if_empty():
     if Book.query.first():
@@ -54,6 +67,13 @@ def seed_books_if_empty():
             rating=4.1,
             reads=870
         ),
+		Book(
+			title="Sunrise on the Reaping",
+			author="Suzanne Collins",
+			description="The newest book in The Hunger Games series",
+			rating=4.6,
+			reads=2300
+		)
     ]
 
     db.session.add_all(books)
@@ -159,6 +179,7 @@ def register_routes(app: Flask) -> None:
 			reviews=reviews
 		)
 
+
 	@app.route("/profile")
 	@app.route("/profile.html")
 	def profile():
@@ -181,26 +202,59 @@ def register_routes(app: Flask) -> None:
 	
 	@app.route("/read")
 	@app.route("/read.html")
+	#@login_required
 	def read():
-		return render_template("read.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "Read"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("read.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/currently-reading")
 	@app.route("/currently-reading.html")
+	#@login_required
 	def currently_reading():
-		return render_template("currently-reading.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "Currently Reading"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("currently-reading.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/to-be-read")
 	@app.route("/to-be-read.html")
+	#@login_required
 	def to_be_read():
-		return render_template("to-be-read.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "To Be Read"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/did-not-finish")
 	@app.route("/did-not-finish.html")
+	#@login_required
 	def did_not_finish():
-		return render_template("did-not-finish.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "Did Not Finish"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("did-not-finish.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/my-reviews")
 	@app.route("/my-reviews.html")
+	#@login_required
 	def my_reviews():
 		return render_template("my-reviews.html")
 	

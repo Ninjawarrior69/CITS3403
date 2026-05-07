@@ -22,10 +22,10 @@
             <h2>My Books</h2>
             <hr>
             <div class="col-md-12 d-flex gap-4">
-                <a href="{{ url_for('read') }}">Read (102)</a>
-                <a class="current-page" href="{{ url_for('currently_reading') }}">Currently Reading (3)</a>
-                <a href="{{ url_for('to_be_read') }}">To Be Read (22)</a>
-                <a href="{{ url_for('did_not_finish') }}">Did Not Finish (7)</a>
+                <a href="{{ url_for('read') }}">Read ({{ counts.read }})</a>
+                <a class="current-page" href="{{ url_for('currently_reading') }}">Currently Reading ({{ counts.currently_reading }})</a>
+                <a href="{{ url_for('to_be_read') }}">To Be Read ({{ counts.to_be_read }})</a>
+                <a href="{{ url_for('did_not_finish') }}">Did Not Finish ({{ counts.did_not_finish }})</a>
             </div>
             <hr>
             <!--- Book Progress Cards -->
