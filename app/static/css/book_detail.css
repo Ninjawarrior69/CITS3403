@@ -154,8 +154,10 @@
 
 .dist-fill {
     height: 100%;
+    width: 0;
     background-color: #FCAC83;
     border-radius: 999px;
+    transition: width 0.25s ease;
 }
 
 .dist-value {
@@ -174,6 +176,7 @@
     padding-bottom: 15px;
     border-bottom: 1px solid #ddd;
 }
+
 
 .review-header {
     display: flex;
@@ -488,4 +491,11 @@
   background-color: var(--secondary-green);
   border-color: var(--secondary-green);
   color: var(--primary-yellow);
+}
+
+.book-info p,
+.author-info p,
+.review-item > p {
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
