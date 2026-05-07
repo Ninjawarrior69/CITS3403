@@ -183,7 +183,9 @@ def register_routes(app: Flask) -> None:
 	@app.route("/profile")
 	@app.route("/profile.html")
 	def profile():
-		return render_template("profile.html")
+		session_id = get_session_id()
+		counts = get_shelf_counts(session_id)
+		return render_template("profile.html", counts=counts)
 
 	@app.route("/login")
 	@app.route("/login.html")
