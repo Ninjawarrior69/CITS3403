@@ -1,0 +1,146 @@
+/* Search results page */
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Search bar */
+
+.search-results-form {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.search-bar-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+}
+
+.search-button {
+    height: 35px;
+    padding: 0 20px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+/* Single search result */
+
+.search-result-item {
+    border-top: 1px solid #3D2F2A1A;
+    padding: 18px 0;
+}
+
+/* Entire clickable row */
+
+.search-result-link {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    text-decoration: none;
+    color: inherit;
+
+    transition: opacity 0.2s ease;
+}
+
+.search-result-link:hover {
+    opacity: 0.8;
+}
+
+/* Cover section */
+
+.search-cover-wrapper {
+    width: 72px;
+    flex-shrink: 0;
+}
+
+.search-cover {
+    width: 100%;
+    border-radius: 6px;
+
+    display: block;
+}
+
+/* Right side info */
+
+.search-book-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    min-width: 0;
+}
+
+/* Book title */
+
+.search-book-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.3;
+
+    margin-bottom: 8px;
+
+    color: #000000;
+}
+
+.search-book-title:hover {
+    text-decoration: underline;
+}
+
+/* Author */
+
+.search-book-author {
+    margin: 0;
+
+    font-size: 1rem;
+    font-weight: 500;
+
+    color: #768e78;
+}
+
+/* Empty state */
+
+.search-empty-state {
+    padding: 48px 0;
+    text-align: center;
+}
+
+.search-empty-state h3 {
+    font-weight: 600;
+}
+
+.search-empty-state p {
+    color: #3D2F2A;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+    .search-result-item {
+        padding: 18px 0;
+    }
+
+    .search-result-link {
+        gap: 16px;
+    }
+
+    .search-cover-wrapper {
+        width: 70px;
+    }
+
+    .search-book-title {
+        font-size: 1.1rem;
+    }
+
+    .search-book-author {
+        font-size: 0.92rem;
+    }
+
+}
