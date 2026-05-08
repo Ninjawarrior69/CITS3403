@@ -21,9 +21,9 @@
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="hero-content"><br>
-          <h1 class="hero-title">Track books you've read.</h1>
+          <h1 class="hero-title">Track your reading journey.</h1>
           <p class="hero-subtitle">
-            Save those you want to read. Tell your friends what's good.
+            Your books, your shelves, your story. 
           </p>
         </div>
       </section>
@@ -32,7 +32,6 @@
        <br>
       <section class="trending-section">
         <div class="section-title-row">
-          <span class="section-icon">↗</span>
           <h2 class="section-title">Trending Now</h2>
         </div>
 
@@ -43,7 +42,7 @@
                 <article class="trending-book-card">
                   <div class="book-cover-wrapper">
                     <img
-                      src="https://placehold.co/220x330?text=Book+Cover"
+                      src="{{ book.cover_url }}"
                       alt="Book cover"
                       class="book-cover"
                     />
@@ -64,13 +63,12 @@
 
       <!-- Bottom Section -->
       <br>
-      <section class="bottom-section mt-5">
+      <section class="bottom-section">
         <div class="bottom-grid">
 
           <!-- Most Read -->
           <div class="most-read-column">
             <div class="section-title-row">
-              <span class="section-icon">◉</span>
               <h2 class="section-title">Most Read</h2>
             </div>
 
@@ -103,7 +101,6 @@
           <!-- Reviews -->
           <div class="reviews-column">
             <div class="section-title-row">
-              <span class="section-icon">◌</span>
               <h2 class="section-title">Recent Reviews</h2>
             </div>
 

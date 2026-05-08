@@ -34,19 +34,21 @@
         <!-- BOOK HEADER -->
         <div class="section-card">
           <div class="book-header">
-            <img src="https://placehold.co/300x450" class="book-cover" />
+            <div>
+              <img src="{{ book.cover_url }}" class="book-cover"/>
+            </div>
 
             <div class="book-info">
-              <h1>{{ book.title }}</h1>
+              <h1 class="mb-1">{{ book.title }}</h1>
               <p>by {{ book.author }}</p>
 
               <div class="rating">
                 {% for i in range(rating_summary.average | int) %}★{% endfor %}
                 {% for i in range(5 - (rating_summary.average | int)) %}☆{%
                 endfor %} {{ rating_summary.average }}
-              </div>
+              </div><br>
 
-              <h3>About this book</h3>
+              <h4 class="mb-2">About this book</h4>
               <p id="book-desc" class="collapsed">{{ book.description if book.description else "Not available for this title" }}</p>
 
               <button
@@ -154,13 +156,13 @@
                   Follow
                 </button>
               </div>
-
-              <div class="stars">
+              
+              <div class="stars mt-3 mb-0">
                 {% for i in range(review.stars) %}★{% endfor %} {% for i in
                 range(5 - review.stars) %}☆{% endfor %}
               </div>
 
-              <p>{{ review.text }}</p>
+              <p></p>{{ review.text }}</p>
             </div>
             {% else %}
             <p>No reviews yet.</p>
@@ -172,12 +174,12 @@
       <!-- RIGHT SIDEBAR -->
       <div class="sidebar">
         <div class="sidebar-card">
-          <img src="https://placehold.co/200x300" />
+          <img src="{{ book.cover_url }}" class="book-cover-sm mb-3"/>
 
           <h3>{{ book.title }}</h3>
           <p>by {{ book.author }}</p>
 
-          <div class="rating">
+          <div class="rating mb-0">
             {% for i in range(rating_summary.average | int) %}★{% endfor %} {%
             for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
             {{ rating_summary.average }}
@@ -217,28 +219,10 @@
 
           <!-- RATING SECTION -->
           <div class="interaction-section">
-            <div class="rating-title-row">
+            
               <p class="section-label">Rate this book</p>
 
-              <form
-                method="POST"
-                action="{{ url_for('rate_book', book_id=book.id) }}"
-                id="rating-form"
-              >
-                <input
-                  type="hidden"
-                  name="csrf_token"
-                  value="{{ csrf_token() }}"
-                />
-                <input type="hidden" name="stars" id="rating-stars" />
-
-                <button type="submit" class="secondary-btn save-rating-btn">
-                  Save Rating
-                </button>
-              </form>
-            </div>
-
-            <div
+              <div
               class="rating"
               id="rating"
               data-current-rating="{{ user_rating }}"
@@ -259,6 +243,23 @@
                 >{% if user_rating >= 5 %}★{% else %}☆{% endif %}</span
               >
             </div>
+
+              <form
+                method="POST"
+                action="{{ url_for('rate_book', book_id=book.id) }}"
+                id="rating-form"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <input type="hidden" name="stars" id="rating-stars" />
+
+                <button type="submit" class="secondary-btn save-rating-btn">
+                  Save Rating
+                </button>
+              </form>
           </div>
 
           <!-- REVIEW SECTION -->

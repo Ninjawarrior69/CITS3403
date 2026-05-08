@@ -1,6 +1,5 @@
 /* Import fonts */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
 
 :root {
   --primary-yellow: #f6efd8;
@@ -35,7 +34,11 @@ body {
 
 body {
   background-color: #f6efd8;
-  font-family: "Inter", sans-serif;
+  font-family: "Inter", serif;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: "Lora", serif;
 }
 
 /* Main content container size */
