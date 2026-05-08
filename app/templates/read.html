@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <title>My Books: Read</title>
+        <title>My Books - Read</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link
@@ -20,79 +20,29 @@
             <h2>My Books</h2>
             <hr>
             <div class="col-md-12 d-flex gap-4">
-                <a class="current-page" href="{{ url_for('read') }}">Read (102)</a>
-                <a href="{{ url_for('currently_reading') }}">Currently Reading (3)</a>
-                <a href="{{ url_for('to_be_read') }}">To Be Read (22)</a>
-                <a href="{{ url_for('did_not_finish') }}">Did Not Finish (7)</a>
+                <a class="current-page" href="{{ url_for('read') }}">Read ({{ counts.read }})</a>
+                <a href="{{ url_for('currently_reading') }}">Currently Reading ({{ counts.currently_reading }})</a>
+                <a href="{{ url_for('to_be_read') }}">To Be Read ({{ counts.to_be_read }})</a>
+                <a href="{{ url_for('did_not_finish') }}">Did Not Finish ({{ counts.did_not_finish }})</a>
             </div>
             <hr><br>
-            <div class="row">
-            <!-- Placeholder books -->
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
+            {% for row in shelf_rows %}
+            <div class="shelf">
+                <div class="row justify-content-start">
+                {% for item in row %}
+                <div class="col-md-2 col-6 mb-3">
+                    <a href="{{ url_for('book_detail', book_id=item.book.id ) }}">
+                        <div class="book-card">
+                            <img src="{{ item.book.cover_url }}">
+                        </div>
+                    </a>
                 </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
+                {% endfor %}
                 </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div> 
+
+                <div class="shelf-line mb-5"></div>
             </div>
-          </div>
-          <div class="shelf mb-5"></div>
-          <div class="row">
-            <!-- Placeholder books -->
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                    <div class="col-md-2 col-6 mb-2">
-                <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div> 
-            </div>
-          </div>
-          <div class="shelf mb-5"></div>
-          <div class="row">
-            <!-- Placeholder books -->
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                    <div class="col-md-2 col-6 mb-2">
-                <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div>
-                </div>
-                <div class="col-md-2 col-6 mb-2">
-                    <div class="book-card"></div> 
-            </div>
-          </div>
-          <div class="shelf mb-5"></div>
-        </div>
+            {% endfor %}
     </body>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
