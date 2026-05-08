@@ -334,7 +334,12 @@ def register_routes(app: Flask) -> None:
 		rating_summary = build_rating_summary(book)
 		
 		# Get all reviews for this book
-		comments = Comment.query.filter_by(book_id=book_id).all()
+		comments = (
+			Comment.query
+			.filter_by(book_id=book_id)
+			.order_by(Comment.created_at.desc())
+			.all()
+		)
 		reviews = [format_review(comment) for comment in comments]
 		
 		# Get current user's rating

@@ -5,11 +5,24 @@ let selectedRating = 0;
 function toggleSection(id, button) {
     const section = document.getElementById(id);
 
-    if (section.classList.contains("collapsed")) {
-        section.classList.remove("collapsed");
+    if (
+        section.classList.contains("review-collapsed") ||
+        section.classList.contains("description-collapsed")
+    ) {
+
+        section.classList.remove("review-collapsed");
+        section.classList.remove("description-collapsed");
+
         button.innerText = "Show Less";
+
     } else {
-        section.classList.add("collapsed");
+
+        if (section.classList.contains("review-text")) {
+            section.classList.add("review-collapsed");
+        } else {
+            section.classList.add("description-collapsed");
+        }
+
         button.innerText = "Show More";
     }
 }
