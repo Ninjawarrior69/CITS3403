@@ -218,27 +218,7 @@ def fetch_openlibrary_description(olid):
 
     return description
 
-def fetch_openlibrary_page_count(edition_key):
-
-	if not edition_key:
-		return None
-	
-	url = f"https://openlibrary.org/books/{edition_key}.json"
-	res = requests.get(url)
-
-	if res.status_code != 200:
-		return None
-	
-	data = res.json()
-
-	return data.get("number_of_pages")
-
-def resolve_page_count(openlibrary_id, edition_key=None):
-    """
-    Tries multiple Open Library sources to reliably get page count.
-    """
-
-    # 1. Direct edition lookup (best case)
+def fetch_page_count(openlibrary_id, edition_key=None):
     if edition_key:
         url = f"https://openlibrary.org/books/{edition_key}.json"
         res = requests.get(url)
@@ -248,7 +228,6 @@ def resolve_page_count(openlibrary_id, edition_key=None):
             if data.get("number_of_pages"):
                 return data["number_of_pages"]
 
-    # 2. Fallback: work-level lookup
     if openlibrary_id:
         url = f"https://openlibrary.org{openlibrary_id}.json"
         res = requests.get(url)
@@ -256,11 +235,9 @@ def resolve_page_count(openlibrary_id, edition_key=None):
         if res.status_code == 200:
             data = res.json()
 
-            # Try to find editions
-            editions = data.get("covers")  # sometimes useless, but harmless
+            editions = data.get("covers")
             edition_keys = data.get("covers", [])
 
-            # Better: try /editions endpoint via API field
             if "latest_revision" in data:
                 editions_url = f"https://openlibrary.org{openlibrary_id}/editions.json"
                 r = requests.get(editions_url)
@@ -272,7 +249,6 @@ def resolve_page_count(openlibrary_id, edition_key=None):
                     for e in entries:
                         if e.get("number_of_pages"):
                             return e["number_of_pages"]
-
     return None
 
 
@@ -629,7 +605,7 @@ def register_routes(app: Flask) -> None:
 		edition_key = request.args.get("edition_key")
 		description = fetch_openlibrary_description(openlibrary_id)
 
-		page_count = resolve_page_count(openlibrary_id, edition_key)
+		page_count = fetch_page_count(openlibrary_id, edition_key)
 
 		existing_book = Book.query.filter_by(
 			openlibrary_id=openlibrary_id

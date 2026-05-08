@@ -105,18 +105,23 @@
                                 title=book.title,
                                 author=book.author,
                                 cover=book.cover_url) }}"
-                            class="search-result-link"
+                                class="search-result-link"
                         >
 
-                            <!-- Book cover -->
+                            <!-- Book cover --> 
 
                             <div class="search-cover-wrapper">
-
+                                {% if book.cover_url %}
                                 <img
-                                    src="{{ book.cover_url if book.cover_url else 'https://placehold.co/80x110' }}"
+                                    src="{{ book.cover_url }}"
                                     class="search-cover"
                                     alt="{{ book.title }}"
                                 />
+                            {% else %}
+                            <div class="search-cover-placeholder">
+                                Cover Unavailable
+                            </div>
+                            {% endif %}
 
                             </div>
 

@@ -47,7 +47,7 @@
               </div>
 
               <h3>About this book</h3>
-              <p id="book-desc" class="collapsed">{{ book.description }}</p>
+              <p id="book-desc" class="collapsed">{{ book.description if book.description else "Not available for this title" }}</p>
 
               <button
                 class="show-more-btn"
