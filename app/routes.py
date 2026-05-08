@@ -125,6 +125,8 @@ def format_review(comment):
         "username": comment.username,
         "book_id": comment.book_id,
         "book_title": comment.book.title,
+		"author": comment.book.author,
+		"cover_url": comment.book.cover_url,
         "stars": comment.stars,
         "text": comment.text,
         "time": comment.created_at.strftime("%Y-%m-%d")
@@ -295,7 +297,25 @@ def register_routes(app: Flask) -> None:
 	@app.route("/my-reviews.html")
 	#@login_required
 	def my_reviews():
-		return render_template("my-reviews.html")
+
+		if current_user.is_authenticated:
+			comments = Comment.query.filter_by(
+				user_id=current_user.id
+			).order_by(Comment.created_at.desc()).all()
+
+		else:
+			session_id = get_session_id()
+
+			comments = Comment.query.filter_by(
+				session_id=session_id
+			).order_by(Comment.created_at.desc()).all()
+
+		reviews = [format_review(comment) for comment in comments]
+
+		return render_template(
+			"my-reviews.html",
+			reviews=reviews
+		)
 	
 	@app.route("/book/<int:book_id>")
 	def book_detail(book_id):
