@@ -300,6 +300,15 @@ def register_routes(app: Flask) -> None:
 	@app.route("/book/<int:book_id>")
 	def book_detail(book_id):
 		book = Book.query.get_or_404(book_id)
+
+		viewed_books = session.get("viewed_books", [])
+
+		if book_id not in viewed_books:
+			book.reads += 1
+			db.session.commit()
+
+			viewed_books.append(book_id)
+			session["viewed_books"] = viewed_books
 		
 		# Build rating summary
 		rating_summary = build_rating_summary(book)
@@ -415,6 +424,12 @@ def register_routes(app: Flask) -> None:
 				db.session.add(rating)
 	
 		db.session.commit()
+
+		rating_summary = build_rating_summary(book)
+		book.rating = rating_summary["average"]
+
+		db.session.commit()
+
 		return redirect(url_for("book_detail", book_id=book_id))
 	
 	@app.route("/book/<int:book_id>/review", methods=["POST"])
@@ -483,6 +498,12 @@ def register_routes(app: Flask) -> None:
 		
 		db.session.add(comment)
 		db.session.commit()
+
+		rating_summary = build_rating_summary(book)
+		book.rating = rating_summary["average"]
+
+		db.session.commit()
+		
 		return redirect(url_for("book_detail", book_id=book_id))
 	
 	@app.route("/search")
