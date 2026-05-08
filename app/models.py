@@ -23,11 +23,12 @@ class User(UserMixin, db.Model):
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    openlibrary_id = db.Column(db.String(200), unique=True, nullable=True)
+    openlibrary_id = db.Column(db.String(200), nullable=True)
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    pages = db.Column(db.Integer)
+    page_count = db.Column(db.Integer, nullable=True)
+    publish_year = db.Column(db.Integer, nullable=True)
     cover_url = db.Column(db.String(500), nullable=True)
     rating = db.Column(db.Float, default=0.0, nullable=False)
     reads = db.Column(db.Integer, default=0, nullable=False)

@@ -51,7 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const item = document.createElement("a");
 
-                item.href = `/import-book?olid=${encodeURIComponent(book.openlibrary_id)}`;
+                const params = new URLSearchParams({
+                    olid: book.openlibrary_id,
+                    title: book.title,
+                    author: book.author,
+                    cover: book.cover_url || "",
+                    edition_key: book.edition_key || "",
+                    publish_year: book.publish_year || ""
+                });
+
+                item.href = `/import-book?${params.toString()}`;
 
                 item.classList.add("suggestion-item");
 
@@ -69,14 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
         }, 200);
-
-    });
-
-    document.addEventListener("click", (event) => {
-
-        if (!searchWrapper.contains(event.target)) {
-            suggestionsBox.innerHTML = "";
-        }
 
     });
 

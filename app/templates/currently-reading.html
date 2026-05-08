@@ -29,7 +29,7 @@
             
             <div class="row g-4">
                 {% for item in items %}
-                {% set percent = ((item.current_page / item.book.pages) * 100) | round(1) if item.book.pages else 0 %}
+                {% set percent = ((item.current_page / item.book.page_count) * 100) | round(1) if item.book.page_count else 0 %}
                 <div class="col-12 col-md-6">
                 <div class="row align-items-start p-3 h-100 book">
                     
@@ -43,8 +43,8 @@
 
                     <div class="col-12 col-md-8">
                         <a href="{{ url_for('book_detail', book_id=item.book.id) }}">
-                        <h5 class="mb-1">{{ item.book.title }}</h5>
-                        <p class="text-muted mb-4">{{ item.book.author }}</p></a>
+                        <h5 class="title mb-1">{{ item.book.title }}</h5>
+                        <p class="author text-muted mb-4">{{ item.book.author }}</p></a>
                         <div class="d-flex justify-content-between">
                             <p>Progress</p>
                             <p>{{ percent }}%</p>
@@ -55,7 +55,7 @@
 
                         <p class="mt-2 text-muted" style="font-size: small;">
                             Page {{ item.current_page }}
-                            of {{ item.book.pages }}
+                            of {{ item.book.page_count }}
                         </p>
                         <button 
                         class="btn btn-primary btn-sm"
@@ -120,5 +120,6 @@
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
         <script src="{{ url_for('static', filename='js/mybooks.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/search_suggestions.js') }}"></script>
     </body>
 </html>

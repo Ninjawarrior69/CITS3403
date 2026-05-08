@@ -36,3 +36,10 @@
 .modal-header {
     border-color: #3D2F2A4D;
 }
+
+.title,
+.author {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

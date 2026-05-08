@@ -32,7 +32,7 @@ def seed_books_if_empty():
             title="The Midnight Library",
             author="Matt Haig",
             description="A novel about choices, regrets, and the different lives a person could have lived.",
-			pages=304,
+			page_count=304,
 			cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
             rating=4.2,
             reads=1247
@@ -41,7 +41,7 @@ def seed_books_if_empty():
             title="Atomic Habits",
             author="James Clear",
             description="A practical book about building good habits and breaking bad ones through small daily changes.",
-			pages=320,
+			page_count=320,
 			cover_url="https://m.media-amazon.com/images/I/81kg51XRc1L.jpg",
             rating=4.6,
             reads=2100
@@ -50,7 +50,7 @@ def seed_books_if_empty():
             title="Project Hail Mary",
             author="Andy Weir",
             description="A science fiction story about survival, problem solving, and saving humanity.",
-			pages=496,
+			page_count=496,
 			cover_url="https://m.media-amazon.com/images/I/91ENQs2KLAL._AC_UF1000,1000_QL80_.jpg",
             rating=4.5,
             reads=1680
@@ -59,7 +59,7 @@ def seed_books_if_empty():
             title="Normal People",
             author="Sally Rooney",
             description="A story about friendship, love, communication, and growing up.",
-			pages=288,
+			page_count=288,
 			cover_url="https://m.media-amazon.com/images/I/61nFGO425OL.jpg",
             rating=4.0,
             reads=980
@@ -68,7 +68,7 @@ def seed_books_if_empty():
             title="Dune",
             author="Frank Herbert",
             description="A classic science fiction novel about politics, power, religion, and survival on a desert planet.",
-			pages=489,
+			page_count=489,
 			cover_url="https://m.media-amazon.com/images/I/71oO1E-XPuL.jpg",
             rating=4.4,
             reads=1900
@@ -77,7 +77,7 @@ def seed_books_if_empty():
             title="Before the Coffee Gets Cold",
             author="Toshikazu Kawaguchi",
             description="A gentle story about time travel, memory, regret, and human connection.",
-			pages=208,
+			page_count=208,
 			cover_url="https://m.media-amazon.com/images/I/71kW0ESYl5L.jpg",
             rating=4.1,
             reads=870
@@ -86,7 +86,7 @@ def seed_books_if_empty():
 			title="Sunrise on the Reaping",
 			author="Suzanne Collins",
 			description="The newest book in The Hunger Games series",
-			pages=400,
+			page_count=400,
 			cover_url="https://m.media-amazon.com/images/I/81RUJzM+wvL._UF894,1000_QL80_.jpg",
 			rating=4.6,
 			reads=2300
@@ -173,12 +173,12 @@ def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
-def search_open_library(query):
+def search_open_library(query, limit=10):
 	url = "https://openlibrary.org/search.json"
 
 	params = {
 		"q": query,
-		"limit": 10
+		"limit": limit
 	}
 
 	response = requests.get(url, params=params)
@@ -188,13 +188,15 @@ def search_open_library(query):
 	for doc in data.get("docs", []):
 
 		cover_id = doc.get("cover_i")
+		edition_key = doc.get("edition_key", [])
 
 		books.append({
 			"title": doc.get("title", "Unknown Title"),
 			"author": ", ".join(doc.get("author_name", ["Unknown"])),
-			"cover_url": f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
-			if cover_id else None,
-			"openlibrary_id": doc.get("key")
+			"cover_url": f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg" if cover_id else None,
+			"openlibrary_id": doc.get("key"),
+			"edition_key": doc.get("edition_key", [None])[0] if doc.get("edition_key") else None,
+			"publish_year": doc.get("first_publish_year")
 		})
 	return books
 
@@ -215,6 +217,63 @@ def fetch_openlibrary_description(olid):
         return description.get("value")
 
     return description
+
+def fetch_openlibrary_page_count(edition_key):
+
+	if not edition_key:
+		return None
+	
+	url = f"https://openlibrary.org/books/{edition_key}.json"
+	res = requests.get(url)
+
+	if res.status_code != 200:
+		return None
+	
+	data = res.json()
+
+	return data.get("number_of_pages")
+
+def resolve_page_count(openlibrary_id, edition_key=None):
+    """
+    Tries multiple Open Library sources to reliably get page count.
+    """
+
+    # 1. Direct edition lookup (best case)
+    if edition_key:
+        url = f"https://openlibrary.org/books/{edition_key}.json"
+        res = requests.get(url)
+
+        if res.status_code == 200:
+            data = res.json()
+            if data.get("number_of_pages"):
+                return data["number_of_pages"]
+
+    # 2. Fallback: work-level lookup
+    if openlibrary_id:
+        url = f"https://openlibrary.org{openlibrary_id}.json"
+        res = requests.get(url)
+
+        if res.status_code == 200:
+            data = res.json()
+
+            # Try to find editions
+            editions = data.get("covers")  # sometimes useless, but harmless
+            edition_keys = data.get("covers", [])
+
+            # Better: try /editions endpoint via API field
+            if "latest_revision" in data:
+                editions_url = f"https://openlibrary.org{openlibrary_id}/editions.json"
+                r = requests.get(editions_url)
+
+                if r.status_code == 200:
+                    ed_data = r.json()
+                    entries = ed_data.get("entries", [])
+
+                    for e in entries:
+                        if e.get("number_of_pages"):
+                            return e["number_of_pages"]
+
+    return None
 
 
 def register_routes(app: Flask) -> None:
@@ -247,14 +306,14 @@ def register_routes(app: Flask) -> None:
 		if current_page is None or current_page < 0:
 			abort(400)
 		
-		if item.book.pages and current_page > item.book.pages:
-			current_page = item.book.pages
+		if item.book.page_count and current_page > item.book.page_count:
+			current_page = item.book.page_count
 		
 		item.current_page = current_page
 		
-		if item.book.pages and current_page >= item.book.pages:
+		if item.book.page_count and current_page >= item.book.page_count:
 			item.status = "Read"
-			item.current_page = item.book.pages
+			item.current_page = item.book.page_count
 		else:
 			item.status = "Currently Reading"
 		
@@ -566,11 +625,18 @@ def register_routes(app: Flask) -> None:
 		title = request.args.get("title")
 		author = request.args.get("author")
 		cover_url = request.args.get("cover")
+		publish_year = request.args.get("first_publish_year", type=int)
+		edition_key = request.args.get("edition_key")
 		description = fetch_openlibrary_description(openlibrary_id)
+
+		page_count = resolve_page_count(openlibrary_id, edition_key)
 
 		existing_book = Book.query.filter_by(
 			openlibrary_id=openlibrary_id
 		).first()
+
+		if not title or not author:
+			return redirect(url_for("search"))
 
 		if existing_book:
 			return redirect(
@@ -582,6 +648,8 @@ def register_routes(app: Flask) -> None:
 			title=title,
 			author=author,
 			cover_url=cover_url,
+			page_count=page_count,
+			publish_year=publish_year,
 			description=description
 		)
 
