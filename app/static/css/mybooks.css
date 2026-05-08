@@ -1,14 +1,19 @@
-.shelf {
+.shelf-line {
     background-color: #544036;
     height: 20px;
     width: 100%;
 }
 
-.book-card {
+.book-card img {
     width: 100%;
     aspect-ratio: 2/3;
-    background-color: #e5e5e5;
-    border-radius: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.book-card:hover {
+  transform: translateY(-4px);
 }
 
 .current-page {

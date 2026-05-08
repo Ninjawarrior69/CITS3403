@@ -32,13 +32,29 @@
     font-size: 1.25rem;
 }
 
-/* Stats card */
+/* Stats cards */
 .stats {
     text-align: left;
     color: #000000;
     padding: 20px;
     height: 140px;
     border-radius: 8px;
+}
+
+.read-stats {
+    background-color: #e798974d;
+}
+
+.cr-stats {
+    background-color: #db96734d;
+}
+
+.tbr-stats {
+    background-color: #97916f4d;
+}
+
+.dnf-stats {
+    background-color: #e798974d;
 }
 
 /* Profile pic placeholder */

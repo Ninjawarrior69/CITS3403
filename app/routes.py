@@ -1,14 +1,27 @@
 from uuid import uuid4
-from sqlalchemy import or_
+from itertools import islice
 
 from flask import Flask, render_template, abort, request, redirect, url_for, session
 from flask_login import current_user
+from flask_login import login_required
+from sqlalchemy import or_
 from flask import jsonify
 
 from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
 import requests
 
+def chunked(iterable, size):
+	it = iter(iterable)
+	return iter(lambda: list(islice(it, size)),[])
+
+def get_shelf_counts(session_id):
+	return {
+		"read": ShelfItem.query.filter_by(session_id=session_id, status="Read").count(),
+		"currently_reading": ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").count(),
+		"to_be_read": ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").count(),
+		"did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count()
+	}
 
 def seed_books_if_empty():
     if Book.query.first():
@@ -19,6 +32,8 @@ def seed_books_if_empty():
             title="The Midnight Library",
             author="Matt Haig",
             description="A novel about choices, regrets, and the different lives a person could have lived.",
+			pages=304,
+			cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
             rating=4.2,
             reads=1247
         ),
@@ -26,6 +41,8 @@ def seed_books_if_empty():
             title="Atomic Habits",
             author="James Clear",
             description="A practical book about building good habits and breaking bad ones through small daily changes.",
+			pages=320,
+			cover_url="https://m.media-amazon.com/images/I/81kg51XRc1L.jpg",
             rating=4.6,
             reads=2100
         ),
@@ -33,6 +50,8 @@ def seed_books_if_empty():
             title="Project Hail Mary",
             author="Andy Weir",
             description="A science fiction story about survival, problem solving, and saving humanity.",
+			pages=496,
+			cover_url="https://m.media-amazon.com/images/I/91ENQs2KLAL._AC_UF1000,1000_QL80_.jpg",
             rating=4.5,
             reads=1680
         ),
@@ -40,6 +59,8 @@ def seed_books_if_empty():
             title="Normal People",
             author="Sally Rooney",
             description="A story about friendship, love, communication, and growing up.",
+			pages=288,
+			cover_url="https://m.media-amazon.com/images/I/61nFGO425OL.jpg",
             rating=4.0,
             reads=980
         ),
@@ -47,6 +68,8 @@ def seed_books_if_empty():
             title="Dune",
             author="Frank Herbert",
             description="A classic science fiction novel about politics, power, religion, and survival on a desert planet.",
+			pages=489,
+			cover_url="https://m.media-amazon.com/images/I/71oO1E-XPuL.jpg",
             rating=4.4,
             reads=1900
         ),
@@ -54,9 +77,20 @@ def seed_books_if_empty():
             title="Before the Coffee Gets Cold",
             author="Toshikazu Kawaguchi",
             description="A gentle story about time travel, memory, regret, and human connection.",
+			pages=208,
+			cover_url="https://m.media-amazon.com/images/I/71kW0ESYl5L.jpg",
             rating=4.1,
             reads=870
         ),
+		Book(
+			title="Sunrise on the Reaping",
+			author="Suzanne Collins",
+			description="The newest book in The Hunger Games series",
+			pages=400,
+			cover_url="https://m.media-amazon.com/images/I/81RUJzM+wvL._UF894,1000_QL80_.jpg",
+			rating=4.6,
+			reads=2300
+		)
     ]
 
     db.session.add_all(books)
@@ -204,11 +238,36 @@ def register_routes(app: Flask) -> None:
 			most_read_books=most_read_books,
 			reviews=reviews
 		)
+	
+	@app.route("/shelf/<int:item_id>/progress", methods=["POST"])
+	def update_progress(item_id):
+		item = ShelfItem.query.get_or_404(item_id)
+		current_page = request.form.get("current_page", type=int)
+
+		if current_page is None or current_page < 0:
+			abort(400)
+		
+		if item.book.pages and current_page > item.book.pages:
+			current_page = item.book.pages
+		
+		item.current_page = current_page
+		
+		if item.book.pages and current_page >= item.book.pages:
+			item.status = "Read"
+			item.current_page = item.book.pages
+		else:
+			item.status = "Currently Reading"
+		
+		db.session.commit()
+
+		return redirect(url_for("currently_reading"))
 
 	@app.route("/profile")
 	@app.route("/profile.html")
 	def profile():
-		return render_template("profile.html")
+		session_id = get_session_id()
+		counts = get_shelf_counts(session_id)
+		return render_template("profile.html", counts=counts)
 
 	@app.route("/login")
 	@app.route("/login.html")
@@ -227,26 +286,58 @@ def register_routes(app: Flask) -> None:
 	
 	@app.route("/read")
 	@app.route("/read.html")
+	#@login_required
 	def read():
-		return render_template("read.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "Read"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("read.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/currently-reading")
 	@app.route("/currently-reading.html")
+	#@login_required
 	def currently_reading():
-		return render_template("currently-reading.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "Currently Reading"
+		).all()
+		counts = get_shelf_counts(session_id)
+		return render_template("currently-reading.html", items=items, counts=counts)
 	
 	@app.route("/to-be-read")
 	@app.route("/to-be-read.html")
+	#@login_required
 	def to_be_read():
-		return render_template("to-be-read.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "To Be Read"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/did-not-finish")
 	@app.route("/did-not-finish.html")
+	#@login_required
 	def did_not_finish():
-		return render_template("did-not-finish.html")
+		session_id = get_session_id() # for testing
+		items = ShelfItem.query.filter_by(
+			session_id = session_id, #user_id = current_user.id
+			status = "Did Not Finish"
+		).all()
+		shelf_rows = chunked(items,6)
+		counts = get_shelf_counts(session_id)
+		return render_template("did-not-finish.html", shelf_rows=shelf_rows, counts=counts)
 	
 	@app.route("/my-reviews")
 	@app.route("/my-reviews.html")
+	#@login_required
 	def my_reviews():
 		return render_template("my-reviews.html")
 	

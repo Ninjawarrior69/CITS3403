@@ -27,6 +27,7 @@ class Book(db.Model):
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    pages = db.Column(db.Integer)
     cover_url = db.Column(db.String(500), nullable=True)
     rating = db.Column(db.Float, default=0.0, nullable=False)
     reads = db.Column(db.Integer, default=0, nullable=False)
@@ -95,6 +96,8 @@ class ShelfItem(db.Model):
 
     status = db.Column(db.String(30), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    current_page = db.Column(db.Integer, default=0)
   
 
     __table_args__ = (
