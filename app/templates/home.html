@@ -84,9 +84,9 @@
                         <p class="book-author">{{ book.author }}</p>
 
                         <div class="book-stats">
-                          <span class="rating">★ {{ book.rating }}</span>
-                          <span class="reads">👁 {{ book.reads }}</span>
-                          <span class="comments">💬 {{ book.comments|length }}</span>
+                          <span class="rating"><i class="bi bi-star-fill"></i> {{ book.rating }}</span>
+                          <span class="reads"><i class="bi bi-eye-fill"></i> {{ book.reads }}</span>
+                          <span class="comments"><i class="bi bi-chat-dots"></i> {{ book.comments|length }}</span>
                         </div>
                       </div>
                     </article>

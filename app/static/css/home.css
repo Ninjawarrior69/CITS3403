@@ -254,6 +254,12 @@
     word-break: break-word;
 }
 
+.bi-star-fill,
+.bi-chat-dots,
+.bi-eye-fill {
+  color: #6b5d56;
+}
+
 /* Responsive */
 @media (max-width: 1100px) {
   .trending-books-grid {
