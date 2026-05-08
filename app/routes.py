@@ -11,8 +11,14 @@ from app.models import Book, Comment, Rating, User, WantToRead, ShelfItem
 
 
 def chunked(iterable, size):
-    it = iter(iterable)
-    return iter(lambda: list(islice(it, size)), [])
+    iterator = iter(iterable)
+    return iter(lambda: list(islice(iterator, size)), [])
+
+
+def get_session_id():
+    if "session_id" not in session:
+        session["session_id"] = str(uuid4())
+    return session["session_id"]
 
 
 def get_shelf_counts(session_id):
@@ -21,6 +27,15 @@ def get_shelf_counts(session_id):
         "currently_reading": ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").count(),
         "to_be_read": ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").count(),
         "did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count(),
+    }
+
+
+def get_shelf_counts_for_user(user_id):
+    return {
+        "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
+        "currently_reading": ShelfItem.query.filter_by(user_id=user_id, status="Currently Reading").count(),
+        "to_be_read": ShelfItem.query.filter_by(user_id=user_id, status="To Be Read").count(),
+        "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count(),
     }
 
 
@@ -65,31 +80,32 @@ def format_review(comment):
 def build_rating_summary(book):
     all_stars = [rating.stars for rating in book.ratings]
     total = len(all_stars)
+
     if total == 0:
-        return {"average": book.rating, "total": 0, "distribution": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}, "counts": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0}}
+        return {
+            "average": book.rating,
+            "total": 0,
+            "distribution": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
+            "counts": {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
+        }
+
     distribution = {}
     counts = {}
     for star in [5, 4, 3, 2, 1]:
         count = all_stars.count(star)
         counts[star] = count
         distribution[star] = round(count / total * 100)
+
     average = round(sum(all_stars) / total, 1)
-    return {"average": average, "total": total, "distribution": distribution, "counts": counts}
-
-
-def get_session_id():
-    if "session_id" not in session:
-        session["session_id"] = str(uuid4())
-    return session["session_id"]
-
-
-def get_display_rating(book):
-    rating_summary = build_rating_summary(book)
-    return rating_summary["average"]
+    return {
+        "average": average,
+        "total": total,
+        "distribution": distribution,
+        "counts": counts,
+    }
 
 
 def register_routes(app: Flask) -> None:
-
     @app.route("/")
     def home():
         seed_books_if_empty()
@@ -99,31 +115,13 @@ def register_routes(app: Flask) -> None:
         reviews = [format_review(comment) for comment in comments]
         return render_template("home.html", trending_books=trending_books, most_read_books=most_read_books, reviews=reviews)
 
-    @app.route("/shelf/<int:item_id>/progress", methods=["POST"])
-    def update_progress(item_id):
-        item = ShelfItem.query.get_or_404(item_id)
-        current_page = request.form.get("current_page", type=int)
-        if current_page is None or current_page < 0:
-            abort(400)
-        if item.book.pages and current_page > item.book.pages:
-            current_page = item.book.pages
-        item.current_page = current_page
-        if item.book.pages and current_page >= item.book.pages:
-            item.status = "Read"
-            item.current_page = item.book.pages
-        else:
-            item.status = "Currently Reading"
-        db.session.commit()
-        return redirect(url_for("currently_reading"))
-
     @app.route("/profile")
     @app.route("/profile.html")
     def profile():
         if current_user.is_authenticated:
-            counts = get_shelf_counts_for_user(current_user.id) if 'get_shelf_counts_for_user' in globals() else get_shelf_counts(get_session_id())
+            counts = get_shelf_counts_for_user(current_user.id)
         else:
-            session_id = get_session_id()
-            counts = get_shelf_counts(session_id)
+            counts = get_shelf_counts(get_session_id())
         return render_template("profile.html", counts=counts)
 
     @app.route("/login", methods=["GET", "POST"])
@@ -131,85 +129,80 @@ def register_routes(app: Flask) -> None:
     def login():
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
+
         form = LoginForm()
         if form.validate_on_submit():
             identifier = form.username_or_email.data.strip()
-            user = User.query.filter(or_(User.username == identifier, User.email == identifier)).first()
+            user = User.query.filter(
+                or_(
+                    User.username == identifier,
+                    User.email == identifier,
+                )
+            ).first()
+
             if user and user.check_password(form.password.data):
                 login_user(user)
                 return redirect(url_for("profile"))
-                    form = EditProfileForm(
-                        original_username=current_user.username,
-                        original_email=current_user.email
-                    )
-        
-                    if form.validate_on_submit():
-                        current_user.username = form.username.data.strip()
-                        current_user.email = form.email.data.strip().lower()
-                        current_user.bio = form.bio.data.strip() if form.bio.data else ""
-            
-                        db.session.commit()
-                        flash("Profile updated successfully!", "success")
-                        return redirect(url_for("profile"))
-        
-                    # If the form was submitted but failed validation, flash errors so user sees them.
-                    if request.method == "POST" and not form.validate():
-                        for field_name, field in form._fields.items():
-                            for err in field.errors:
-                                flash(f"{field.label.text}: {err}", "danger")
 
-                    elif request.method == "GET":
-                        form.username.data = current_user.username
-                        form.email.data = current_user.email
-                        form.bio.data = current_user.bio or ""
+            form.password.errors.append("Invalid username/email or password.")
 
-                    return render_template("edit-profile.html", form=form)
+        return render_template("login.html", form=form)
+
+    @app.route("/signup", methods=["GET", "POST"])
+    @app.route("/signup.html", methods=["GET", "POST"])
+    def signup():
+        if current_user.is_authenticated:
+            return redirect(url_for("profile"))
+
+        form = SignupForm()
+        if form.validate_on_submit():
+            user = User(
+                username=form.username.data.strip(),
+                email=form.email.data.strip().lower(),
+            )
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+
+            login_user(user)
+            return redirect(url_for("profile"))
+
+        return render_template("signup.html", form=form)
+
+    @app.route("/logout")
+    @login_required
+    def logout():
+        logout_user()
+        flash("You have been logged out.", "info")
+        return redirect(url_for("home"))
+
     @app.route("/edit-profile", methods=["GET", "POST"])
     @app.route("/edit-profile.html", methods=["GET", "POST"])
     @login_required
     def edit_profile():
-<<<<<<< HEAD
-        form = EditProfileForm(original_username=current_user.username, original_email=current_user.email)
-=======
         form = EditProfileForm(
             original_username=current_user.username,
-            original_email=current_user.email
+            original_email=current_user.email,
         )
-        
->>>>>>> 7487d20 (Updated the routes for profile and edit profile page, fixed bug with DB not updating to new version)
+
         if form.validate_on_submit():
             current_user.username = form.username.data.strip()
             current_user.email = form.email.data.strip().lower()
             current_user.bio = form.bio.data.strip() if form.bio.data else ""
-<<<<<<< HEAD
+
             db.session.commit()
             flash("Profile updated successfully!", "success")
             return redirect(url_for("profile"))
+
         if request.method == "POST" and not form.validate():
             for field in form:
-                for err in field.errors:
-                    flash(f"{field.label.text}: {err}", "danger")
-=======
-            
-            db.session.commit()
-            flash("Profile updated successfully!", "success")
-            return redirect(url_for("profile"))
-        
-        # If the form was submitted but failed validation, flash errors so user sees them.
-        if request.method == "POST" and not form.validate():
-            for field_name, field in form._fields.items():
-                for err in field.errors:
-                    flash(f"{field.label.text}: {err}", "danger")
-
->>>>>>> 7487d20 (Updated the routes for profile and edit profile page, fixed bug with DB not updating to new version)
+                for error in field.errors:
+                    flash(f"{field.label.text}: {error}", "danger")
         elif request.method == "GET":
             form.username.data = current_user.username
             form.email.data = current_user.email
             form.bio.data = current_user.bio or ""
-<<<<<<< HEAD
-=======
-        
->>>>>>> 7487d20 (Updated the routes for profile and edit profile page, fixed bug with DB not updating to new version)
+
         return render_template("edit-profile.html", form=form)
 
     @app.route("/read")
@@ -217,13 +210,13 @@ def register_routes(app: Flask) -> None:
     def read():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
-            shelf_rows = chunked(items, 6)
-            counts = get_shelf_counts_for_user(current_user.id) if 'get_shelf_counts_for_user' in globals() else {}
+            counts = get_shelf_counts_for_user(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="Read").all()
-            shelf_rows = chunked(items, 6)
             counts = get_shelf_counts(session_id)
+
+        shelf_rows = chunked(items, 6)
         return render_template("read.html", shelf_rows=shelf_rows, counts=counts)
 
     @app.route("/currently-reading")
@@ -231,11 +224,12 @@ def register_routes(app: Flask) -> None:
     def currently_reading():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="Currently Reading").all()
-            counts = get_shelf_counts_for_user(current_user.id) if 'get_shelf_counts_for_user' in globals() else {}
+            counts = get_shelf_counts_for_user(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").all()
             counts = get_shelf_counts(session_id)
+
         return render_template("currently-reading.html", items=items, counts=counts)
 
     @app.route("/to-be-read")
@@ -243,13 +237,13 @@ def register_routes(app: Flask) -> None:
     def to_be_read():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="To Be Read").all()
-            shelf_rows = chunked(items, 6)
-            counts = get_shelf_counts_for_user(current_user.id) if 'get_shelf_counts_for_user' in globals() else {}
+            counts = get_shelf_counts_for_user(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").all()
-            shelf_rows = chunked(items, 6)
             counts = get_shelf_counts(session_id)
+
+        shelf_rows = chunked(items, 6)
         return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts)
 
     @app.route("/did-not-finish")
@@ -257,13 +251,13 @@ def register_routes(app: Flask) -> None:
     def did_not_finish():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="Did Not Finish").all()
-            shelf_rows = chunked(items, 6)
-            counts = get_shelf_counts_for_user(current_user.id) if 'get_shelf_counts_for_user' in globals() else {}
+            counts = get_shelf_counts_for_user(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").all()
-            shelf_rows = chunked(items, 6)
             counts = get_shelf_counts(session_id)
+
+        shelf_rows = chunked(items, 6)
         return render_template("did-not-finish.html", shelf_rows=shelf_rows, counts=counts)
 
     @app.route("/my-reviews")
@@ -271,43 +265,74 @@ def register_routes(app: Flask) -> None:
     def my_reviews():
         return render_template("my-reviews.html")
 
+    @app.route("/shelf/<int:item_id>/progress", methods=["POST"])
+    def update_progress(item_id):
+        item = ShelfItem.query.get_or_404(item_id)
+        current_page = request.form.get("current_page", type=int)
+
+        if current_page is None or current_page < 0:
+            abort(400)
+
+        if item.book.pages and current_page > item.book.pages:
+            current_page = item.book.pages
+
+        item.current_page = current_page
+        if item.book.pages and current_page >= item.book.pages:
+            item.status = "Read"
+            item.current_page = item.book.pages
+        else:
+            item.status = "Currently Reading"
+
+        db.session.commit()
+        return redirect(url_for("currently_reading"))
+
     @app.route("/book/<int:book_id>")
     def book_detail(book_id):
         book = Book.query.get_or_404(book_id)
         rating_summary = build_rating_summary(book)
         comments = Comment.query.filter_by(book_id=book_id).all()
-        reviews = [format_review(c) for c in comments]
+        reviews = [format_review(comment) for comment in comments]
+
         user_rating = 0
         if current_user.is_authenticated:
             rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+            shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
         else:
             session_id = get_session_id()
             rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
+            shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+
         if rating:
             user_rating = rating.stars
-        shelf_status = None
-        if current_user.is_authenticated:
-            shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-        else:
-            session_id = get_session_id()
-            shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
-        if shelf_item:
-            shelf_status = shelf_item.status
+
+        shelf_status = shelf_item.status if shelf_item else None
         author = None
-        return render_template("book_detail.html", book=book, author=author, rating_summary=rating_summary, reviews=reviews, user_rating=user_rating, shelf_status=shelf_status)
+
+        return render_template(
+            "book_detail.html",
+            book=book,
+            author=author,
+            rating_summary=rating_summary,
+            reviews=reviews,
+            user_rating=user_rating,
+            shelf_status=shelf_status,
+        )
 
     @app.route("/book/<int:book_id>/shelf", methods=["POST"])
     def update_shelf_status(book_id):
-        book = Book.query.get_or_404(book_id)
+        Book.query.get_or_404(book_id)
         status = request.form.get("status")
         allowed_status = ["Read", "Currently Reading", "To Be Read", "Did Not Finish", "remove"]
+
         if status not in allowed_status:
             abort(400)
+
         if current_user.is_authenticated:
             shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
         else:
             session_id = get_session_id()
             shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+
         if status == "remove":
             if shelf_item:
                 db.session.delete(shelf_item)
@@ -320,15 +345,18 @@ def register_routes(app: Flask) -> None:
                 else:
                     shelf_item = ShelfItem(session_id=session_id, book_id=book_id, status=status)
                 db.session.add(shelf_item)
+
         db.session.commit()
         return redirect(url_for("book_detail", book_id=book_id))
 
     @app.route("/book/<int:book_id>/rate", methods=["POST"])
     def rate_book(book_id):
-        book = Book.query.get_or_404(book_id)
+        Book.query.get_or_404(book_id)
         stars = request.form.get("stars", type=int)
+
         if stars is None or stars < 0 or stars > 5:
             abort(400)
+
         if current_user.is_authenticated:
             existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
             if existing_rating:
@@ -337,8 +365,7 @@ def register_routes(app: Flask) -> None:
                 else:
                     existing_rating.stars = stars
             elif stars > 0:
-                rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
-                db.session.add(rating)
+                db.session.add(Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username))
         else:
             session_id = get_session_id()
             existing_rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
@@ -348,27 +375,29 @@ def register_routes(app: Flask) -> None:
                 else:
                     existing_rating.stars = stars
             elif stars > 0:
-                rating = Rating(session_id=session_id, book_id=book_id, stars=stars)
-                db.session.add(rating)
+                db.session.add(Rating(session_id=session_id, book_id=book_id, stars=stars))
+
         db.session.commit()
         return redirect(url_for("book_detail", book_id=book_id))
 
     @app.route("/book/<int:book_id>/review", methods=["POST"])
     def post_review(book_id):
-        book = Book.query.get_or_404(book_id)
+        Book.query.get_or_404(book_id)
         text = request.form.get("text", "").strip()
         stars = request.form.get("stars", type=int)
+
         if not text:
             abort(400)
         if stars is None or stars < 1 or stars > 5:
             abort(400)
+
         if current_user.is_authenticated:
             existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
             if existing_rating:
                 existing_rating.stars = stars
             else:
-                rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
-                db.session.add(rating)
+                db.session.add(Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username))
+
             comment = Comment(user_id=current_user.id, username=current_user.username, book_id=book_id, text=text, stars=stars)
         else:
             session_id = get_session_id()
@@ -376,9 +405,10 @@ def register_routes(app: Flask) -> None:
             if existing_rating:
                 existing_rating.stars = stars
             else:
-                rating = Rating(session_id=session_id, book_id=book_id, stars=stars)
-                db.session.add(rating)
+                db.session.add(Rating(session_id=session_id, book_id=book_id, stars=stars))
+
             comment = Comment(session_id=session_id, username="Anonymous", book_id=book_id, text=text, stars=stars)
+
         db.session.add(comment)
         db.session.commit()
         return redirect(url_for("book_detail", book_id=book_id))
@@ -388,10 +418,17 @@ def register_routes(app: Flask) -> None:
         query = request.args.get("q", "").strip()
         books = []
         empty_query = False
+
         if query:
-            books = Book.query.filter(or_(Book.title.ilike(f"%{query}%"), Book.author.ilike(f"%{query}%"))).all()
+            books = Book.query.filter(
+                or_(
+                    Book.title.ilike(f"%{query}%"),
+                    Book.author.ilike(f"%{query}%"),
+                )
+            ).all()
         else:
             empty_query = True
+
         return render_template("search-result.html", query=query, books=books, empty_query=empty_query)
 
     @app.route("/search-suggestions")
@@ -399,6 +436,13 @@ def register_routes(app: Flask) -> None:
         query = request.args.get("q", "").strip()
         if not query:
             return jsonify([])
-        books = Book.query.filter(or_(Book.title.ilike(f"%{query}%"), Book.author.ilike(f"%{query}%"))).limit(5).all()
-        suggestions = [{"id": b.id, "title": b.title, "author": b.author} for b in books]
+
+        books = Book.query.filter(
+            or_(
+                Book.title.ilike(f"%{query}%"),
+                Book.author.ilike(f"%{query}%"),
+            )
+        ).limit(5).all()
+
+        suggestions = [{"id": book.id, "title": book.title, "author": book.author} for book in books]
         return jsonify(suggestions)

@@ -55,19 +55,6 @@
             method="post"
           >
             {{ form.hidden_tag() }}
-            <div>
-              <label class="form-label" for="signup-name">Name</label>
-              <input
-                class="form-control w-100"
-                id="signup-name"
-                type="text"
-                name="name"
-                placeholder="Enter your name"
-                autocomplete="name"
-                required
-              />
-            </div>
-            
             <div class="mt-2">
               <label class="form-label" for="signup-username">Username</label>
               {{ form.username( class="form-control w-100",

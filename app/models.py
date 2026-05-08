@@ -73,6 +73,60 @@ class User(UserMixin, db.Model):
 
         return []
 
+    def set_password(self, password: str) -> None:
+        """Hash and set the user's password."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Check if the provided password matches the hash."""
+        return check_password_hash(self.password_hash, password)
+
+    def get_to_be_read_books(self) -> list["Book"]:
+        """Return books the user has marked as want-to-read."""
+        return (
+            Book.query.join(WantToRead, WantToRead.book_id == Book.id)
+            .filter(WantToRead.user_id == self.id)
+            .order_by(WantToRead.created_at.desc())
+            .all()
+        )
+
+    def get_read_books(self) -> list["Book"]:
+        """Return books the user has interacted with via ratings or comments."""
+        rated_book_ids = (
+            db.session.query(Rating.book_id)
+            .filter(Rating.user_id == self.id)
+            .subquery()
+        )
+        commented_book_ids = (
+            db.session.query(Comment.book_id)
+            .filter(Comment.user_id == self.id)
+            .subquery()
+        )
+
+        return (
+            Book.query
+            .filter(
+                db.or_(
+                    Book.id.in_(db.select(rated_book_ids.c.book_id)),
+                    Book.id.in_(db.select(commented_book_ids.c.book_id)),
+                )
+            )
+            .order_by(Book.title.asc())
+            .all()
+        )
+
+    def get_books_by_status(self, status: str) -> list["Book"]:
+        """Return user books for a supported status key."""
+        normalized = status.strip().lower().replace("-", "_")
+
+        if normalized in {"to_be_read", "want_to_read"}:
+            return self.get_to_be_read_books()
+
+        if normalized == "read":
+            return self.get_read_books()
+
+        return []
+
     def __repr__(self) -> str:
         return f"<User {self.username}>"
 
