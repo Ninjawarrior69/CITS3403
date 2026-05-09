@@ -21,9 +21,9 @@
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="hero-content"><br>
-          <h1 class="hero-title">Track books you've read.</h1>
+          <h1 class="hero-title">Track your reading journey.</h1>
           <p class="hero-subtitle">
-            Save those you want to read. Tell your friends what's good.
+            Your books, your shelves, your story. 
           </p>
         </div>
       </section>
@@ -32,7 +32,6 @@
        <br>
       <section class="trending-section">
         <div class="section-title-row">
-          <span class="section-icon">↗</span>
           <h2 class="section-title">Trending Now</h2>
         </div>
 
@@ -42,11 +41,17 @@
               <a href="{{ url_for('book_detail', book_id=book.id) }}" class="book-link">
                 <article class="trending-book-card">
                   <div class="book-cover-wrapper">
+                    {% if book.cover_url %}
                     <img
-                      src="https://placehold.co/220x330?text=Book+Cover"
-                      alt="Book cover"
+                      src="{{ book.cover_url }}"
+                      alt="Book cover"f
                       class="book-cover"
                     />
+                    {% else %}
+                    <div class="book-cover-placeholder">
+                       Cover Unavailable
+                    </div>
+                    {% endif %}
                   </div>
 
                   <div class="book-meta">
@@ -64,13 +69,12 @@
 
       <!-- Bottom Section -->
       <br>
-      <section class="bottom-section mt-5">
+      <section class="bottom-section">
         <div class="bottom-grid">
 
           <!-- Most Read -->
           <div class="most-read-column">
             <div class="section-title-row">
-              <span class="section-icon">◉</span>
               <h2 class="section-title">Most Read</h2>
             </div>
 
@@ -86,9 +90,9 @@
                         <p class="book-author">{{ book.author }}</p>
 
                         <div class="book-stats">
-                          <span class="rating">★ {{ book.rating }}</span>
-                          <span class="reads">👁 {{ book.reads }}</span>
-                          <span class="comments">💬 {{ book.comments|length }}</span>
+                          <span class="rating"><i class="bi bi-star-fill"></i> {{ book.rating }}</span>
+                          <span class="reads"><i class="bi bi-eye-fill"></i> {{ book.reads }}</span>
+                          <span class="comments"><i class="bi bi-chat-dots"></i> {{ book.comments|length }}</span>
                         </div>
                       </div>
                     </article>
@@ -103,7 +107,6 @@
           <!-- Reviews -->
           <div class="reviews-column">
             <div class="section-title-row">
-              <span class="section-icon">◌</span>
               <h2 class="section-title">Recent Reviews</h2>
             </div>
 

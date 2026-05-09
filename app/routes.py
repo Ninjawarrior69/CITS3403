@@ -9,6 +9,7 @@ from flask import jsonify
 
 from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
+import requests
 
 def chunked(iterable, size):
 	it = iter(iterable)
@@ -31,7 +32,7 @@ def seed_books_if_empty():
             title="The Midnight Library",
             author="Matt Haig",
             description="A novel about choices, regrets, and the different lives a person could have lived.",
-			pages=304,
+			page_count=304,
 			cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
             rating=4.2,
             reads=1247
@@ -40,7 +41,7 @@ def seed_books_if_empty():
             title="Atomic Habits",
             author="James Clear",
             description="A practical book about building good habits and breaking bad ones through small daily changes.",
-			pages=320,
+			page_count=320,
 			cover_url="https://m.media-amazon.com/images/I/81kg51XRc1L.jpg",
             rating=4.6,
             reads=2100
@@ -49,7 +50,7 @@ def seed_books_if_empty():
             title="Project Hail Mary",
             author="Andy Weir",
             description="A science fiction story about survival, problem solving, and saving humanity.",
-			pages=496,
+			page_count=496,
 			cover_url="https://m.media-amazon.com/images/I/91ENQs2KLAL._AC_UF1000,1000_QL80_.jpg",
             rating=4.5,
             reads=1680
@@ -58,7 +59,7 @@ def seed_books_if_empty():
             title="Normal People",
             author="Sally Rooney",
             description="A story about friendship, love, communication, and growing up.",
-			pages=288,
+			page_count=288,
 			cover_url="https://m.media-amazon.com/images/I/61nFGO425OL.jpg",
             rating=4.0,
             reads=980
@@ -67,7 +68,7 @@ def seed_books_if_empty():
             title="Dune",
             author="Frank Herbert",
             description="A classic science fiction novel about politics, power, religion, and survival on a desert planet.",
-			pages=489,
+			page_count=489,
 			cover_url="https://m.media-amazon.com/images/I/71oO1E-XPuL.jpg",
             rating=4.4,
             reads=1900
@@ -76,7 +77,7 @@ def seed_books_if_empty():
             title="Before the Coffee Gets Cold",
             author="Toshikazu Kawaguchi",
             description="A gentle story about time travel, memory, regret, and human connection.",
-			pages=208,
+			page_count=208,
 			cover_url="https://m.media-amazon.com/images/I/71kW0ESYl5L.jpg",
             rating=4.1,
             reads=870
@@ -85,7 +86,7 @@ def seed_books_if_empty():
 			title="Sunrise on the Reaping",
 			author="Suzanne Collins",
 			description="The newest book in The Hunger Games series",
-			pages=400,
+			page_count=400,
 			cover_url="https://m.media-amazon.com/images/I/81RUJzM+wvL._UF894,1000_QL80_.jpg",
 			rating=4.6,
 			reads=2300
@@ -174,6 +175,90 @@ def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
+def search_open_library(query, page=1, limit=10):
+	url = "https://openlibrary.org/search.json"
+
+	params = {
+		"q": query,
+		"page": page,
+		"limit": limit
+	}
+
+	response = requests.get(url, params=params)
+
+	try:
+		data = response.json()
+	except requests.exceptions.JSONDecodeError:
+		return []
+	
+	books = []
+
+	for doc in data.get("docs", []):
+
+		cover_id = doc.get("cover_i")
+		edition_key = doc.get("edition_key", [])
+
+		books.append({
+			"title": doc.get("title", "Unknown Title"),
+			"author": ", ".join(doc.get("author_name", ["Unknown"])),
+			"cover_url": f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg" if cover_id else None,
+			"openlibrary_id": doc.get("key"),
+			"edition_key": doc.get("edition_key", [None])[0] if doc.get("edition_key") else None,
+			"publish_year": doc.get("first_publish_year")
+		})
+	return books
+
+
+def fetch_openlibrary_description(olid):
+
+    url = f"https://openlibrary.org{olid}.json"
+    res = requests.get(url)
+
+    if res.status_code != 200:
+        return None
+
+    data = res.json()
+
+    description = data.get("description")
+
+    if isinstance(description, dict):
+        return description.get("value")
+
+    return description
+
+def fetch_page_count(openlibrary_id, edition_key=None):
+    if edition_key:
+        url = f"https://openlibrary.org/books/{edition_key}.json"
+        res = requests.get(url)
+
+        if res.status_code == 200:
+            data = res.json()
+            if data.get("number_of_pages"):
+                return data["number_of_pages"]
+
+    if openlibrary_id:
+        url = f"https://openlibrary.org{openlibrary_id}.json"
+        res = requests.get(url)
+
+        if res.status_code == 200:
+            data = res.json()
+
+            editions = data.get("covers")
+            edition_keys = data.get("covers", [])
+
+            if "latest_revision" in data:
+                editions_url = f"https://openlibrary.org{openlibrary_id}/editions.json"
+                r = requests.get(editions_url)
+
+                if r.status_code == 200:
+                    ed_data = r.json()
+                    entries = ed_data.get("entries", [])
+
+                    for e in entries:
+                        if e.get("number_of_pages"):
+                            return e["number_of_pages"]
+    return None
+
 
 def register_routes(app: Flask) -> None:
 	@app.route("/")
@@ -205,14 +290,14 @@ def register_routes(app: Flask) -> None:
 		if current_page is None or current_page < 0:
 			abort(400)
 		
-		if item.book.pages and current_page > item.book.pages:
-			current_page = item.book.pages
+		if item.book.page_count and current_page > item.book.page_count:
+			current_page = item.book.page_count
 		
 		item.current_page = current_page
 		
-		if item.book.pages and current_page >= item.book.pages:
+		if item.book.page_count and current_page >= item.book.page_count:
 			item.status = "Read"
-			item.current_page = item.book.pages
+			item.current_page = item.book.page_count
 		else:
 			item.status = "Currently Reading"
 		
@@ -535,21 +620,22 @@ def register_routes(app: Flask) -> None:
 	def search():
 		query = request.args.get("q", "").strip()
 
+		try:
+			page = int(request.args.get("page", 1))
+		except ValueError:
+			page = 1
+
 		books = []
 		empty_query = False
 
 		if query:
-			books = Book.query.filter(
-				or_(
-					Book.title.ilike(f"%{query}%"),
-					Book.author.ilike(f"%{query}%")
-				)
-			).all()
+			books = search_open_library(query, page=page)
 		else:
-			empty_query =True
+			empty_query = True
 		
 		return render_template(
 			"search-result.html",
+			page=page,
 			query=query,
 			books=books,
 			empty_query=empty_query
@@ -579,3 +665,45 @@ def register_routes(app: Flask) -> None:
 			})
 		
 		return jsonify(suggestions)
+	
+	@app.route("/import-book")
+	def import_book():
+		
+		openlibrary_id = request.args.get("olid")
+		title = request.args.get("title")
+		author = request.args.get("author")
+		cover_url = request.args.get("cover")
+		publish_year = request.args.get("first_publish_year", type=int)
+		edition_key = request.args.get("edition_key")
+		description = fetch_openlibrary_description(openlibrary_id)
+
+		page_count = fetch_page_count(openlibrary_id, edition_key)
+
+		existing_book = Book.query.filter_by(
+			openlibrary_id=openlibrary_id
+		).first()
+
+		if not title or not author:
+			return redirect(url_for("search"))
+
+		if existing_book:
+			return redirect(
+				url_for("book_detail", book_id=existing_book.id)
+			)
+		
+		new_book = Book(
+			openlibrary_id=openlibrary_id,
+			title=title,
+			author=author,
+			cover_url=cover_url,
+			page_count=page_count,
+			publish_year=publish_year,
+			description=description
+		)
+
+		db.session.add(new_book)
+		db.session.commit()
+
+		return redirect(
+			url_for("book_detail", book_id=new_book.id)
+		)
