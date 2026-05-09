@@ -30,15 +30,14 @@
         <!-- Name, Username, Bio -->
         <div class="col-md-9">
           <h2 class="mb-0">
-            Name
+            {{ profile_name }}
             <a href="{{ url_for('edit_profile') }}">
               <i class="bi bi-pencil-square edit-icon"></i>
             </a>
           </h2>
-          <p class="text-muted">@username</p>
+          <p class="text-muted">@{{ profile_username }}</p>
           <p>
-            An avid reader with interests in a range of genres. Currently making
-            my way through a mountain of books which keeps on growing!
+            {{ profile_bio }}
           </p>
           <button class="btn-follow">
             <i class="bi bi-person" style="color: #768e78"></i>

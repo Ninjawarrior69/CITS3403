@@ -23,6 +23,15 @@ def get_shelf_counts(session_id):
 		"did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count()
 	}
 
+def get_user_shelf_counts(user_id):
+
+    return {
+        "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
+        "currently_reading": ShelfItem.query.filter_by(user_id=user_id, status="Currently Reading").count(),
+        "to_be_read": ShelfItem.query.filter_by(user_id=user_id, status="To Be Read").count(),
+        "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count()
+    }
+
 def seed_books_if_empty():
     if Book.query.first():
         return
@@ -308,9 +317,30 @@ def register_routes(app: Flask) -> None:
 	@app.route("/profile")
 	@app.route("/profile.html")
 	def profile():
-		session_id = get_session_id()
-		counts = get_shelf_counts(session_id)
-		return render_template("profile.html", counts=counts)
+		if current_user.is_authenticated:
+			counts = get_user_shelf_counts(current_user.id)
+			profile_name = current_user.name
+			profile_username = current_user.username
+			profile_bio = current_user.bio
+
+		else:
+			session_id = get_session_id()
+			counts = get_shelf_counts(session_id)
+
+			profile_name = session.get("profile_name", "Name")
+			profile_username = session.get("profile_username", "username")
+			profile_bio = session.get(
+				"profile_bio",
+				"An avid reader with interests in a range of genres. Currently making my way through a mountain of books which keeps on growing!"
+			  )
+
+		return render_template(
+			"profile.html", 
+			counts=counts,
+			profile_name=profile_name,
+			profile_username=profile_username,
+			profile_bio=profile_bio,
+		)
 
 	@app.route("/login")
 	@app.route("/login.html")
@@ -322,9 +352,29 @@ def register_routes(app: Flask) -> None:
 	def signup():
 		return render_template("signup.html")
 
-	@app.route("/edit-profile")
-	@app.route("/edit-profile.html")
+	@app.route("/edit-profile", methods=["GET", "POST"])
+	@app.route("/edit-profile.html", methods=["GET", "POST"])
 	def edit_profile():
+
+		if request.method == "POST":
+			if current_user.is_authenticated:
+
+				current_user.name = request.form.get("name")
+				current_user.username = request.form.get("username")
+				current_user.bio = request.form.get("bio")
+				current_user.email = request.form.get("email")
+
+				db.session.commit()
+
+			else:
+
+				session["profile_name"] = request.form.get("name")
+				session["profile_username"] = request.form.get("username")
+				session["profile_bio"] = request.form.get("bio")
+				session["profile_email"] = request.form.get("email")
+
+			return redirect(url_for("profile"))
+		
 		return render_template("edit-profile.html")
 	
 	@app.route("/read")

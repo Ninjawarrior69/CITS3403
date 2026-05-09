@@ -28,17 +28,17 @@
           <!-- Edit Image -->
           <div class="mini-profile-pic-placeholder mx-auto"></div>
           <!-- Details -->
-          <div class="profile-form mt-4 text-start">
+          <form method="POST" action="{{ url_for('edit_profile') }}" class="profile-form mt-4 text-start">
             <label>Name</label>
-            <input class="form-control mb-3" />
+            <input name="name" value="{{ current_user.name }}" class="form-control mb-3" />
             <label>Username</label>
-            <input class="form-control mb-3" />
+            <input name="username" value="{{ current_user.username }}" class="form-control mb-3" />
             <label>Bio</label>
-            <textarea class="form-control mb-3"></textarea>
+            <textarea name="bio" class="form-control mb-3">{{ current_user.bio }}</textarea>
             <label>Email Address</label>
-            <input class="form-control mb-3" />
-            <button class="btn btn-primary btn-sm mt-3">Save Changes</button>
-          </div>
+            <input name="email" value="{{ current_user.email }}" class="form-control mb-3" />
+            <button type="submit" class="btn btn-primary btn-sm mt-3">Save Changes</button>
+          </form>
         </div>
         <div class="col-md-5 ms-auto">
           <!-- Favourite Books -->
