@@ -187,3 +187,76 @@
 .show-more-btn:hover {
     text-decoration: underline;
 }
+
+.favorite-slot {
+    width: 120px;
+    height: 180px;
+    background: #d9d9d9;
+    border-radius: 10px;
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+.add-book-btn {
+    border: none;
+    background: transparent;
+    font-size: 2rem;
+    color: #666;
+    cursor: pointer;
+}
+
+.favorite-book-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-book-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+
+    border: none;
+    border-radius: 50%;
+
+    width: 24px;
+    height: 24px;
+
+    background: rgba(0,0,0,0.7);
+    color: white;
+
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+.empty-slot {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 3rem;
+    color: #666;
+
+    cursor: pointer;
+}
+
+.favorite-slot:hover {
+    transform: scale(1.02);
+    transition: 0.2s ease;
+}
+
+.remove-book-btn:hover {
+    background: rgba(0,0,0,0.9);
+}

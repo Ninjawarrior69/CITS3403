@@ -332,7 +332,22 @@ def register_routes(app: Flask) -> None:
 			profile_bio = session.get(
 				"profile_bio",
 				"An avid reader with interests in a range of genres. Currently making my way through a mountain of books which keeps on growing!"
-			  )
+			)
+
+			favorite_book_ids = session.get("favorite_books", "")
+			favorite_books = []
+
+			if favorite_book_ids:
+				ids = [
+					int(book_id)
+					for book_id in favorite_book_ids.split(",")
+					if book_id
+				]
+
+				favorite_books = Book.query.filter(Book.id.in_(ids)).all()
+
+				print("IDS:", ids)
+				print("BOOKS:", favorite_books)
 
 		return render_template(
 			"profile.html", 
@@ -340,6 +355,7 @@ def register_routes(app: Flask) -> None:
 			profile_name=profile_name,
 			profile_username=profile_username,
 			profile_bio=profile_bio,
+			favorite_books=favorite_books,
 		)
 
 	@app.route("/login")
@@ -372,6 +388,7 @@ def register_routes(app: Flask) -> None:
 				session["profile_username"] = request.form.get("username")
 				session["profile_bio"] = request.form.get("bio")
 				session["profile_email"] = request.form.get("email")
+				session["favorite_books"] = request.form.get("favorite_books", "")
 
 			return redirect(url_for("profile"))
 		
@@ -711,7 +728,8 @@ def register_routes(app: Flask) -> None:
 			suggestions.append({
 				"id": book.id,
 				"title": book.title,
-				"author": book.author
+				"author": book.author,
+				"cover_url": book.cover_url
 			})
 		
 		return jsonify(suggestions)
