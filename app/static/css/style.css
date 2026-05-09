@@ -88,6 +88,11 @@ hr {
     width: 350px;
 }
 
+.form-control:focus {
+    border-color: #3D2F2A;
+    box-shadow: 0 0 0 0.2rem rgba(61, 47, 42, 0.25);
+}
+
 .heading {
   text-align: center;
 }
