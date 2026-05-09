@@ -4,7 +4,7 @@ from flask import session
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
-from app.models import Book
+from app.models import Book, Comment
 
 
 def save_avatar(avatar_file):
@@ -42,6 +42,15 @@ def get_profile_data(
 
         favorite_books = current_user.favorite_books
 
+        recent_reviews = (
+            Comment.query
+            .filter_by(user_id=current_user.id)
+            .order_by(Comment.created_at.desc())
+            .limit(2)
+            .all()
+        )
+
+
         return {
             "counts": counts,
             "profile_name": current_user.name,
@@ -49,7 +58,8 @@ def get_profile_data(
             "profile_bio": current_user.bio,
             "profile_email": current_user.email,
             "profile_avatar": current_user.avatar,
-            "favorite_books": favorite_books
+            "favorite_books": favorite_books,
+            "recent_reviews": recent_reviews,
         }
 
     session_id = get_session_id()
@@ -96,6 +106,14 @@ def get_profile_data(
         favorite_books = Book.query.filter(
             Book.id.in_(ids)
         ).all()
+    
+    recent_reviews = (
+        Comment.query
+        .filter_by(session_id=session_id)
+        .order_by(Comment.created_at.desc())
+        .limit(2)
+        .all()
+    )
 
     return {
         "counts": counts,
@@ -104,7 +122,8 @@ def get_profile_data(
         "profile_bio": profile_bio,
         "profile_email": profile_email,
         "profile_avatar": profile_avatar,
-        "favorite_books": favorite_books
+        "favorite_books": favorite_books,
+        "recent_reviews": recent_reviews
     }
 
 def update_favorite_books(

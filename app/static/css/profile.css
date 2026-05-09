@@ -112,6 +112,7 @@
     aspect-ratio: 2/3;
     background-color: #e5e5e5;
     border-radius: 8px;
+    object-fit: cover;
 }
 
 .mini-book-card-edit {
