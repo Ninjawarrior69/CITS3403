@@ -113,19 +113,17 @@
             <div class="review-list">
               {% if reviews %}
                 {% for review in reviews[:4] %}
-                  <article class="review-card">
-
+                  <a
+                    href="{{ url_for('book_detail', book_id=review.book_id) }}"
+                    class="review-card"
+                  >
                     <div class="review-header">
-                      <div class="review-user-info">
-                        <h3 class="review-username">{{ review.username }}</h3>
 
-                        {% if review.book_id %}
-                          <a href="{{ url_for('book_detail', book_id=review.book_id) }}" class="review-book-link">
-                            <p class="review-book-title">{{ review.book_title }}</p>
-                          </a>
-                        {% else %}
-                          <p class="review-book-title">{{ review.book_title }}</p>
-                        {% endif %}
+                      <div class="review-user-info">
+
+                        <h3 class="review-username">{{ review.username }}</h3>
+                        <p class="review-book-title">{{ review.book_title }}</p>
+
                       </div>
 
                       <div class="review-stars">
@@ -139,14 +137,14 @@
                     </div>
 
                     <p class="review-text">
-                      {{ review.text }}
+                      {{ review.text[:120] }}{% if review.text|length > 120 %}...{% endif %}
                     </p>
 
                     <p class="review-time">
                       {{ review.time }}
                     </p>
 
-                  </article>
+                  </a>
                 {% endfor %}
               {% else %}
                 <p>No reviews yet</p>

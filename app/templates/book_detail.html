@@ -55,14 +55,20 @@
               </div><br>
 
               <h4 class="mb-2">About this book</h4>
-              <p id="book-desc" class="collapsed">{{ book.description if book.description else "Not available for this title" }}</p>
+              <p id="book-desc" class="{% if book.description|length > 250 %}description-collapsed{% endif %}">
+                {{ book.description if book.description else "Not available for this title" }}
+              </p>
 
-              <button
-                class="show-more-btn"
-                onclick="toggleSection('book-desc', this)"
-              >
-                Show More
-              </button>
+              {% if book.description|length > 250 %}
+
+                <button
+                  class="show-more-btn"
+                  onclick="toggleSection('book-desc', this)"
+                >
+                  Show More
+                </button>
+              {% endif %}
+
             </div>
           </div>
         </div>
@@ -85,20 +91,23 @@
               </div>
 
               <p>
-                {{ author.books if author else 0 }} books · {{ author.followers
-                if author else 0 }} followers
+                {{ author.followers if author else 0 }} followers
               </p>
 
-              <p id="author-desc" class="collapsed">
+              <p id="author-desc" class="{% if author and author.bio and author.bio|length > 250 %}description-collapsed{% endif %}">
                 {{ author.bio if author else "Author bio coming soon." }}
               </p>
 
-              <button
-                class="show-more-btn"
-                onclick="toggleSection('author-desc', this)"
-              >
-                Show More
-              </button>
+              {% if author and author.bio and author.bio|length > 250 %}
+
+                <button
+                  class="show-more-btn"
+                  onclick="toggleSection('author-desc', this)"
+                >
+                  Show More
+                </button>
+              {% endif %}
+
             </div>
           </div>
         </div>
@@ -168,7 +177,25 @@
                 range(5 - review.stars) %}☆{% endfor %}
               </div>
 
-              <p></p>{{ review.text }}</p>
+              <p
+                class="review-text {% if review.text|length > 300 %}review-collapsed{% endif %}"
+                id="review-{{ loop.index }}"
+              >
+                {{ review.text }}
+              </p>
+
+              {% if review.text|length > 300 %}
+
+                <button
+                  type="button"
+                  class="show-more-btn"
+                  onclick="toggleSection('review-{{ loop.index }}', this)"
+                >
+                  Show More
+                </button>
+
+              {% endif %}
+
             </div>
             {% else %}
             <p>No reviews yet.</p>

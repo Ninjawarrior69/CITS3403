@@ -375,8 +375,27 @@
 }
 
 /* Collapsed text */
-.collapsed {
+.description-collapsed {
     max-height: 100px;
+    overflow: hidden;
+}
+
+.show-more-btn {
+    background: none;
+    border: none;
+    color: var(--secondary-green);
+    font-size: 0.9rem;
+    padding: 0;
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+.show-more-btn:hover {
+    text-decoration: underline;
+}
+
+.review-collapsed {
+    max-height: 200px;
     overflow: hidden;
 }
 
