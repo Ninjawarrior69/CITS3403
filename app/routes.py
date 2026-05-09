@@ -11,6 +11,13 @@ from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
 import requests
 
+from app.helpers.profile_helpers import (
+    save_avatar,
+    get_profile_data,
+	update_authenticated_profile,
+	update_anonymous_profile
+)
+
 def chunked(iterable, size):
 	it = iter(iterable)
 	return iter(lambda: list(islice(it, size)),[])
@@ -317,45 +324,16 @@ def register_routes(app: Flask) -> None:
 	@app.route("/profile")
 	@app.route("/profile.html")
 	def profile():
-		if current_user.is_authenticated:
-			counts = get_user_shelf_counts(current_user.id)
-			profile_name = current_user.name
-			profile_username = current_user.username
-			profile_bio = current_user.bio
 
-		else:
-			session_id = get_session_id()
-			counts = get_shelf_counts(session_id)
-
-			profile_name = session.get("profile_name", "Name")
-			profile_username = session.get("profile_username", "username")
-			profile_bio = session.get(
-				"profile_bio",
-				"An avid reader with interests in a range of genres. Currently making my way through a mountain of books which keeps on growing!"
-			)
-
-			favorite_book_ids = session.get("favorite_books", "")
-			favorite_books = []
-
-			if favorite_book_ids:
-				ids = [
-					int(book_id)
-					for book_id in favorite_book_ids.split(",")
-					if book_id
-				]
-
-				favorite_books = Book.query.filter(Book.id.in_(ids)).all()
-
-				print("IDS:", ids)
-				print("BOOKS:", favorite_books)
+		profile_data = get_profile_data(
+			get_session_id,
+			get_shelf_counts,
+			get_user_shelf_counts
+		)
 
 		return render_template(
 			"profile.html", 
-			counts=counts,
-			profile_name=profile_name,
-			profile_username=profile_username,
-			profile_bio=profile_bio,
-			favorite_books=favorite_books,
+			**profile_data
 		)
 
 	@app.route("/login")
@@ -373,26 +351,27 @@ def register_routes(app: Flask) -> None:
 	def edit_profile():
 
 		if request.method == "POST":
+
+			avatar_file = request.files.get("avatar")
+
 			if current_user.is_authenticated:
-
-				current_user.name = request.form.get("name")
-				current_user.username = request.form.get("username")
-				current_user.bio = request.form.get("bio")
-				current_user.email = request.form.get("email")
-
-				db.session.commit()
-
+				update_authenticated_profile(request, avatar_file)
+			
 			else:
-
-				session["profile_name"] = request.form.get("name")
-				session["profile_username"] = request.form.get("username")
-				session["profile_bio"] = request.form.get("bio")
-				session["profile_email"] = request.form.get("email")
-				session["favorite_books"] = request.form.get("favorite_books", "")
+				update_anonymous_profile(request, avatar_file)
 
 			return redirect(url_for("profile"))
+            
+		profile_data = get_profile_data(
+			get_session_id,
+			get_shelf_counts,
+			get_user_shelf_counts
+		)
 		
-		return render_template("edit-profile.html")
+		return render_template(
+			"edit-profile.html",
+			**profile_data			
+		)
 	
 	@app.route("/read")
 	@app.route("/read.html")

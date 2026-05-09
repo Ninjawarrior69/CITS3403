@@ -4,6 +4,23 @@ from flask_login import UserMixin
 
 from app.extensions import db
 
+favorite_books = db.Table(
+    "favorite_books",
+
+    db.Column(
+        "user_id",
+        db.Integer,
+        db.ForeignKey("user.id"),
+        primary_key=True
+    ),
+
+    db.Column(
+        "book_id",
+        db.Integer,
+        db.ForeignKey("book.id"),
+        primary_key=True
+    )
+)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -11,13 +28,21 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     bio = db.Column(db.Text, default="")
-    
+    avatar = db.Column(db.String(255), nullable=True)
+
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     comments = db.relationship("Comment", backref="user", lazy=True)
     ratings = db.relationship("Rating", backref="user", lazy=True)
     shelf_items = db.relationship("ShelfItem", backref="user", lazy=True)
+
+    favorite_books = db.relationship(
+        "Book",
+        secondary=favorite_books,
+        backref="favorited_by",
+        lazy=True
+    )
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"

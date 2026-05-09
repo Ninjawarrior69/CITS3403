@@ -1,3 +1,5 @@
+console.log("EDIT PROFILE JS LOADED");
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const searchInput = document.getElementById("favorite-search");
@@ -21,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let debounceTimeout;
 
     // Store selected favorite books
-    let favoriteBooks = [];
+    let favoriteBooks = window.initialFavoriteBooks || [];
 
     // Search input
     searchInput.addEventListener("input", () => {
@@ -218,5 +220,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initial render
     updateGrid();
+    updateHiddenInput();
+
+    const avatarUpload = document.getElementById("avatar-upload");
+
+    const avatarTrigger = document.getElementById("avatar-trigger");
+
+    const avatarPreview = document.getElementById("profile-avatar-preview");
+
+    if (avatarUpload && avatarPreview) {
+
+        avatarUpload.addEventListener("change", function(event) {
+
+            const file = event.target.files[0];
+
+            if (file) {
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+
+                    avatarPreview.src = e.target.result;
+
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        avatarTrigger.addEventListener("click", () => {
+           avatarUpload.click();
+        });
+    }
 
 });

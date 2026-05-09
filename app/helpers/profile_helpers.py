@@ -47,6 +47,7 @@ def get_profile_data(
             "profile_name": current_user.name,
             "profile_username": current_user.username,
             "profile_bio": current_user.bio,
+            "profile_email": current_user.email,
             "profile_avatar": current_user.avatar,
             "favorite_books": favorite_books
         }
@@ -67,6 +68,11 @@ def get_profile_data(
 
     profile_avatar = session.get(
         "profile_avatar"
+    )
+
+    profile_email = session.get(
+        "profile_email",
+        ""
     )
 
     profile_bio = session.get(
@@ -96,6 +102,7 @@ def get_profile_data(
         "profile_name": profile_name,
         "profile_username": profile_username,
         "profile_bio": profile_bio,
+        "profile_email": profile_email,
         "profile_avatar": profile_avatar,
         "favorite_books": favorite_books
     }
