@@ -36,15 +36,13 @@
                     <div class="col-12 col-md-4 d-flex justify-content-center justify-content-md-start">
                         <div>
                             <a href="{{ url_for('book_detail', book_id=item.book.id) }}">
-                                <div>
-                                    {% if item.book.cover_url %}
-                                    <img src="{{ item.book.cover_url }}" class="book-cover"/>
-                                    {% else %}
-                                    <div class="book-cover-placeholder">
-                                        {{ item.book.title }}
-                                    </div>
-                                    {% endif %}
+                                {% if item.book.cover_url %}
+                                <img src="{{ item.book.cover_url }}" class="book-cover"/>
+                                <!--{% else %} 
+                                <div class="book-cover-placeholder">
+                                    {{ item.book.title }}
                                 </div>
+                                {% endif %}-->
                             </a>
                         </div>
                     </div>
