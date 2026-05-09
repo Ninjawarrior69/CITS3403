@@ -35,7 +35,13 @@
         <div class="section-card">
           <div class="book-header">
             <div>
+              {% if book.cover_url %}
               <img src="{{ book.cover_url }}" class="book-cover"/>
+              {% else %}
+              <div class="book-cover-placeholder">
+                  Cover Unavailable
+              </div>
+              {% endif %}
             </div>
 
             <div class="book-info">
@@ -174,9 +180,15 @@
       <!-- RIGHT SIDEBAR -->
       <div class="sidebar">
         <div class="sidebar-card">
+          {% if book.cover_url %}
           <img src="{{ book.cover_url }}" class="book-cover-sm mb-3"/>
-
-          <h3>{{ book.title }}</h3>
+          {% else %}
+          <div class="book-cover-sm-placeholder">
+              Cover Unavailable
+          </div>
+          {% endif %}
+          
+          <h3 class="mt-3">{{ book.title }}</h3>
           <p>by {{ book.author }}</p>
 
           <div class="rating mb-0">

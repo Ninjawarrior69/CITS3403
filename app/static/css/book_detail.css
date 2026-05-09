@@ -19,10 +19,45 @@
 
 .book-cover {
     width: 300px;
-    height: 450px;
-    background-color: #e5e5e5;
-    border-radius: 12px;
+    background-color: #768e784D;
+    border-radius: 10px;
     object-fit: cover;
+}
+
+.book-cover-placeholder {
+    width: 300px;
+    height: 450px;
+    background-color: #768e784D;
+    border-radius: 10px;
+    object-fit: cover;
+    font-size: 24px;
+    color: #3D2F2A80;
+    text-align: center;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;   
+}
+
+.book-cover-sm {
+    width: 80%;
+    height: auto;
+    margin: 0 auto;
+}
+
+.book-cover-sm-placeholder {
+    width: 80%;
+    aspect-ratio: 2/3;
+    font-size: 11px;
+    background-color: #768e784D;
+    color: #3D2F2A80;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
 
 .book-info h1 {

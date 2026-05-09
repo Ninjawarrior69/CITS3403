@@ -41,11 +41,17 @@
               <a href="{{ url_for('book_detail', book_id=book.id) }}" class="book-link">
                 <article class="trending-book-card">
                   <div class="book-cover-wrapper">
+                    {% if book.cover_url %}
                     <img
                       src="{{ book.cover_url }}"
-                      alt="Book cover"
+                      alt="Book cover"f
                       class="book-cover"
                     />
+                    {% else %}
+                    <div class="book-cover-placeholder">
+                       Cover Unavailable
+                    </div>
+                    {% endif %}
                   </div>
 
                   <div class="book-meta">

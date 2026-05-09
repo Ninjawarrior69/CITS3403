@@ -81,4 +81,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
+    document.addEventListener("click", (event) => {
+
+        if (!searchWrapper.contains(event.target)) {
+            suggestionsBox.innerHTML = "";
+        }
+
+    });
+
 });

@@ -173,16 +173,22 @@ def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
-def search_open_library(query, limit=10):
+def search_open_library(query, page=1, limit=10):
 	url = "https://openlibrary.org/search.json"
 
 	params = {
 		"q": query,
+		"page": page,
 		"limit": limit
 	}
 
 	response = requests.get(url, params=params)
-	data = response.json()
+
+	try:
+		data = response.json()
+	except requests.exceptions.JSONDecodeError:
+		return []
+	
 	books = []
 
 	for doc in data.get("docs", []):
@@ -568,16 +574,22 @@ def register_routes(app: Flask) -> None:
 	def search():
 		query = request.args.get("q", "").strip()
 
+		try:
+			page = int(request.args.get("page", 1))
+		except ValueError:
+			page = 1
+
 		books = []
 		empty_query = False
 
 		if query:
-			books = search_open_library(query)
+			books = search_open_library(query, page=page)
 		else:
-			empty_query =True
+			empty_query = True
 		
 		return render_template(
 			"search-result.html",
+			page=page,
 			query=query,
 			books=books,
 			empty_query=empty_query
@@ -590,9 +602,23 @@ def register_routes(app: Flask) -> None:
 		if not query:
 			return jsonify([])
 		
-		books = search_open_library(query, limit=5)
+		books = Book.query.filter(
+			or_(
+				Book.title.ilike(f"%{query}%"),
+				Book.author.ilike(f"%{query}%")
+			)
+		).limit(5).all()
+
+		suggestions = []
+
+		for book in books:
+			suggestions.append({
+				"id": book.id,
+				"title": book.title,
+				"author": book.author
+			})
 		
-		return jsonify(books)
+		return jsonify(suggestions)
 	
 	@app.route("/import-book")
 	def import_book():
