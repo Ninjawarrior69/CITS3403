@@ -28,20 +28,21 @@
           <!-- Edit Image -->
             <div class="profile-pic-placeholder mx-auto" id="avatar-trigger">
 
+              {% if profile_avatar %}
               <img
                 id="profile-avatar-preview"
-                src="
-                  {% if profile_avatar %}
-                    {{ url_for('static', filename=profile_avatar) }}
-                  {% else %}
-                    {{ url_for('static', filename='images/default-avatar.png') }}
-                  {% endif %}"
+                src="{{ url_for('static', filename=profile_avatar) }}"
                 class="profile-avatar-image"
-                alt="Profile Avatar"
               />
+              {% else %}
+              <img
+                id="profile-avatar-preview"
+                class="profile-avatar-image hidden"
+              />
+              {% endif %}
             </div>
 
-            <p class="upload-hint">Click avatar to upload</p>
+            <p class="upload-hint mt-3">Click avatar to upload</p>
 
           <!-- Details -->
           <form 
@@ -52,6 +53,20 @@
             >
 
             <input type="file" id="avatar-upload" name="avatar" class="form-control mt-3 d-none" accept="image/*"/>
+
+            <button 
+              type="button"
+              class="btn"
+              id="remove-avatar-btn">
+              Remove photo
+            </button>
+            <br>
+            <input 
+              type="hidden"
+              name="remove_avatar"
+              id="remove-avatar-input"
+              value="0"
+            />
 
             <label>Name</label>
             <input name="name" value="{{ profile_name }}" class="form-control mb-3" />
@@ -82,8 +97,8 @@
           </div>
 
             <div class="books-grid" id="favorite-books-grid">
-             {% for i in range(4) %}
-                <div class="favorite-slot">
+             {% for i in range(6) %}
+                <div class="favorite-slot favorite-slot-edit">
                   <button
                     type="button"
                     class="add-book-btn"

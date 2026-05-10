@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         // Limit to 4 books
-        if (favoriteBooks.length >= 4) {
+        if (favoriteBooks.length >= 6) {
             return;
         }
 
@@ -242,11 +242,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (file) {
 
+                removeAvatarInput.value = "0";
+
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
 
                     avatarPreview.src = e.target.result;
+
+                    avatarPreview.classList.remove("hidden");
 
                 };
 
@@ -256,6 +260,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         avatarTrigger.addEventListener("click", () => {
            avatarUpload.click();
+        });
+    }
+
+    // Remove avatar
+
+    const removeAvatarBtn = document.getElementById("remove-avatar-btn");
+    const removeAvatarInput = document.getElementById("remove-avatar-input");
+
+    if (
+        removeAvatarBtn &&
+        removeAvatarInput &&
+        avatarPreview
+    ) {
+        removeAvatarBtn.addEventListener("click", () => {
+            avatarPreview.src = "";
+            avatarPreview.classList.add("hidden");
+            avatarUpload.value = "";
+            removeAvatarInput.value = "1";
         });
     }
 

@@ -175,6 +175,9 @@ def update_authenticated_profile(
 
     current_user.email = request.form.get("email")
 
+    if request.form.get("remove_avatar") == "1":
+        current_user["profile_avatar"] = None
+
     if avatar_file and avatar_file.filename:
 
         current_user.avatar = save_avatar(
@@ -190,7 +193,7 @@ def update_authenticated_profile(
         current_user,
         favorite_book_ids
     )
-
+    
     db.session.commit()
 
 
@@ -219,6 +222,9 @@ def update_anonymous_profile(
         "favorite_books",
         ""
     )
+
+    if request.form.get("remove_avatar") == "1":
+        session["profile_avatar"] = None
 
     if avatar_file and avatar_file.filename:
 
