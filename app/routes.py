@@ -11,6 +11,13 @@ from app.extensions import db
 from app.models import Book, Comment, Rating, ShelfItem
 import requests
 
+from app.helpers.profile_helpers import (
+    save_avatar,
+    get_profile_data,
+	update_authenticated_profile,
+	update_anonymous_profile
+)
+
 def chunked(iterable, size):
 	it = iter(iterable)
 	return iter(lambda: list(islice(it, size)),[])
@@ -22,6 +29,15 @@ def get_shelf_counts(session_id):
 		"to_be_read": ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").count(),
 		"did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count()
 	}
+
+def get_user_shelf_counts(user_id):
+
+    return {
+        "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
+        "currently_reading": ShelfItem.query.filter_by(user_id=user_id, status="Currently Reading").count(),
+        "to_be_read": ShelfItem.query.filter_by(user_id=user_id, status="To Be Read").count(),
+        "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count()
+    }
 
 def seed_books_if_empty():
     if Book.query.first():
@@ -308,10 +324,18 @@ def register_routes(app: Flask) -> None:
 	@app.route("/profile")
 	@app.route("/profile.html")
 	def profile():
-		session_id = get_session_id()
-		counts = get_shelf_counts(session_id)
-		return render_template("profile.html", counts=counts)
 
+		profile_data = get_profile_data(
+			get_session_id,
+			get_shelf_counts,
+			get_user_shelf_counts
+		)
+
+		return render_template(
+			"profile.html", 
+			**profile_data
+		)
+      
 	@app.route("/login")
 	@app.route("/login.html")
 	def login():
@@ -322,10 +346,32 @@ def register_routes(app: Flask) -> None:
 	def signup():
 		return render_template("signup.html")
 
-	@app.route("/edit-profile")
-	@app.route("/edit-profile.html")
+	@app.route("/edit-profile", methods=["GET", "POST"])
+	@app.route("/edit-profile.html", methods=["GET", "POST"])
 	def edit_profile():
-		return render_template("edit-profile.html")
+
+		if request.method == "POST":
+
+			avatar_file = request.files.get("avatar")
+
+			if current_user.is_authenticated:
+				update_authenticated_profile(request, avatar_file)
+			
+			else:
+				update_anonymous_profile(request, avatar_file)
+
+			return redirect(url_for("profile"))
+            
+		profile_data = get_profile_data(
+			get_session_id,
+			get_shelf_counts,
+			get_user_shelf_counts
+		)
+		
+		return render_template(
+			"edit-profile.html",
+			**profile_data			
+		)
 	
 	@app.route("/read")
 	@app.route("/read.html")
@@ -593,6 +639,7 @@ def register_routes(app: Flask) -> None:
 			else:
 				rating =Rating(
 					session_id=session_id,
+					username=session.get("profile_username", "Anonymous"),
 					book_id=book_id,
 					stars=stars
 				)
@@ -600,7 +647,7 @@ def register_routes(app: Flask) -> None:
 
 			comment = Comment(
 				session_id=session_id,
-				username="Anonymous",
+				username=session.get("profile_username", "Anonymous"),
 				book_id=book_id,
 				text=text,
 				stars=stars
@@ -661,7 +708,8 @@ def register_routes(app: Flask) -> None:
 			suggestions.append({
 				"id": book.id,
 				"title": book.title,
-				"author": book.author
+				"author": book.author,
+				"cover_url": book.cover_url
 			})
 		
 		return jsonify(suggestions)

@@ -26,36 +26,98 @@
       <div class="row">
         <div class="col-md-4">
           <!-- Edit Image -->
-          <div class="mini-profile-pic-placeholder mx-auto"></div>
+            <div class="profile-pic-placeholder mx-auto" id="avatar-trigger">
+
+              <img
+                id="profile-avatar-preview"
+                src="
+                  {% if profile_avatar %}
+                    {{ url_for('static', filename=profile_avatar) }}
+                  {% else %}
+                    {{ url_for('static', filename='images/default-avatar.png') }}
+                  {% endif %}"
+                class="profile-avatar-image"
+                alt="Profile Avatar"
+              />
+            </div>
+
+            <p class="upload-hint">Click avatar to upload</p>
+
           <!-- Details -->
-          <div class="profile-form mt-4 text-start">
+          <form 
+            method="POST" 
+            action="{{ url_for('edit_profile') }}"
+            enctype="multipart/form-data" 
+            class="profile-form mt-4 text-start"
+            >
+
+            <input type="file" id="avatar-upload" name="avatar" class="form-control mt-3 d-none" accept="image/*"/>
+
             <label>Name</label>
-            <input class="form-control mb-3" />
+            <input name="name" value="{{ profile_name }}" class="form-control mb-3" />
             <label>Username</label>
-            <input class="form-control mb-3" />
+            <input name="username" value="{{ profile_username }}" class="form-control mb-3" />
             <label>Bio</label>
-            <textarea class="form-control mb-3"></textarea>
+            <textarea name="bio" class="form-control mb-3">{{ profile_bio }}</textarea>
             <label>Email Address</label>
-            <input class="form-control mb-3" />
-            <button class="btn btn-primary btn-sm mt-3">Save Changes</button>
-          </div>
+            <input name="email" value="{{ profile_email }}" class="form-control mb-3" />
+
+            <input type="hidden" name="favorite_books" id="favorite-books-input"/>
+
+            <button type="submit" class="btn btn-primary btn-sm mt-3">Save Changes</button>
+          </form>
         </div>
         <div class="col-md-5 ms-auto">
+
           <!-- Favourite Books -->
-          <div>
-            <label class="mb-2">Favourite Books</label>
-            <div class="books-grid">
-              <div class="mini-book-card-edit"></div>
-              <div class="mini-book-card-edit"></div>
-              <div class="mini-book-card-edit"></div>
-              <div class="mini-book-card-edit"></div>
-            </div>
+          <div id="favorite-search-panel" class="favorite-search-panel hidden">
+            <input
+              type="text"
+              id="favorite-search"
+              class="form-control mb-3"
+              placeholder="Search books..."
+            />
+
+            <div id="favorite-suggestions" class="mb-3"></div>
           </div>
+
+            <div class="books-grid" id="favorite-books-grid">
+             {% for i in range(4) %}
+                <div class="favorite-slot">
+                  <button
+                    type="button"
+                    class="add-book-btn"
+                    data-slot="{{ i }}"
+                  >
+                    +
+                  </button>
+                </div>
+              {% endfor %}
+          </div>
+
+          <p class="upload-hint">Click + to add favorite books</p>
+
+          
+
         </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      window.initialFavoriteBooks = [
+        {% for book in favorite_books %}
+        {
+          id: {{ book.id }},
+          title: "{{ book.title }}",
+          author: "{{ book.author }}",
+          cover_url: "{{ book.cover_url }}"
+        },
+        {% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+    </script>
+    <script src="{{ url_for('static', filename='js/edit-profile.js') }}"></script>
     <script src="{{ url_for('static', filename='js/search_suggestions.js') }}"></script>
   </body>
 </html>

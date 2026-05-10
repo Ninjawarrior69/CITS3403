@@ -8,6 +8,8 @@ def create_app() -> Flask:
 	app = Flask(__name__)
 	app.config.from_object(Config)
 
+	app.config["WTF_CSRF_ENABLED"] = False
+
 	db.init_app(app)
 	migrate.init_app(app, db)
 	login_manager.init_app(app)

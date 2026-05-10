@@ -12,3 +12,6 @@ app.db-shm
 app.db-wal
 app.db-journal
 app-venv
+
+app/static/uploads/avatars/*
+!app/static/uploads/avatars/.gitkeep
