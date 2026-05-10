@@ -399,20 +399,6 @@
     overflow: hidden;
 }
 
-.show-more-btn {
-    background: none;
-    border: none;
-    color: var(--secondary-green);
-    font-size: 0.9rem;
-    padding: 0;
-    margin-top: 8px;
-    cursor: pointer;
-}
-
-.show-more-btn:hover {
-    text-decoration: underline;
-}
-
 /* Reading Shelf Modal */
 .shelf-modal-overlay {
   display: none;

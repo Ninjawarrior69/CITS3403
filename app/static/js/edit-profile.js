@@ -93,12 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Prevent duplicates
         const exists = favoriteBooks.some(
-            favorite => favorite.id === book.id
+            favorite => Number(favorite.id) === Number(book.id)
         );
 
         if (exists) {
             return;
         }
+
+        favoriteBooks = favoriteBooks.filter(Boolean);
 
         favoriteBooks.push(book);
 
@@ -116,6 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Update favorite books grid
     function updateGrid() {
+
+        favoriteBooks = favoriteBooks.filter(Boolean);
 
         const slots = grid.querySelectorAll(".favorite-slot");
 
@@ -183,6 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 button.addEventListener("click", () => {
 
                     const index = button.dataset.index;
+
+                    favoriteBooks = favoriteBooks.filter(Boolean);
 
                     favoriteBooks.splice(index, 1);
 

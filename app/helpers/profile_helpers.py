@@ -102,10 +102,15 @@ def get_profile_data(
             for book_id in favorite_book_ids.split(",")
             if book_id
         ]
-
-        favorite_books = Book.query.filter(
+        
+        books = Book.query.filter(
             Book.id.in_(ids)
         ).all()
+
+        favorite_books = sorted(
+            books,
+            key=lambda book: ids.index(book.id)
+        )
     
     recent_reviews = (
         Comment.query
@@ -145,8 +150,13 @@ def update_favorite_books(
             Book.id.in_(ids)
         ).all()
 
+        sorted_books = sorted(
+            books,
+            key=lambda book: ids.index(book.id)
+        )
+
         user.favorite_books.extend(
-            books
+            sorted_books
         )
 
 

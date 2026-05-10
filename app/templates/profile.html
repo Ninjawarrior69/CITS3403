@@ -45,9 +45,27 @@
             </a>
           </h2>
           <p class="text-muted">@{{ profile_username }}</p>
-          <p class="profile-bio">
+          <p 
+            class="
+              profile-bio
+              {% if profile_bio|length > 300 %}
+                review-collapsed
+              {% endif %}
+            "
+            id="profile-bio"
+          >
             {{ profile_bio }}
           </p>
+          {% if profile_bio|length > 300 %}
+          <button
+            type="button"
+            class="show-more-btn"
+            onclick="toggleSection('profile-bio', this)"
+          >
+            Show More
+          </button>
+          {% endif %}
+
           <button class="btn-follow">
             <i class="bi bi-person" style="color: #768e78"></i>
             <strong>540</strong> followers

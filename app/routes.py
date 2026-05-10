@@ -335,7 +335,7 @@ def register_routes(app: Flask) -> None:
 			"profile.html", 
 			**profile_data
 		)
-
+      
 	@app.route("/login")
 	@app.route("/login.html")
 	def login():
@@ -639,6 +639,7 @@ def register_routes(app: Flask) -> None:
 			else:
 				rating =Rating(
 					session_id=session_id,
+					username=session.get("profile_username", "Anonymous"),
 					book_id=book_id,
 					stars=stars
 				)
@@ -646,7 +647,7 @@ def register_routes(app: Flask) -> None:
 
 			comment = Comment(
 				session_id=session_id,
-				username="Anonymous",
+				username=session.get("profile_username", "Anonymous"),
 				book_id=book_id,
 				text=text,
 				stars=stars
