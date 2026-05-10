@@ -185,7 +185,7 @@
               </div>
 
               <p
-                class="review-text {% if review.text|length > 300 %}review-collapsed{% endif %}"
+                class="review-text mt-2 {% if review.text|length > 300 %}review-collapsed{% endif %}"
                 id="review-{{ loop.index }}"
               >
                 {{ review.text }}
