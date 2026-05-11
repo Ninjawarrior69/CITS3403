@@ -55,7 +55,7 @@
               </div><br>
 
               <h4 class="mb-2">About this book</h4>
-              <p id="book-desc" class="{% if book.description|length > 250 %}description-collapsed{% endif %}">
+              <p id="book-desc" class="{% if book.description and book.description|length > 250 %}description-collapsed{% endif %}">
                 {{ book.description if book.description else "Not available for this title" }}
               </p>
 
@@ -185,7 +185,7 @@
               </div>
 
               <p
-                class="review-text {% if review.text|length > 300 %}review-collapsed{% endif %}"
+                class="review-text mt-2 {% if review.text|length > 300 %}review-collapsed{% endif %}"
                 id="review-{{ loop.index }}"
               >
                 {{ review.text }}

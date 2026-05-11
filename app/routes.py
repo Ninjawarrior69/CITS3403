@@ -231,7 +231,7 @@ def fetch_openlibrary_description(olid):
     res = requests.get(url)
 
     if res.status_code != 200:
-        return None
+        return "Not available for this title."
 
     data = res.json()
 
@@ -240,7 +240,7 @@ def fetch_openlibrary_description(olid):
     if isinstance(description, dict):
         return description.get("value")
 
-    return description
+    return description or "Not available for this title."
 
 def fetch_page_count(openlibrary_id, edition_key=None):
     if edition_key:
