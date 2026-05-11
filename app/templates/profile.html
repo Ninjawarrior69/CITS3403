@@ -153,17 +153,10 @@
         <hr />
         <!-- Reviews -->
         <div class="mb-5 mt-4">
-<<<<<<< HEAD
-          <a href="{{ url_for('my_reviews') }}"
-            ><h4 class="section-title mb-4">Recent Reviews</h4></a
-          >
-          <div class="row align-items-start">
-=======
           <a href="{{ url_for('my_reviews') }}"><h4 class="section-title mb-4">Recent Reviews</h4></a>
 
           {% for review in recent_reviews %}
           <div class="row align-items-start mb-4">
->>>>>>> main
             <div class="col-md-2 text-center">
               {% if review.book.cover_url %}
               <img
