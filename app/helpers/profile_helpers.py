@@ -4,6 +4,7 @@ from flask import session
 from flask_login import current_user
 from werkzeug.utils import secure_filename
 
+from app.extensions import db
 from app.models import Book, Comment
 
 
@@ -34,7 +35,7 @@ def get_profile_data(
 
     favorite_books = []
 
-    if current_user.is_authenticated:
+    if current_user and current_user.is_authenticated:
 
         counts = get_user_shelf_counts(
             current_user.id
