@@ -4,15 +4,34 @@
     width: 100%;
 }
 
-.book-card img {
+.book-cover {
     width: 100%;
     aspect-ratio: 2/3;
     border-radius: 10px;
     cursor: pointer;
     transition: transform 0.2s ease;
+    object-fit: cover;
+    display: block;
 }
 
-.book-card:hover {
+.book-cover-placeholder {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    background-color: #768e784D;
+    color: #3D2F2A80;
+    font-size: 12px;
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.book-cover:hover,
+.book-cover-placeholder:hover {
   transform: translateY(-4px);
 }
 
@@ -35,4 +54,11 @@
 
 .modal-header {
     border-color: #3D2F2A4D;
+}
+
+.title,
+.author {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

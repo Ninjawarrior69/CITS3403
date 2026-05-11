@@ -19,10 +19,45 @@
 
 .book-cover {
     width: 300px;
-    height: 450px;
-    background-color: #e5e5e5;
-    border-radius: 12px;
+    background-color: #768e784D;
+    border-radius: 10px;
     object-fit: cover;
+}
+
+.book-cover-placeholder {
+    width: 300px;
+    height: 450px;
+    background-color: #768e784D;
+    border-radius: 10px;
+    object-fit: cover;
+    font-size: 24px;
+    color: #3D2F2A80;
+    text-align: center;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;   
+}
+
+.book-cover-sm {
+    width: 80%;
+    height: auto;
+    margin: 0 auto;
+}
+
+.book-cover-sm-placeholder {
+    width: 80%;
+    aspect-ratio: 2/3;
+    font-size: 11px;
+    background-color: #768e784D;
+    color: #3D2F2A80;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
 
 .book-info h1 {
@@ -32,7 +67,7 @@
 
 .rating,
 .stars {
-    color: #FCAC83;
+    color: #db9673;
 }
 
 .rating {
@@ -145,7 +180,7 @@
 .dist-bar {
     flex: 1;
     height: 10px;
-    background-color: #e5e5e5;
+    background-color: #E798974D;
     border-radius: 999px;
     margin: 0 12px;
     overflow: hidden;
@@ -154,7 +189,7 @@
 .dist-fill {
     height: 100%;
     width: 0;
-    background-color: #FCAC83;
+    background-color: #E79897;
     border-radius: 999px;
     transition: width 0.25s ease;
 }
@@ -173,7 +208,7 @@
 .review-item {
     margin-top: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #3d2f2a4D;
 }
 
 
@@ -229,7 +264,7 @@
 /* Buttons */
 .primary-btn {
     width: 100%;
-    background-color: var(--darkbrown);
+    background-color: #3D2F2A;
     color: #ffffff;
     border: none;
     padding: 8px;
@@ -245,7 +280,7 @@
 
 .secondary-btn {
     border: none;
-    background-color: #FCAC83;
+    background-color: #db9673;
     color: var(--primary-yellow);
     transition: 0.2s;
 }
@@ -286,7 +321,7 @@
     display: flex;
     gap: 10px;
     font-size: 1.9rem;
-    color: #FCAC83;
+    color: #db9673;
     cursor: pointer;
     margin-bottom: 14px;
 }
@@ -300,10 +335,10 @@
 }
 
 .save-rating-btn {
-    width: auto;
+    width: 100%;
     min-width: 68px;
     padding: 6px 12px;
-    border-radius: 999px;
+    border-radius: 10px;
     font-size: 0.85rem;
     font-weight: 600;
     line-height: 1.2;
@@ -340,7 +375,7 @@
 }
 
 /* Collapsed text */
-.collapsed {
+.description-collapsed {
     max-height: 100px;
     overflow: hidden;
 }
@@ -357,6 +392,11 @@
 
 .show-more-btn:hover {
     text-decoration: underline;
+}
+
+.review-collapsed {
+    max-height: 200px;
+    overflow: hidden;
 }
 
 /* Reading Shelf Modal */
@@ -536,6 +576,11 @@
     .book-cover {
         width: 100%;
         max-width: 260px;
+        height: auto;
+    }
+
+    .book-cover-sm {
+        width: 100%;
         height: auto;
     }
 

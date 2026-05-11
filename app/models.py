@@ -5,19 +5,44 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.extensions import db
 
+favorite_books = db.Table(
+    "favorite_books",
+
+    db.Column(
+        "user_id",
+        db.Integer,
+        db.ForeignKey("user.id"),
+        primary_key=True
+    ),
+
+    db.Column(
+        "book_id",
+        db.Integer,
+        db.ForeignKey("book.id"),
+        primary_key=True
+    )
+)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    bio = db.Column(db.Text, default="")
+    avatar = db.Column(db.String(255), nullable=True)
+
     password_hash = db.Column(db.String(255), nullable=False)
-    bio = db.Column(db.Text, nullable=True, default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     comments = db.relationship("Comment", backref="user", lazy=True)
     ratings = db.relationship("Rating", backref="user", lazy=True)
     shelf_items = db.relationship("ShelfItem", backref="user", lazy=True)
+    favorite_books = db.relationship(
+        "Book",
+        secondary=favorite_books,
+        backref="favorited_by",
+        lazy=True
+    )
 
     def set_password(self, password: str) -> None:
         """Hash and set the user's password."""
@@ -79,10 +104,12 @@ class User(UserMixin, db.Model):
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    openlibrary_id = db.Column(db.String(200), nullable=True)
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    pages = db.Column(db.Integer)
+    page_count = db.Column(db.Integer, nullable=True)
+    publish_year = db.Column(db.Integer, nullable=True)
     cover_url = db.Column(db.String(500), nullable=True)
     rating = db.Column(db.Float, default=0.0, nullable=False)
     reads = db.Column(db.Integer, default=0, nullable=False)

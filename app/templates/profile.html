@@ -31,27 +31,47 @@
       <div class="row align-items-start">
         <!-- Profile Pic -->
         <div class="col-md-3 text-center">
-          <div class="profile-pic-placeholder mx-auto"></div>
+          <div class="profile-pic-placeholder mx-auto">
+            {% if profile_avatar %}
+            <img
+              src="{{ url_for('static',
+              filename=profile_avatar) }}"
+              class="profile-avatar-image"
+              alt="Profile Avatar"
+            />
+            {% endif %}
+          </div>
         </div>
         <!-- Name, Username, Bio -->
         <div class="col-md-9">
           <h2 class="mb-0">
-            {{ current_user.username if current_user.is_authenticated else
-            'Guest' }}
+            {{ profile_name }}
             <a href="{{ url_for('edit_profile') }}">
               <i class="bi bi-pencil-square edit-icon"></i>
             </a>
           </h2>
-          <p class="text-muted">
-            @{{ current_user.username if current_user.is_authenticated else
-            'guest' }}
+          <p class="text-muted">@{{ profile_username }}</p>
+          <p 
+            class="
+              profile-bio
+              {% if profile_bio|length > 300 %}
+                review-collapsed
+              {% endif %}
+            "
+            id="profile-bio"
+          >
+            {{ profile_bio }}
           </p>
-          <p>
-            {{ current_user.bio if (current_user.is_authenticated and
-            current_user.bio) else 'An avid reader with interests in a range of
-            genres. Currently making my way through a mountain of books which
-            keeps on growing!' }}
-          </p>
+          {% if profile_bio|length > 300 %}
+          <button
+            type="button"
+            class="show-more-btn"
+            onclick="toggleSection('profile-bio', this)"
+          >
+            Show More
+          </button>
+          {% endif %}
+
           <button class="btn-follow">
             <i class="bi bi-person" style="color: #768e78"></i>
             <strong>540</strong> followers
@@ -107,62 +127,83 @@
         <div class="mb-5 mt-4">
           <h4 class="section-title mb-4">Favourite Books</h4>
           <div class="row">
-            <!-- Placeholder cards -->
-            <div class="col-md-3 col-6 mb-3">
-              <div class="book-card"></div>
+            {% for book in favorite_books %}
+            <div class="col-md-2 col-6 mb-3">
+              <a
+                href="{{ url_for('book_detail', book_id=book.id) }}"
+                class="favorite-book-link"
+              >
+                <div class="favorite-slot favorite-slot-profile">
+                  <img 
+                    src="{{ book.cover_url }}" 
+                    class="favorite-book-cover"k
+                    alt="{{ book.title }}"
+                  />
+                </div>
+              </a>
+            
             </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="book-card"></div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="book-card"></div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="book-card"></div>
-            </div>
+            {% endfor %}
+
+            {% if not favorite_books %}
+            <p class="text-muted">No favourite books added yet.</p>
+            {% endif %}
           </div>
         </div>
         <hr />
         <!-- Reviews -->
         <div class="mb-5 mt-4">
+<<<<<<< HEAD
           <a href="{{ url_for('my_reviews') }}"
             ><h4 class="section-title mb-4">Recent Reviews</h4></a
           >
           <div class="row align-items-start">
+=======
+          <a href="{{ url_for('my_reviews') }}"><h4 class="section-title mb-4">Recent Reviews</h4></a>
+
+          {% for review in recent_reviews %}
+          <div class="row align-items-start mb-4">
+>>>>>>> main
             <div class="col-md-2 text-center">
+              {% if review.book.cover_url %}
+              <img
+                src="{{ review.book.cover_url }}"
+                alt="{{ review.book.title }}"
+                class="mini-book-card"
+              />
+              {% else %}
               <div class="mini-book-card"></div>
+              {% endif %}
             </div>
             <div class="col-md-10">
-              <h5 class="mb-1">Better Than the Movies</h5>
-              <p class="text-muted mb-1">Lynn Painter</p>
-              <p class="mb-2 star">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
-              <p>
-                What a cute YA novel. A nice escape. Where at the beginning of
-                each chapter we are provided with a lovely quote from one of our
-                favorite romcom movies that reminds of us how much we love
-                romance.
+              <h5 class="mb-1">{{ review.book.title }}</h5>
+              <p class="text-muted mb-1">{{ review.book.author }}</p>
+              <p class="mb-2 star">
+                {% for i in range(review.stars) %}
+                  &#9733;
+                {% endfor %}
               </p>
+              <p class="my-review-text review-collapsed" id="review-{{ loop.index }}">
+                {{ review.text }}
+              </p>
+              <button 
+                class="show-more-btn"
+                onclick="toggleSection(
+                  'review-{{ loop.index }}',
+                  this
+                )"
+              >
+                Show More
+              </button>
             </div>
           </div>
+          {% endfor %}
+
+          {% if not recent_reviews %}
+            <p class="text-muted">No reviews yet.</p>
+            {% endif %}
           <br />
-          <div class="row align-items-start">
-            <div class="col-md-2 text-center">
-              <div class="mini-book-card"></div>
-            </div>
-            <div class="col-md-10">
-              <h5 class="mb-1">Caraval</h5>
-              <p class="text-muted mb-1">Stephanie Garber</p>
-              <p class="mb-2 star">&#9733;&#9733;&#9733;&#9733;</p>
-              <p>
-                One of my favorite parts of this book is the world! I would LOVE
-                to attend Caraval. It's so magical and dark and mysterious. I
-                also love that this book combines romance, fantasy, and mystery.
-                I loved following all the clues along with Scarlett to try and
-                find her sister. At no point did I know how this book was going
-                to end. I need to read book two ASAP!
-              </p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
@@ -176,5 +217,7 @@
     </div>
     <script src="../static/js/profile.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/search_suggestions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/my-reviews.js') }}"></script>
   </body>
 </html>
