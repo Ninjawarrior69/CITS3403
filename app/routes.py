@@ -218,8 +218,15 @@ def search_open_library(query, page=1, limit=10):
 
 
 def fetch_openlibrary_description(olid):
+    if not olid:
+        return "Not available for this title."
+
     url = f"https://openlibrary.org{olid}.json"
-    res = requests.get(url)
+
+    try:
+        res = requests.get(url, timeout=8)
+    except requests.RequestException:
+        return "Not available for this title."
 
     if res.status_code != 200:
         return "Not available for this title."
@@ -237,25 +244,34 @@ def fetch_openlibrary_description(olid):
 def fetch_page_count(openlibrary_id, edition_key=None):
     if edition_key:
         url = f"https://openlibrary.org/books/{edition_key}.json"
-        res = requests.get(url)
+        try:
+            res = requests.get(url, timeout=8)
+        except requests.RequestException:
+            res = None
 
-        if res.status_code == 200:
+        if res and res.status_code == 200:
             data = res.json()
             if data.get("number_of_pages"):
                 return data["number_of_pages"]
 
     if openlibrary_id:
         url = f"https://openlibrary.org{openlibrary_id}.json"
-        res = requests.get(url)
+        try:
+            res = requests.get(url, timeout=8)
+        except requests.RequestException:
+            res = None
 
-        if res.status_code == 200:
+        if res and res.status_code == 200:
             data = res.json()
 
             if "latest_revision" in data:
                 editions_url = f"https://openlibrary.org{openlibrary_id}/editions.json"
-                r = requests.get(editions_url)
+                try:
+                    r = requests.get(editions_url, timeout=8)
+                except requests.RequestException:
+                    r = None
 
-                if r.status_code == 200:
+                if r and r.status_code == 200:
                     ed_data = r.json()
                     entries = ed_data.get("entries", [])
 
@@ -263,6 +279,24 @@ def fetch_page_count(openlibrary_id, edition_key=None):
                         if e.get("number_of_pages"):
                             return e["number_of_pages"]
     return None
+
+
+def normalize_openlibrary_id(raw_openlibrary_id):
+    if not raw_openlibrary_id:
+        return None
+
+    normalized = raw_openlibrary_id.strip()
+
+    if normalized.lower() in {"undefined", "null", "none", ""}:
+        return None
+
+    if normalized.startswith("http://") or normalized.startswith("https://"):
+        normalized = normalized.replace("https://openlibrary.org", "").replace("http://openlibrary.org", "")
+
+    if not normalized.startswith("/"):
+        normalized = f"/{normalized}"
+
+    return normalized
 
 
 def register_routes(app: Flask) -> None:
@@ -658,27 +692,35 @@ def register_routes(app: Flask) -> None:
 
     @app.route("/import-book")
     def import_book():
-        openlibrary_id = request.args.get("olid")
+        openlibrary_id = normalize_openlibrary_id(request.args.get("olid"))
         title = request.args.get("title")
         author = request.args.get("author")
         cover_url = request.args.get("cover")
         publish_year = request.args.get("first_publish_year", type=int)
+        if publish_year is None:
+            publish_year = request.args.get("publish_year", type=int)
         edition_key = request.args.get("edition_key")
-        description = fetch_openlibrary_description(openlibrary_id)
-
-        page_count = fetch_page_count(openlibrary_id, edition_key)
-
-        existing_book = Book.query.filter_by(
-            openlibrary_id=openlibrary_id
-        ).first()
 
         if not title or not author:
             return redirect(url_for("search"))
+
+        if openlibrary_id:
+            existing_book = Book.query.filter_by(
+                openlibrary_id=openlibrary_id
+            ).first()
+        else:
+            existing_book = Book.query.filter_by(
+                title=title,
+                author=author
+            ).first()
 
         if existing_book:
             return redirect(
                 url_for("book_detail", book_id=existing_book.id)
             )
+
+        description = fetch_openlibrary_description(openlibrary_id)
+        page_count = fetch_page_count(openlibrary_id, edition_key)
 
         new_book = Book(
             openlibrary_id=openlibrary_id,

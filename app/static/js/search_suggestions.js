@@ -1,92 +1,83 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("search-input");
+  const suggestionsBox = document.getElementById("search-suggestions");
+  const searchWrapper = document.querySelector(".search-wrapper");
 
-    const searchInput = document.getElementById("search-input");
-    const suggestionsBox = document.getElementById("search-suggestions");
-    const searchWrapper = document.querySelector(".search-wrapper");
+  if (!searchInput || !suggestionsBox || !searchWrapper) {
+    return;
+  }
 
-    if (!searchInput || !suggestionsBox || !searchWrapper) {
+  let debounceTimeout;
+
+  searchInput.addEventListener("input", () => {
+    clearTimeout(debounceTimeout);
+
+    debounceTimeout = setTimeout(async () => {
+      const query = searchInput.value.trim();
+
+      if (!query) {
+        suggestionsBox.innerHTML = "";
         return;
-    }
+      }
 
-    let debounceTimeout;
+      const response = await fetch(`/search-suggestions?q=${query}`);
 
-    searchInput.addEventListener("input", () => {
+      const books = await response.json();
 
-        clearTimeout(debounceTimeout);
+      suggestionsBox.innerHTML = "";
 
-        debounceTimeout = setTimeout(async () => {
+      if (books.length === 0) {
+        const searchAll = document.createElement("a");
 
-            const query = searchInput.value.trim();
+        searchAll.href = `/search?q=${query}`;
 
-            if (!query) {
-                suggestionsBox.innerHTML = "";
-                return;
-            }
+        searchAll.classList.add("suggestion-item", "suggestion-search-all");
 
-            const response = await fetch(`/search-suggestions?q=${query}`);
+        searchAll.textContent = `Search for "${query}"...`;
 
-            const books = await response.json();
+        suggestionsBox.appendChild(searchAll);
 
-            suggestionsBox.innerHTML = "";
+        return;
+      }
 
-            if (books.length === 0) {
+      books.forEach((book) => {
+        const item = document.createElement("a");
 
-                const searchAll = document.createElement("a");
+        if (book.id) {
+          item.href = `/book/${book.id}`;
+        } else {
+          const params = new URLSearchParams({
+            title: book.title || "",
+            author: book.author || "",
+            cover: book.cover_url || "",
+          });
 
-                searchAll.href = `/search?q=${query}`;
+          if (book.openlibrary_id) {
+            params.set("olid", book.openlibrary_id);
+          }
 
-                searchAll.classList.add(
-                    "suggestion-item",
-                    "suggestion-search-all"
-                );
-
-                searchAll.textContent = `Search for "${query}"...`;
-
-                suggestionsBox.appendChild(searchAll);
-
-                return;
-            }
-
-            books.forEach(book => {
-
-                const item = document.createElement("a");
-
-                const params = new URLSearchParams({
-                    olid: book.openlibrary_id,
-                    title: book.title,
-                    author: book.author,
-                    cover: book.cover_url || "",
-                    edition_key: book.edition_key || "",
-                    publish_year: book.publish_year || ""
-                });
-
-                item.href = `/import-book?${params.toString()}`;
-
-                item.classList.add("suggestion-item");
-
-                const title = document.createElement("strong");
-                title.textContent = book.title;
-
-                const author = document.createElement("div");
-                author.textContent = book.author;
-
-                item.appendChild(title);
-                item.appendChild(author);
-
-                suggestionsBox.appendChild(item);
-
-            });
-
-        }, 200);
-
-    });
-
-    document.addEventListener("click", (event) => {
-
-        if (!searchWrapper.contains(event.target)) {
-            suggestionsBox.innerHTML = "";
+          item.href = `/import-book?${params.toString()}`;
         }
 
-    });
+        item.classList.add("suggestion-item");
 
+        const title = document.createElement("strong");
+        title.textContent = book.title;
+
+        const author = document.createElement("div");
+        author.textContent = book.author;
+
+        item.appendChild(title);
+        item.appendChild(author);
+
+        suggestionsBox.appendChild(item);
+      });
+    }, 200);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!searchWrapper.contains(event.target)) {
+      suggestionsBox.innerHTML = "";
+    }
+  });
 });
