@@ -7,7 +7,7 @@ from sqlalchemy import or_
 
 from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
-from app.models import Book, Comment, Rating, User, WantToRead, ShelfItem
+from app.models import Book, Comment, Rating, User, ShelfItem
 import requests
 
 from app.helpers.profile_helpers import (
@@ -137,6 +137,23 @@ def seed_books_if_empty():
     db.session.add_all(comments)
     db.session.commit()
 
+def seed_follow_data():
+    if not User.query.first():
+        return
+
+    stella = User.query.filter_by(username="stella").first()
+    oliver = User.query.filter_by(username="oliver").first()
+    leo = User.query.filter_by(username="leo").first()
+
+    if not stella or not oliver or not leo:
+        return
+
+    stella.following.append(oliver)
+    stella.following.append(leo)
+    oliver.following.append(stella)
+    leo.following.append(oliver)
+
+    db.session.commit()
 
 def format_review(comment):
     return {
@@ -317,6 +334,9 @@ def register_routes(app: Flask) -> None:
             get_shelf_counts,
             get_user_shelf_counts
         )
+
+        profile_data["followers_count"] = current_user.followers.count() if current_user.is_authenticated else 0
+        profile_data["following_count"] = current_user.following.count() if current_user.is_authenticated else 0
 
         return render_template("profile.html", **profile_data)
 
@@ -738,3 +758,31 @@ def register_routes(app: Flask) -> None:
         return redirect(
             url_for("book_detail", book_id=new_book.id)
         )
+    
+    @app.route("/profile/followers") #"/users/<username>/followers"
+    def get_followers():
+        user = current_user
+
+        followers = [
+            {
+                "username": follower.username,
+                "avatar": follower.avatar
+            }
+            for follower in user.followers
+        ]
+
+        return jsonify(followers)
+    
+    @app.route("/profile/following")
+    def get_following():
+        user = current_user
+
+        following = [
+            {
+                "username": followed.username,
+                "avatar": followed.avatar
+            }
+            for followed in user.following
+        ]
+
+        return jsonify(following)

@@ -23,6 +23,12 @@ favorite_books = db.Table(
     )
 )
 
+followers = db.Table(
+    "followers",
+    db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("followed_id", db.Integer, db.ForeignKey("user.id"))
+)
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
@@ -33,6 +39,28 @@ class User(UserMixin, db.Model):
 
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    following = db.relationship(
+        "User",
+        secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref("followers", lazy="dynamic"),
+        lazy="dynamic"
+    )
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.following.append(user)
+    
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.following.remove(user)
+
+    def is_following(self, user):
+        return self.following.filter(
+            followers.c.followed_id == user.id
+        ).count() > 0
 
     comments = db.relationship("Comment", backref="user", lazy=True)
     ratings = db.relationship("Rating", backref="user", lazy=True)
