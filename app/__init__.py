@@ -17,7 +17,7 @@ def create_app() -> Flask:
 	csrf.init_app(app)
 
 	# Import models so Flask-Migrate can detect schema metadata.
-	from app import models  # noqa: F401
+	from app import models 
 
 	# Register user loader for Flask-Login
 	@login_manager.user_loader
