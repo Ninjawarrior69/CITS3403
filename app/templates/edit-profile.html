@@ -14,54 +14,75 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
     />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/profile.css') }}"
+    />
   </head>
   <body>
     {% include "navbar.html" %}
 
     <div class="page-container py-5">
       <h2>Edit Profile</h2>
-      <hr><br />
+      <hr />
+      <br />
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div>
+        {% for category, msg in messages %}
+        <div
+          class="alert alert-{{ 'danger' if category=='danger' else (category if category else 'info') }}"
+          role="alert"
+        >
+          {{ msg }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
       <div class="row">
         <div class="col-md-4">
           <!-- Edit Image -->
-            <div class="profile-pic-placeholder mx-auto" id="avatar-trigger">
+          <div class="profile-pic-placeholder mx-auto" id="avatar-trigger">
+            {% if profile_avatar %}
+            <img
+              id="profile-avatar-preview"
+              src="{{ url_for('static', filename=profile_avatar) }}"
+              class="profile-avatar-image"
+            />
+            {% else %}
+            <img
+              id="profile-avatar-preview"
+              class="profile-avatar-image hidden"
+            />
+            {% endif %}
+          </div>
 
-              {% if profile_avatar %}
-              <img
-                id="profile-avatar-preview"
-                src="{{ url_for('static', filename=profile_avatar) }}"
-                class="profile-avatar-image"
-              />
-              {% else %}
-              <img
-                id="profile-avatar-preview"
-                class="profile-avatar-image hidden"
-              />
-              {% endif %}
-            </div>
-
-            <p class="upload-hint mt-3">Click avatar to upload</p>
+          <p class="upload-hint mt-3">Click avatar to upload</p>
 
           <!-- Details -->
-          <form 
-            method="POST" 
+          <form
+            method="POST"
             action="{{ url_for('edit_profile') }}"
-            enctype="multipart/form-data" 
+            enctype="multipart/form-data"
             class="profile-form mt-4 text-start"
-            >
+          >
+            <input
+              type="file"
+              id="avatar-upload"
+              name="avatar"
+              class="form-control mt-3 d-none"
+              accept="image/*"
+            />
 
-            <input type="file" id="avatar-upload" name="avatar" class="form-control mt-3 d-none" accept="image/*"/>
-
-            <button 
-              type="button"
-              class="btn"
-              id="remove-avatar-btn">
+            <button type="button" class="btn" id="remove-avatar-btn">
               Remove photo
             </button>
-            <br>
-            <input 
+            <br />
+            <input
               type="hidden"
               name="remove_avatar"
               id="remove-avatar-input"
@@ -69,21 +90,40 @@
             />
 
             <label>Name</label>
-            <input name="name" value="{{ profile_name }}" class="form-control mb-3" />
+            <input
+              name="name"
+              value="{{ profile_name }}"
+              class="form-control mb-3"
+            />
             <label>Username</label>
-            <input name="username" value="{{ profile_username }}" class="form-control mb-3" />
+            <input
+              name="username"
+              value="{{ profile_username }}"
+              class="form-control mb-3"
+            />
             <label>Bio</label>
-            <textarea name="bio" class="form-control mb-3">{{ profile_bio }}</textarea>
+            <textarea name="bio" class="form-control mb-3">
+{{ profile_bio }}</textarea
+            >
             <label>Email Address</label>
-            <input name="email" value="{{ profile_email }}" class="form-control mb-3" />
+            <input
+              name="email"
+              value="{{ profile_email }}"
+              class="form-control mb-3"
+            />
 
-            <input type="hidden" name="favorite_books" id="favorite-books-input"/>
+            <input
+              type="hidden"
+              name="favorite_books"
+              id="favorite-books-input"
+            />
 
-            <button type="submit" class="btn btn-primary btn-sm mt-3">Save Changes</button>
+            <button type="submit" class="btn btn-primary btn-sm mt-3">
+              Save Changes
+            </button>
           </form>
         </div>
         <div class="col-md-5 ms-auto">
-
           <!-- Favourite Books -->
           <div id="favorite-search-panel" class="favorite-search-panel hidden">
             <input
@@ -96,24 +136,17 @@
             <div id="favorite-suggestions" class="mb-3"></div>
           </div>
 
-            <div class="books-grid" id="favorite-books-grid">
-             {% for i in range(6) %}
-                <div class="favorite-slot favorite-slot-edit">
-                  <button
-                    type="button"
-                    class="add-book-btn"
-                    data-slot="{{ i }}"
-                  >
-                    +
-                  </button>
-                </div>
-              {% endfor %}
+          <div class="books-grid" id="favorite-books-grid">
+            {% for i in range(6) %}
+            <div class="favorite-slot favorite-slot-edit">
+              <button type="button" class="add-book-btn" data-slot="{{ i }}">
+                +
+              </button>
+            </div>
+            {% endfor %}
           </div>
 
           <p class="upload-hint">Click + to add favourite books</p>
-
-          
-
         </div>
       </div>
     </div>
@@ -127,8 +160,7 @@
           title: "{{ book.title }}",
           author: "{{ book.author }}",
           cover_url: "{{ book.cover_url }}"
-        },
-        {% if not loop.last %},{% endif %}
+        }{% if not loop.last %},{% endif %}
         {% endfor %}
       ];
     </script>
