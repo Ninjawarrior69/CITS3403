@@ -4,11 +4,11 @@ from itertools import islice
 from flask import Flask, render_template, abort, request, redirect, url_for, session, flash, jsonify
 from flask_login import current_user, login_user, login_required, logout_user
 from sqlalchemy import or_
+import requests
 
 from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
 from app.models import Book, Comment, Rating, User, ShelfItem
-import requests
 
 from app.helpers.profile_helpers import (
     save_avatar,
@@ -67,17 +67,6 @@ def seed_books_if_empty():
             description="A novel about choices, regrets, and the different lives a person could have lived.",
             page_count=304,
             cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
-            rating=4.2,
-            reads=1247
-        ),
-        Book(
-            title="Atomic Habits",
-            author="James Clear",
-            description="A practical book about building good habits and breaking bad ones through small daily changes.",
-            page_count=320,
-            cover_url="https://m.media-amazon.com/images/I/81kg51XRc1L.jpg",
-            rating=4.6,
-            reads=2100
         ),
         Book(
             title="Project Hail Mary",
@@ -384,8 +373,8 @@ def register_routes(app: Flask) -> None:
         )
 
         profile_data["followers_count"] = user.followers.count()
+        profile_data["followers_count"] = user.followers.count()
         profile_data["following_count"] = user.following.count()
-
         return render_template("profile.html", **profile_data)  
 
 
@@ -814,12 +803,11 @@ def register_routes(app: Flask) -> None:
     def search_suggestions():
         query = request.args.get("q", "").strip()
         search_type = request.args.get("type", "books").strip()
-        
+
         if not query:
             return jsonify([])
 
         if search_type == "users":
-            # Search for users in the database
             users = User.query.filter(
                 or_(
                     User.username.ilike(f"%{query}%"),
@@ -836,25 +824,24 @@ def register_routes(app: Flask) -> None:
                 })
 
             return jsonify(suggestions)
-        else:
-            # Search for books in the database
-            books = Book.query.filter(
-                or_(
-                    Book.title.ilike(f"%{query}%"),
-                    Book.author.ilike(f"%{query}%"),
-                )
-            ).limit(5).all()
 
-            suggestions = []
-            for book in books:
-                suggestions.append({
-                    "id": book.id,
-                    "title": book.title,
-                    "author": book.author,
-                    "cover_url": book.cover_url
-                })
+        books = Book.query.filter(
+            or_(
+                Book.title.ilike(f"%{query}%"),
+                Book.author.ilike(f"%{query}%"),
+            )
+        ).limit(5).all()
 
-            return jsonify(suggestions)
+        suggestions = []
+        for book in books:
+            suggestions.append({
+                "id": book.id,
+                "title": book.title,
+                "author": book.author,
+                "cover_url": book.cover_url
+            })
+
+        return jsonify(suggestions)
 
     @app.route("/import-book")
     def import_book():

@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const suggestionItem = document.createElement("a");
 
         if (searchType === "users") {
-          // Handle user suggestions
-          suggestionItem.href = `/profile/${item.id}`;
+          // Handle user suggestions - link to public profile by username
+          suggestionItem.href = `/user/${item.username}`;
           suggestionItem.classList.add("suggestion-item");
 
           const title = document.createElement("strong");
