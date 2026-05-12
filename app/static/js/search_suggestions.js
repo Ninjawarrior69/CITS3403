@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search-input");
+  const searchTypeSelect = document.getElementById("search-type");
   const suggestionsBox = document.getElementById("search-suggestions");
   const searchWrapper = document.querySelector(".search-wrapper");
 
@@ -14,22 +15,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     debounceTimeout = setTimeout(async () => {
       const query = searchInput.value.trim();
+      const searchType = searchTypeSelect ? searchTypeSelect.value : "books";
 
       if (!query) {
         suggestionsBox.innerHTML = "";
         return;
       }
 
-      const response = await fetch(`/search-suggestions?q=${query}`);
+      const response = await fetch(
+        `/search-suggestions?q=${query}&type=${searchType}`,
+      );
 
-      const books = await response.json();
+      const results = await response.json();
 
       suggestionsBox.innerHTML = "";
 
-      if (books.length === 0) {
+      if (results.length === 0) {
         const searchAll = document.createElement("a");
 
-        searchAll.href = `/search?q=${query}`;
+        searchAll.href = `/search?q=${query}&type=${searchType}`;
 
         searchAll.classList.add("suggestion-item", "suggestion-search-all");
 
@@ -40,37 +44,55 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      books.forEach((book) => {
-        const item = document.createElement("a");
+      results.forEach((item) => {
+        const suggestionItem = document.createElement("a");
 
-        if (book.id) {
-          item.href = `/book/${book.id}`;
+        if (searchType === "users") {
+          // Handle user suggestions
+          suggestionItem.href = `/profile/${item.id}`;
+          suggestionItem.classList.add("suggestion-item");
+
+          const title = document.createElement("strong");
+          title.textContent = item.username;
+
+          const name = document.createElement("div");
+          name.textContent = item.name || "";
+
+          suggestionItem.appendChild(title);
+          if (item.name) {
+            suggestionItem.appendChild(name);
+          }
         } else {
-          const params = new URLSearchParams({
-            title: book.title || "",
-            author: book.author || "",
-            cover: book.cover_url || "",
-          });
+          // Handle book suggestions
+          if (item.id) {
+            suggestionItem.href = `/book/${item.id}`;
+          } else {
+            const params = new URLSearchParams({
+              title: item.title || "",
+              author: item.author || "",
+              cover: item.cover_url || "",
+            });
 
-          if (book.openlibrary_id) {
-            params.set("olid", book.openlibrary_id);
+            if (item.openlibrary_id) {
+              params.set("olid", item.openlibrary_id);
+            }
+
+            suggestionItem.href = `/import-book?${params.toString()}`;
           }
 
-          item.href = `/import-book?${params.toString()}`;
+          suggestionItem.classList.add("suggestion-item");
+
+          const title = document.createElement("strong");
+          title.textContent = item.title;
+
+          const author = document.createElement("div");
+          author.textContent = item.author;
+
+          suggestionItem.appendChild(title);
+          suggestionItem.appendChild(author);
         }
 
-        item.classList.add("suggestion-item");
-
-        const title = document.createElement("strong");
-        title.textContent = book.title;
-
-        const author = document.createElement("div");
-        author.textContent = book.author;
-
-        item.appendChild(title);
-        item.appendChild(author);
-
-        suggestionsBox.appendChild(item);
+        suggestionsBox.appendChild(suggestionItem);
       });
     }, 200);
   });
