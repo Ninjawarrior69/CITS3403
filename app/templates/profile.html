@@ -209,6 +209,7 @@
               <p class="my-review-text review-collapsed" id="review-{{ loop.index }}">
                 {{ review.text }}
               </p>
+              {% if review.text|length > 300 %}
               <button 
                 class="show-more-btn"
                 onclick="toggleSection(
@@ -218,6 +219,7 @@
               >
                 Show More
               </button>
+              {% endif %}
             </div>
           </div>
           {% endfor %}
