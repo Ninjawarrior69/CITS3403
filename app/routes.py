@@ -138,20 +138,49 @@ def seed_books_if_empty():
     db.session.commit()
 
 def seed_follow_data():
-    if not User.query.first():
+
+    if User.query.filter_by(username="leoleo").first():
         return
 
-    stella = User.query.filter_by(username="stella").first()
-    oliver = User.query.filter_by(username="oliver").first()
-    leo = User.query.filter_by(username="leo").first()
+    leo = User(
+        name="Leo",
+        username="leoleo",
+        email="leo@gmail.com",
+    )
+    leo.set_password("test123")
 
-    if not stella or not oliver or not leo:
-        return
+    stella = User(
+        name="Stella",
+        username="Stella",
+        email="stella@gmail.com"
+    )
+    stella.set_password("test123")
 
-    stella.following.append(oliver)
-    stella.following.append(leo)
-    oliver.following.append(stella)
+    oliver = User(
+        name="Oliver",
+        username="Oliver",
+        email="oliver@gmail.com"
+    )
+    oliver.set_password("test123")
+
+    valentine = User(
+        name="Valentine",
+        username="Valentine",
+        email="valentine@gmail.com"
+    )
+    valentine.set_password("test123")
+
+    db.session.add_all([leo, stella, oliver, valentine])
+    db.session.commit()
+
+    leo.following.append(stella)
     leo.following.append(oliver)
+
+    stella.following.append(leo)
+
+    oliver.following.append(valentine)
+
+    valentine.following.append(leo)
 
     db.session.commit()
 
@@ -786,3 +815,9 @@ def register_routes(app: Flask) -> None:
         ]
 
         return jsonify(following)
+    
+    # Remove later
+    @app.route("/seed-follows")
+    def seed_follows():
+        seed_follow_data()
+        return "Seeded!"

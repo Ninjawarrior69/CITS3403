@@ -174,15 +174,21 @@
     border-radius: 8px;
 }
 
+.modal-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .close {
-    float: right;
     font-size: 24px;
     cursor: pointer;
 }
 
 #modal-list li {
     padding: 5px 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #3d2f2a4d;
 }
 
 .my-review-text {
