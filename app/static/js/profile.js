@@ -24,7 +24,10 @@ function openModal(title, users) {
 
         li.innerHTML = `
             <div class="user-row">
-                <img src="${user.avatar}" class="avatar">
+                ${user.avatar
+                    ? `<img src="/static/${user.avatar}" class="avatar">`
+                    : `<div class="avatar avatar-placeholder"></div>`
+                }
                 <span>${user.username}</span>
             </div>
         `;

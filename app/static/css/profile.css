@@ -347,3 +347,23 @@
     overflow-wrap: anywhere;
     word-break: break-word;
 }
+
+/* Followers list avatar */
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.avatar-placeholder {
+    background-color: #d6d6d6;
+    border: 2px solid #c0c0c0;
+}
+
+.user-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
