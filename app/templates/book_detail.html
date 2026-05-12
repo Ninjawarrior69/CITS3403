@@ -186,12 +186,12 @@
       <!-- RIGHT SIDEBAR -->
       <div class="sidebar">
         <div class="sidebar-card">
-          <h2>My Activity</h2>
+          <h2 class="mb-0" style="font-size: x-large;">My Activity</h2>
 
           <button 
             type="button"
             id="openShelfModal"
-            class="primary-btn {% if shelf_status %}active{% endif %}"
+            class="primary-btn mb-0 {% if shelf_status %}active{% endif %}"
           >
             {% if shelf_status %}
               ✓ {{ shelf_status }}
