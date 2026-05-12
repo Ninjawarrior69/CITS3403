@@ -81,11 +81,11 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_to_be_read_books(self) -> list["Book"]:
-        """Return books the user has marked as want-to-read."""
+        """Return books the user has marked as to-be-read."""
         return (
-            Book.query.join(WantToRead, WantToRead.book_id == Book.id)
-            .filter(WantToRead.user_id == self.id)
-            .order_by(WantToRead.created_at.desc())
+            Book.query.join(ShelfItem, ShelfItem.book_id == Book.id)
+            .filter(ShelfItem.user_id == self.id)
+            .order_by(ShelfItem.created_at.desc())
             .all()
         )
 
@@ -195,20 +195,6 @@ class Rating(db.Model):
 
     def __repr__(self) -> str:
         return f"<Rating {self.id}>"
-
-
-class WantToRead(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
-    __table_args__ = (
-        db.UniqueConstraint("user_id", "book_id", name="unique_user_book_want_to_read"),
-    )
-
-    def __repr__(self) -> str:
-        return f"<WantToRead user={self.user_id} book={self.book_id}>"
     
 
 class ShelfItem(db.Model):
