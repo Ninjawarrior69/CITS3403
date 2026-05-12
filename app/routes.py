@@ -776,6 +776,7 @@ def register_routes(app: Flask) -> None:
     @app.route("/search")
     def search():
         query = request.args.get("q", "").strip()
+        search_type = request.args.get("type", "books").strip()
 
         try:
             page = int(request.args.get("page", 1))
@@ -783,10 +784,19 @@ def register_routes(app: Flask) -> None:
             page = 1
 
         books = []
+        users = []
         empty_query = False
 
         if query:
-            books = search_open_library(query, page=page)
+            if search_type == "users":
+                users = User.query.filter(
+                    or_(
+                        User.username.ilike(f"%{query}%"),
+                        User.name.ilike(f"%{query}%"),
+                    )
+                ).order_by(User.username.asc()).limit(10).all()
+            else:
+                books = search_open_library(query, page=page)
         else:
             empty_query = True
 
@@ -795,6 +805,8 @@ def register_routes(app: Flask) -> None:
             page=page,
             query=query,
             books=books,
+            users=users,
+            search_type=search_type,
             empty_query=empty_query
         )
 
