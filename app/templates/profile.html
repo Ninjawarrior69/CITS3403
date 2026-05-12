@@ -25,6 +25,7 @@
   </head>
   <body>
     {% include "navbar.html" %}
+    <div id="profile-data" data-username="{{ profile_username }}"></div>
 
     <div class="page-container py-5">
       <!-- Profile Header -->
@@ -72,13 +73,13 @@
           </button>
           {% endif %}
 
-          <button class="btn-follow">
+          <button class="btn-follow" id="followers-btn">
             <i class="bi bi-person" style="color: #768e78"></i>
-            <strong>540</strong> followers
+            <strong>{{ followers_count }}</strong> followers
           </button>
-          <button class="btn-follow">
+          <button class="btn-follow" id="following-btn">
             <i class="bi bi-person" style="color: #768e78"></i>
-            <strong>235</strong> following
+            <strong>{{ following_count }}</strong> following
           </button>
         </div>
         <!-- Stats -->
@@ -136,7 +137,7 @@
                 <div class="favorite-slot favorite-slot-profile">
                   <img 
                     src="{{ book.cover_url }}" 
-                    class="favorite-book-cover"k
+                    class="favorite-book-cover"
                     alt="{{ book.title }}"
                   />
                 </div>
@@ -203,12 +204,14 @@
     <!-- Followers/Following Modal -->
     <div id="modal" class="modal">
       <div class="modal-content">
-        <span id="close-modal" class="close">&times;</span>
-        <h3 id="modal-title">Followers</h3>
+        <div class="modal-header-custom">
+          <h3 id="modal-title">Followers</h3>
+          <h3 id="close-modal" class="close"><i class="bi bi-x"></i></h3>
+        </div>
         <ul id="modal-list" class="list-unstyled mb-0"></ul>
       </div>
     </div>
-    <script src="../static/js/profile.js"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/search_suggestions.js') }}"></script>
     <script src="{{ url_for('static', filename='js/my-reviews.js') }}"></script>

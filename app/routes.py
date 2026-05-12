@@ -7,7 +7,7 @@ from sqlalchemy import or_
 
 from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
-from app.models import Book, Comment, Rating, User, WantToRead, ShelfItem
+from app.models import Book, Comment, Rating, User, ShelfItem
 import requests
 
 from app.helpers.profile_helpers import (
@@ -137,6 +137,52 @@ def seed_books_if_empty():
     db.session.add_all(comments)
     db.session.commit()
 
+def seed_follow_data():
+
+    if User.query.filter_by(username="leoleo").first():
+        return
+
+    leo = User(
+        name="Leo",
+        username="leoleo",
+        email="leo@gmail.com",
+    )
+    leo.set_password("test123")
+
+    stella = User(
+        name="Stella",
+        username="Stella",
+        email="stella@gmail.com"
+    )
+    stella.set_password("test123")
+
+    oliver = User(
+        name="Oliver",
+        username="Oliver",
+        email="oliver@gmail.com"
+    )
+    oliver.set_password("test123")
+
+    valentine = User(
+        name="Valentine",
+        username="Valentine",
+        email="valentine@gmail.com"
+    )
+    valentine.set_password("test123")
+
+    db.session.add_all([leo, stella, oliver, valentine])
+    db.session.commit()
+
+    leo.following.append(stella)
+    leo.following.append(oliver)
+
+    stella.following.append(leo)
+
+    oliver.following.append(valentine)
+
+    valentine.following.append(leo)
+
+    db.session.commit()
 
 def format_review(comment):
     return {
@@ -317,6 +363,9 @@ def register_routes(app: Flask) -> None:
             get_shelf_counts,
             get_user_shelf_counts
         )
+
+        profile_data["followers_count"] = current_user.followers.count() if current_user.is_authenticated else 0
+        profile_data["following_count"] = current_user.following.count() if current_user.is_authenticated else 0
 
         return render_template("profile.html", **profile_data)
 
@@ -738,3 +787,37 @@ def register_routes(app: Flask) -> None:
         return redirect(
             url_for("book_detail", book_id=new_book.id)
         )
+    
+    @app.route("/profile/followers") #"/users/<username>/followers"
+    def get_followers():
+        user = current_user
+
+        followers = [
+            {
+                "username": follower.username,
+                "avatar": follower.avatar
+            }
+            for follower in user.followers
+        ]
+
+        return jsonify(followers)
+    
+    @app.route("/profile/following")
+    def get_following():
+        user = current_user
+
+        following = [
+            {
+                "username": followed.username,
+                "avatar": followed.avatar
+            }
+            for followed in user.following
+        ]
+
+        return jsonify(following)
+    
+    # Remove later
+    @app.route("/seed-follows")
+    def seed_follows():
+        seed_follow_data()
+        return "Seeded!"

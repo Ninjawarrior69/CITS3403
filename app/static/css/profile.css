@@ -174,15 +174,21 @@
     border-radius: 8px;
 }
 
+.modal-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .close {
-    float: right;
     font-size: 24px;
     cursor: pointer;
 }
 
 #modal-list li {
     padding: 5px 0;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #3d2f2a4d;
 }
 
 .my-review-text {
@@ -340,4 +346,24 @@
 .profile-bio {
     overflow-wrap: anywhere;
     word-break: break-word;
+}
+
+/* Followers list avatar */
+.avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.avatar-placeholder {
+    background-color: #d6d6d6;
+    border: 2px solid #c0c0c0;
+}
+
+.user-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
