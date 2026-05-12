@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("search-input");
-  const searchTypeSelect = document.getElementById("search-type");
+  const searchTypeButton = document.getElementById("search-type-button");
+  const searchTypeMenu = document.getElementById("search-type-menu");
+  const searchTypeInput = document.getElementById("search-type-input");
+  const searchTypeLabel = document.getElementById("search-type-label");
+  const searchTypeOptions = document.querySelectorAll(".search-type-option");
   const suggestionsBox = document.getElementById("search-suggestions");
   const searchWrapper = document.querySelector(".search-wrapper");
 
@@ -10,12 +14,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let debounceTimeout;
 
+  // Update placeholder based on search type
+  const updatePlaceholder = () => {
+    const type = searchTypeInput.value || "books";
+    if (type === "users") {
+      searchInput.placeholder = "Search Users";
+      searchInput.setAttribute("aria-label", "Search users");
+    } else {
+      searchInput.placeholder = "Search books or authors...";
+      searchInput.setAttribute("aria-label", "Search books or authors");
+    }
+  };
+
+  // Toggle dropdown menu
+  const toggleMenu = (open) => {
+    if (open === undefined) {
+      open = searchTypeMenu.hidden;
+    }
+    searchTypeMenu.hidden = !open;
+    searchTypeButton.setAttribute("aria-expanded", open);
+  };
+
+  // Handle dropdown option selection
+  searchTypeOptions.forEach((option) => {
+    option.addEventListener("click", (e) => {
+      e.preventDefault();
+      const value = option.dataset.value;
+
+      // Update hidden input
+      searchTypeInput.value = value;
+
+      // Update button label
+      searchTypeLabel.textContent = option.textContent;
+
+      // Update aria-selected
+      searchTypeOptions.forEach((opt) => {
+        opt.setAttribute("aria-selected", opt === option);
+      });
+
+      // Update placeholder
+      updatePlaceholder();
+
+      // Close menu
+      toggleMenu(false);
+
+      // Clear suggestions
+      suggestionsBox.innerHTML = "";
+
+      // Focus input
+      searchInput.focus();
+    });
+  });
+
+  // Toggle menu on button click
+  searchTypeButton.addEventListener("click", () => {
+    toggleMenu();
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (event) => {
+    if (!searchWrapper.contains(event.target)) {
+      toggleMenu(false);
+      suggestionsBox.innerHTML = "";
+    }
+  });
+
+  // Set initial placeholder
+  updatePlaceholder();
+
+  // Handle search input
   searchInput.addEventListener("input", () => {
     clearTimeout(debounceTimeout);
 
     debounceTimeout = setTimeout(async () => {
       const query = searchInput.value.trim();
-      const searchType = searchTypeSelect ? searchTypeSelect.value : "books";
+      const searchType = searchTypeInput.value || "books";
 
       if (!query) {
         suggestionsBox.innerHTML = "";
@@ -95,11 +168,5 @@ document.addEventListener("DOMContentLoaded", () => {
         suggestionsBox.appendChild(suggestionItem);
       });
     }, 200);
-  });
-
-  document.addEventListener("click", (event) => {
-    if (!searchWrapper.contains(event.target)) {
-      suggestionsBox.innerHTML = "";
-    }
   });
 });

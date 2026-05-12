@@ -49,15 +49,50 @@
         >
           <div class="search-wrapper">
             <div class="input-group search-box">
-              <select
-                id="search-type"
-                class="form-select search-type-select"
+              <div class="search-type-dropdown">
+                <button
+                  id="search-type-button"
+                  class="search-type-button"
+                  type="button"
+                  aria-label="Search type"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                >
+                  <span id="search-type-label">Books</span>
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+                <div
+                  id="search-type-menu"
+                  class="search-type-menu"
+                  role="listbox"
+                  hidden
+                >
+                  <button
+                    type="button"
+                    class="search-type-option"
+                    data-value="books"
+                    role="option"
+                    aria-selected="true"
+                  >
+                    Books
+                  </button>
+                  <button
+                    type="button"
+                    class="search-type-option"
+                    data-value="users"
+                    role="option"
+                  >
+                    Users
+                  </button>
+                </div>
+              </div>
+
+              <input
+                type="hidden"
+                id="search-type-input"
                 name="type"
-                aria-label="Search type"
-              >
-                <option value="books">Books</option>
-                <option value="users">Users</option>
-              </select>
+                value="books"
+              />
 
               <input
                 id="search-input"
