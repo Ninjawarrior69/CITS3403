@@ -801,26 +801,48 @@ def register_routes(app: Flask) -> None:
     @app.route("/search-suggestions")
     def search_suggestions():
         query = request.args.get("q", "").strip()
+        search_type = request.args.get("type", "books").strip()
+        
         if not query:
             return jsonify([])
 
-        books = Book.query.filter(
-            or_(
-                Book.title.ilike(f"%{query}%"),
-                Book.author.ilike(f"%{query}%"),
-            )
-        ).limit(5).all()
+        if search_type == "users":
+            # Search for users in the database
+            users = User.query.filter(
+                or_(
+                    User.username.ilike(f"%{query}%"),
+                    User.name.ilike(f"%{query}%"),
+                )
+            ).limit(5).all()
 
-        suggestions = []
-        for book in books:
-            suggestions.append({
-                "id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "cover_url": book.cover_url
-            })
+            suggestions = []
+            for user in users:
+                suggestions.append({
+                    "id": user.id,
+                    "username": user.username,
+                    "name": user.name,
+                })
 
-        return jsonify(suggestions)
+            return jsonify(suggestions)
+        else:
+            # Search for books in the database
+            books = Book.query.filter(
+                or_(
+                    Book.title.ilike(f"%{query}%"),
+                    Book.author.ilike(f"%{query}%"),
+                )
+            ).limit(5).all()
+
+            suggestions = []
+            for book in books:
+                suggestions.append({
+                    "id": book.id,
+                    "title": book.title,
+                    "author": book.author,
+                    "cover_url": book.cover_url
+                })
+
+            return jsonify(suggestions)
 
     @app.route("/import-book")
     def import_book():
