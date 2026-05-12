@@ -422,8 +422,8 @@ def register_routes(app: Flask) -> None:
         form = SignupForm()
         if form.validate_on_submit():
             user = User(
-                name=form.username.data.strip(),
-                username=form.username.data.strip(),
+                name=form.username.data.strip().lower(),
+                username=form.username.data.strip().lower(),
                 email=form.email.data.strip().lower(),
             )
             user.set_password(form.password.data)
