@@ -186,8 +186,12 @@ def seed_follow_data():
     db.session.commit()
 
 def format_review(comment):
+    review_user = comment.user
+
     return {
-        "username": comment.username,
+        "username": review_user.username if review_user else comment.username,
+        "profile_username": review_user.username if review_user else None,
+        "avatar": review_user.avatar if review_user else None,
         "book_id": comment.book_id,
         "book_title": comment.book.title,
         "author": comment.book.author,
