@@ -4,11 +4,11 @@ from itertools import islice
 from flask import Flask, render_template, abort, request, redirect, url_for, session, flash, jsonify
 from flask_login import current_user, login_user, login_required, logout_user
 from sqlalchemy import or_
+import requests
 
 from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
 from app.models import Book, Comment, Rating, User, ShelfItem
-import requests
 
 from app.helpers.profile_helpers import (
     save_avatar,
@@ -67,17 +67,6 @@ def seed_books_if_empty():
             description="A novel about choices, regrets, and the different lives a person could have lived.",
             page_count=304,
             cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
-            rating=4.2,
-            reads=1247
-        ),
-        Book(
-            title="Atomic Habits",
-            author="James Clear",
-            description="A practical book about building good habits and breaking bad ones through small daily changes.",
-            page_count=320,
-            cover_url="https://m.media-amazon.com/images/I/81kg51XRc1L.jpg",
-            rating=4.6,
-            reads=2100
         ),
         Book(
             title="Project Hail Mary",
@@ -384,8 +373,8 @@ def register_routes(app: Flask) -> None:
         )
 
         profile_data["followers_count"] = user.followers.count()
+        profile_data["followers_count"] = user.followers.count()
         profile_data["following_count"] = user.following.count()
-
         return render_template("profile.html", **profile_data)  
 
 
@@ -776,6 +765,7 @@ def register_routes(app: Flask) -> None:
     @app.route("/search")
     def search():
         query = request.args.get("q", "").strip()
+        search_type = request.args.get("type", "books").strip()
 
         try:
             page = int(request.args.get("page", 1))
@@ -783,10 +773,19 @@ def register_routes(app: Flask) -> None:
             page = 1
 
         books = []
+        users = []
         empty_query = False
 
         if query:
-            books = search_open_library(query, page=page)
+            if search_type == "users":
+                users = User.query.filter(
+                    or_(
+                        User.username.ilike(f"%{query}%"),
+                        User.name.ilike(f"%{query}%"),
+                    )
+                ).order_by(User.username.asc()).limit(10).all()
+            else:
+                books = search_open_library(query, page=page)
         else:
             empty_query = True
 
@@ -795,14 +794,36 @@ def register_routes(app: Flask) -> None:
             page=page,
             query=query,
             books=books,
+            users=users,
+            search_type=search_type,
             empty_query=empty_query
         )
 
     @app.route("/search-suggestions")
     def search_suggestions():
         query = request.args.get("q", "").strip()
+        search_type = request.args.get("type", "books").strip()
+
         if not query:
             return jsonify([])
+
+        if search_type == "users":
+            users = User.query.filter(
+                or_(
+                    User.username.ilike(f"%{query}%"),
+                    User.name.ilike(f"%{query}%"),
+                )
+            ).limit(5).all()
+
+            suggestions = []
+            for user in users:
+                suggestions.append({
+                    "id": user.id,
+                    "username": user.username,
+                    "name": user.name,
+                })
+
+            return jsonify(suggestions)
 
         books = Book.query.filter(
             or_(

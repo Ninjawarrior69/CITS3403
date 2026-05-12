@@ -32,19 +32,24 @@
       <div class="mb-5">
         <h1 class="mb-3">Search Results</h1>
 
-        <p class="mb-0">Results for "{{ query }}"</p>
+        <p class="mb-0">
+          {% if search_type == "users" %} User results for "{{ query }}" {% else
+          %} Results for "{{ query }}" {% endif %}
+        </p>
 
         <form
           action="{{ url_for('search') }}"
           method="GET"
           class="search-results-form mt-4"
         >
+          <input type="hidden" name="type" value="{{ search_type }}" />
+
           <div class="search-bar-wrapper">
             <input
               type="text"
               name="q"
               class="form-control search-input"
-              placeholder="Search books or authors..."
+              placeholder="{% if search_type == 'users' %}Search users...{% else %}Search books or authors...{% endif %}"
               value="{{ query }}"
             />
 
@@ -60,12 +65,57 @@
       {% if empty_query %}
 
       <div class="search-empty-state">
+        {% if search_type == "users" %}
+        <h3 class="mb-3">Start searching for users</h3>
+
+        <p class="mb-0">Enter a username or name above.</p>
+        {% else %}
         <h3 class="mb-3">Start searching for books</h3>
 
         <p class="mb-0">Enter a book title or author above.</p>
+        {% endif %}
       </div>
 
-      {% elif books %}
+      {% elif search_type == "users" and users %}
+
+      <div class="search-results-list mt-4">
+        {% for user in users %}
+
+        <div class="search-result-item">
+          <a
+            href="{{ url_for('public_profile', username=user.username) }}"
+            class="search-result-link"
+          >
+            <div class="search-cover-wrapper">
+              {% if user.avatar %}
+              <img
+                src="{{ url_for('static', filename=user.avatar) }}"
+                class="search-cover"
+                alt="{{ user.username }}"
+              />
+              {% else %}
+              <div class="search-cover-placeholder">
+                {{ (user.name or user.username or 'U')[0]|upper }}
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="search-book-info">
+              <h3 class="search-book-title">{{ user.name }}</h3>
+
+              <p class="search-book-author">@{{ user.username }}</p>
+
+              {% if user.bio %}
+              <p class="mb-0 text-muted">{{ user.bio }}</p>
+              {% endif %}
+            </div>
+          </a>
+        </div>
+
+        {% endfor %}
+      </div>
+
+      {% elif search_type == "books" and books %}
 
       <div class="search-results-list mt-4">
         {% for book in books %}
@@ -110,9 +160,15 @@
       {% else %}
 
       <div class="search-empty-state">
+        {% if search_type == "users" %}
+        <h3 class="mb-3">No users found</h3>
+
+        <p class="mb-0">Try searching with a different username or name.</p>
+        {% else %}
         <h3 class="mb-3">No books found</h3>
 
         <p class="mb-0">Try searching with a different keyword.</p>
+        {% endif %}
       </div>
 
       {% endif %}
@@ -121,7 +177,7 @@
         {% if page > 1 %}
         <a
           class="page-btn"
-          href="{{ url_for('search', q=query, page=page-1) }}"
+          href="{{ url_for('search', q=query, type=search_type, page=page-1) }}"
         >
           <i class="bi bi-arrow-left"></i> Previous
         </a>
@@ -131,17 +187,17 @@
           {% for p in range(page-2, page+3) %} {% if p > 0 %}
           <a
             class="page-number {% if p == page %}active{% endif %}"
-            href="{{ url_for('search', q=query, page=p) }}"
+            href="{{ url_for('search', q=query, type=search_type, page=p) }}"
           >
             {{ p }}
           </a>
           {% endif %} {% endfor %}
         </div>
 
-        {% if books|length == 10 %}
+        {% if search_type == "books" and books|length == 10 %}
         <a
           class="page-btn"
-          href="{{ url_for('search', q=query, page=page+1) }}"
+          href="{{ url_for('search', q=query, type=search_type, page=page+1) }}"
         >
           Next <i class="bi bi-arrow-right"></i>
         </a>
