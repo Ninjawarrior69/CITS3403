@@ -177,7 +177,7 @@ def update_authenticated_profile(
     current_user.email = request.form.get("email")
 
     if request.form.get("remove_avatar") == "1":
-        current_user["profile_avatar"] = None
+        current_user.avatar = None
 
     if avatar_file and avatar_file.filename:
 
@@ -232,3 +232,40 @@ def update_anonymous_profile(
         session["profile_avatar"] = save_avatar(
             avatar_file
         )
+
+def get_public_profile_data(
+    user,
+    get_user_shelf_counts
+):
+
+    counts = get_user_shelf_counts(
+        user.id
+    )
+
+    favorite_books = user.favorite_books
+
+    recent_reviews = (
+        Comment.query
+        .filter_by(user_id=user.id)
+        .order_by(Comment.created_at.desc())
+        .limit(2)
+        .all()
+    )
+
+    is_own_profile = (
+        current_user.is_authenticated
+        and current_user.id == user.id
+    )
+
+    return {
+        "counts": counts,
+        "profile_name": user.name,
+        "profile_username": user.username,
+        "profile_bio": user.bio,
+        "profile_email": user.email,
+        "profile_avatar": user.avatar,
+        "favorite_books": favorite_books,
+        "recent_reviews": recent_reviews,
+        "profile_user": user,
+        "is_own_profile": is_own_profile
+    }

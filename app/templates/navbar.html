@@ -1,11 +1,16 @@
 <nav class="navbar global-navbar navbar-expand-lg" aria-label="Main navigation">
   <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}" />
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  />
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/navbar.css') }}"
+  />
   <div class="container-fluid px-4">
-    <a class="navbar-brand nav-site-name fw-semibold" href="{{ url_for('home') }}"
+    <a
+      class="navbar-brand nav-site-name fw-semibold"
+      href="{{ url_for('home') }}"
       >BookWorm</a
     >
     <button
@@ -21,9 +26,7 @@
     </button>
 
     <div class="collapse navbar-collapse" id="globalNav">
-      
       <ul class="navbar-nav mb-2 mb-lg-0">
-        
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('home') }}">Home</a>
         </li>
@@ -36,7 +39,7 @@
           <a class="nav-link" href="{{ url_for('my_reviews') }}">My Reviews</a>
         </li>
       </ul>
-      
+
       <div class="d-lg-flex align-items-lg-center ms-auto">
         <form
           class="navbar-search my-3 my-lg-0 me-lg-3"
@@ -44,9 +47,53 @@
           action="{{ url_for('search') }}"
           method="GET"
         >
-
           <div class="search-wrapper">
             <div class="input-group search-box">
+              <div class="search-type-dropdown">
+                <button
+                  id="search-type-button"
+                  class="search-type-button"
+                  type="button"
+                  aria-label="Search type"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                >
+                  <span id="search-type-label">Books</span>
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+                <div
+                  id="search-type-menu"
+                  class="search-type-menu"
+                  role="listbox"
+                  hidden
+                >
+                  <button
+                    type="button"
+                    class="search-type-option"
+                    data-value="books"
+                    role="option"
+                    aria-selected="true"
+                  >
+                    Books
+                  </button>
+                  <button
+                    type="button"
+                    class="search-type-option"
+                    data-value="users"
+                    role="option"
+                  >
+                    Users
+                  </button>
+                </div>
+              </div>
+
+              <input
+                type="hidden"
+                id="search-type-input"
+                name="type"
+                value="books"
+              />
+
               <input
                 id="search-input"
                 class="form-control search"
@@ -56,14 +103,13 @@
                 aria-label="Search books or authors"
               />
 
-              <button class="btn btn-search" type="submit"><i class="bi bi-search"></i></button>
-
+              <button class="btn btn-search" type="submit">
+                <i class="bi bi-search"></i>
+              </button>
             </div>
 
             <div id="search-suggestions" class="search-suggestions-box"></div>
-
-          </div>         
-
+          </div>
         </form>
 
         <ul class="navbar-nav mb-2 mb-lg-0">
@@ -74,7 +120,10 @@
             <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-profile profile-pic" href="{{ url_for('profile') }}"></a>
+            <a
+              class="nav-link nav-profile profile-pic"
+              href="{{ url_for('profile') }}"
+            ></a>
           </li>
         </ul>
       </div>

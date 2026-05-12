@@ -121,7 +121,16 @@
 
                       <div class="review-user-info">
 
-                        <h3 class="review-username">{{ review.username }}</h3>
+                        {% if review.profile_username %}
+                          <span 
+                            class="review-username home-reviewer-link" 
+                            onclick="event.preventDefault(); event.stopPropagation(); window.location.href='{{ url_for('public_profile', username=review.profile_username) }}';"
+                          >
+                            {{ review.username }}
+                          </span>
+                        {% else %}
+                          <h3 class="review-username">{{ review.username }}</h3>
+                        {% endif %}
                         <p class="review-book-title">{{ review.book_title }}</p>
 
                       </div>

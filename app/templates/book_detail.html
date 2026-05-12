@@ -120,24 +120,35 @@
             <div class="review-item">
               <div class="review-header">
                 <div class="review-user">
-
-                    <div class="avatar small">
-
-                      {{ review.username[0] }}
-
-                    </div>
+                  {% if review.profile_username %}
+                    <a href="{{ url_for('public_profile', username=review.profile_username) }}" class="review-avatar-link">
+                      {% if review.avatar %}
+                        <img src="{{ url_for('static', filename=review.avatar) }}" class="avatar small" alt="{{ review.username }} avatar"/>
+                      {% else %}
+                        <div class="avatar small">{{ review.username[0] }}</div>
+                      {% endif %}
+                    </a>
+                  {% else %}
+                    <div class="avatar small">{{ review.username[0] }}</div>
+                  {% endif %}
 
                   <div>
-
-                    <strong>{{ review.username }}</strong>
+                    {% if review.profile_username %}
+                      <a href="{{ url_for('public_profile', username=review.profile_username) }}" class="reviewer-link">
+                        <strong>{{ review.username }}</strong>
+                      </a>
+                    {% else %}
+                      <strong>{{ review.username }}</strong>
+                    {% endif %}
                     <p>{{ review.time }}</p>
-
                   </div>
                 </div>
 
-                <button class="btn-follow" onclick="toggleFollow(this)">
-                  Follow
-                </button>
+                {% if review.profile_username %}
+                  <button class="btn-follow" onclick="toggleFollow(this)">
+                    Follow
+                  </button>
+                {% endif %}
               </div>
               
               <div class="stars mt-3 mb-0">

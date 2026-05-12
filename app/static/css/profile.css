@@ -62,7 +62,7 @@
     width: 175px;
     height: 175px;
     border-radius: 50%;
-    background-color: #ddd;
+    background-color: #3D2F2A;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 
     display: flex;
@@ -73,34 +73,28 @@
     overflow: hidden;
 }
 
-.profile-pic-placeholder::before {
-    content: "\f4da";
-    font-family: "bootstrap-icons";
-    font-size: 64px;
-    color: #888;
-}
-
-.profile-pic-placeholder:has(img:not(.hidden))::before {
-    display: none;
-}
-
-.mini-profile-pic-placeholder {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: #ddd;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    display: inline-block;
-    object-fit: cover;
-    overflow: hidden;
+.profile-avatar-initial {
+    font-size: 3.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1;
 }
 
 .profile-avatar-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
-    background-color: #e5e5e5;
+}
+
+.mini-profile-pic-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #3D2F2A;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: inline-block;
+    object-fit: cover;
+    overflow: hidden;
 }
 
 .clickable-avatar {
@@ -366,4 +360,18 @@
     display: flex;
     align-items: center;
     gap: 12px;
+}
+
+.user-follow {
+    background: none;
+    border: 1px solid var(--darkbrown);
+    color: var(--darkbrown);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.user-follow:hover {
+    background-color: var(--secondary-green);
+    color: white;
 }

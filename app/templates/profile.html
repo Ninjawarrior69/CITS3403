@@ -35,11 +35,14 @@
           <div class="profile-pic-placeholder mx-auto">
             {% if profile_avatar %}
             <img
-              src="{{ url_for('static',
-              filename=profile_avatar) }}"
+              src="{{ url_for('static', filename=profile_avatar) }}"
               class="profile-avatar-image"
               alt="Profile Avatar"
             />
+            {% else %}
+            <span class="profile-avatar-initial">
+              {{ (profile_username or profile_name or "U")[0]|upper }}
+            </span>
             {% endif %}
           </div>
         </div>
@@ -47,9 +50,17 @@
         <div class="col-md-9">
           <h2 class="mb-0">
             {{ profile_name }}
-            <a href="{{ url_for('edit_profile') }}">
-              <i class="bi bi-pencil-square edit-icon"></i>
-            </a>
+
+            {% if is_own_profile %}
+              <a href="{{ url_for('edit_profile') }}">
+                <i class="bi bi-pencil-square edit-icon"></i>
+              </a>
+            {% else %}
+              <button class="user-follow" onclick="toggleFollow(this)">
+                Follow
+              </button>
+            {% endif %}
+              
           </h2>
           <p class="text-muted">@{{ profile_username }}</p>
           <p 
@@ -86,40 +97,57 @@
         <div class="mb-5 mt-5">
           <div class="row">
             <div class="col-md-3 col-6 mb-3">
-              <a href="{{ url_for('read') }}">
-                <div class="stats read-stats">
-                  <i class="bi bi-journal-check read-icon"></i>
-                  <h4>{{ counts.read }}</h4>
-                  <p class="text-muted">Read</p>
-                </div>
-              </a>
+              {% if is_own_profile %}
+                <a href="{{ url_for('read') }}">
+              {% else %}
+                <a href="{{ url_for('public_user_read', username=profile_username) }}">
+              {% endif %}  
+                  <div class="stats read-stats">
+                    <i class="bi bi-journal-check read-icon"></i>
+                    <h4>{{ counts.read }}</h4>
+                    <p class="text-muted">Read</p>
+                  </div>
+                </a>
             </div>
             <div class="col-md-3 col-6 mb-3">
-              <a href="{{ url_for('currently_reading') }}">
-                <div class="stats cr-stats">
-                  <i class="bi bi-book cr-icon"></i>
-                  <h4>{{ counts.currently_reading }}</h4>
-                  <p class="text-muted">Currently Reading</p>
-                </div>
-              </a>
+              {% if is_own_profile %}
+                <a href="{{ url_for('currently_reading') }}">
+              {% else %}
+                <a href="{{ url_for('public_user_currently_reading', username=profile_username) }}">
+              {% endif %}
+              
+                  <div class="stats cr-stats">
+                    <i class="bi bi-book cr-icon"></i>
+                    <h4>{{ counts.currently_reading }}</h4>
+                    <p class="text-muted">Currently Reading</p>
+                  </div>
+                </a>
             </div>
             <div class="col-md-3 col-6 mb-3">
-              <a href="{{ url_for('to_be_read') }}">
-                <div class="stats tbr-stats">
-                  <i class="bi bi-bookmark tbr-icon"></i>
-                  <h4>{{ counts.to_be_read }}</h4>
-                  <p class="text-muted">To Be Read</p>
-                </div>
-              </a>
+              {% if is_own_profile %}
+                <a href="{{ url_for('to_be_read') }}">
+              {% else %}
+                <a href="{{ url_for('public_user_to_be_read', username=profile_username) }}">
+              {% endif %}    
+                  <div class="stats tbr-stats">
+                    <i class="bi bi-bookmark tbr-icon"></i>
+                    <h4>{{ counts.to_be_read }}</h4>
+                    <p class="text-muted">To Be Read</p>
+                  </div>
+                </a>
             </div>
             <div class="col-md-3 col-6 mb-3">
-              <a href="{{ url_for('did_not_finish') }}">
-                <div class="stats dnf-stats">
-                  <i class="bi bi-bookmark-x dnf-icon"></i>
-                  <h4>{{ counts.did_not_finish }}</h4>
-                  <p class="text-muted">Did Not Finish</p>
-                </div>
-              </a>
+              {% if is_own_profile %}
+                <a href="{{ url_for('did_not_finish') }}">
+              {% else %}
+                <a href="{{ url_for('public_user_did_not_finish', username=profile_username) }}">
+              {% endif %}
+                  <div class="stats dnf-stats">
+                    <i class="bi bi-bookmark-x dnf-icon"></i>
+                    <h4>{{ counts.did_not_finish }}</h4>
+                    <p class="text-muted">Did Not Finish</p>
+                  </div>
+                </a>
             </div>
           </div>
         </div>
@@ -159,18 +187,22 @@
           {% for review in recent_reviews %}
           <div class="row align-items-start mb-4">
             <div class="col-md-2 text-center">
-              {% if review.book.cover_url %}
-              <img
-                src="{{ review.book.cover_url }}"
-                alt="{{ review.book.title }}"
-                class="mini-book-card"
-              />
-              {% else %}
-              <div class="mini-book-card"></div>
-              {% endif %}
+              <a href="{{ url_for('book_detail', book_id=review.book.id) }}">
+                {% if review.book.cover_url %}
+                <img
+                  src="{{ review.book.cover_url }}"
+                  alt="{{ review.book.title }}"
+                  class="mini-book-card"
+                />
+                {% else %}
+                <div class="mini-book-card"></div>
+                {% endif %}
+              </a>
             </div>
             <div class="col-md-10">
-              <h5 class="mb-1">{{ review.book.title }}</h5>
+              <a href="{{ url_for('book_detail', book_id=review.book.id) }}" class="profile-review-link">
+                <h5 class="mb-1">{{ review.book.title }}</h5>
+              </a>
               <p class="text-muted mb-1">{{ review.book.author }}</p>
               <p class="mb-2 star">
                 {% for i in range(review.stars) %}
@@ -180,6 +212,7 @@
               <p class="my-review-text review-collapsed" id="review-{{ loop.index }}">
                 {{ review.text }}
               </p>
+              {% if review.text|length > 300 %}
               <button 
                 class="show-more-btn"
                 onclick="toggleSection(
@@ -189,6 +222,7 @@
               >
                 Show More
               </button>
+              {% endif %}
             </div>
           </div>
           {% endfor %}
