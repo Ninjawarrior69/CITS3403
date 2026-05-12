@@ -397,7 +397,7 @@ def register_routes(app: Flask) -> None:
 
         form = LoginForm()
         if form.validate_on_submit():
-            identifier = form.username_or_email.data.strip()
+            identifier = form.username_or_email.data.strip().lower()
             user = User.query.filter(
                 or_(
                     User.username == identifier,
