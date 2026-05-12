@@ -1,8 +1,8 @@
 .page-container {
-    display: grid;
-    grid-template-columns: 2.6fr 0.7fr;
-    gap: 30px;
-    margin-top: 40px;
+    max-width: 1100px; 
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
 .section-card {
@@ -278,14 +278,14 @@
     background-color: #2a211d;
 }
 
-.secondary-btn {
+.btn-secondary {
     border: none;
     background-color: #db9673;
     color: var(--primary-yellow);
     transition: 0.2s;
 }
 
-.secondary-btn:hover {
+.btn-secondary:hover {
     background-color: #768e78;
 }
 
@@ -335,7 +335,7 @@
 }
 
 .save-rating-btn {
-    width: 100%;
+    width: 20%;
     min-width: 68px;
     padding: 6px 12px;
     border-radius: 10px;
@@ -367,7 +367,7 @@
 }
 
 .post-review-btn {
-    width: 100%;
+    width: 20%;
     padding: 14px 18px;
     border-radius: 14px;
     font-size: 1.05rem;
@@ -585,13 +585,18 @@
 
     .book-cover {
         width: 100%;
-        max-width: 260px;
-        height: auto;
+        aspect-ratio: 2/3;
+        display: block;
+        margin: 0 auto;
     }
 
     .book-cover-sm {
         width: 100%;
         height: auto;
+    }
+
+    .cover-actions {
+        align-items: center;
     }
 
     .btn-follow,

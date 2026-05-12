@@ -28,13 +28,13 @@
   <body>
     {% include "navbar.html" %}
 
-    <div class="page-container">
-      <!-- LEFT -->
+    <div class="page-container py-5">
       <div class="main-content">
-        <!-- BOOK HEADER -->
+        <!-- COVER & SHELF BUTTON -->
         <div class="section-card">
           <div class="book-header">
-            <div>
+              <div class="cover-actions">
+              <div>
               {% if book.cover_url %}
               <img src="{{ book.cover_url }}" class="book-cover"/>
               {% else %}
@@ -42,8 +42,42 @@
                   Cover Unavailable
               </div>
               {% endif %}
-            </div>
 
+              <button 
+            type="button"
+            id="openShelfModal"
+            class="primary-btn {% if shelf_status %}active{% endif %}"
+          >
+            {% if shelf_status %}
+              ✓ {{ shelf_status }}
+            {% else %}
+              Add to Shelf
+            {% endif %}
+          </button>
+          </div>
+
+
+          <div class="shelf-modal-overlay" id="shelfModal">
+            <div class="shelf-modal">
+              <div class="shelf-modal-header">
+                <h3>Choose reading status</h3>
+                <button type="button" id="closeShelfModal" class="shelf-close-btn">×</button>
+              </div>
+
+              <form method="POST" action="{{ url_for('update_shelf_status', book_id=book.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" name="status" value="Read" class="shelf-option">Read</button>
+                <button type="submit" name="status" value="Currently Reading" class="shelf-option">Currently Reading</button>
+                <button type="submit" name="status" value="To Be Read" class="shelf-option">To Be Read</button>
+                <button type="submit" name="status" value="Did Not Finish" class="shelf-option">Did Not Finish</button>
+
+                <button type="submit" name="status" value="remove" id="removeShelf" class="remove-shelf-btn">Remove from my shelf</button>
+              </form>
+            </div>
+          </div>
+
+          </div>
+          <!-- BOOK INFORMATION -->
             <div class="book-info">
               <h1 class="mb-1">{{ book.title }}</h1>
               <p>by {{ book.author }}</p>
@@ -73,44 +107,86 @@
           </div>
         </div>
 
-        <!-- AUTHOR -->
+        <!-- MY RATING & REVIEW -->
         <div class="section-card">
-          <h2>About the Author</h2><br>
+          <h2>My Review</h2>
+          <!-- RATING SECTION -->
+          <div class="interaction-section">
+            
+              <p class="section-label">Rate this book</p>
 
-          <div class="author-box">
-            <div class="avatar">{{ book.author[0] }}</div>
-
-            <div class="author-info">
-              <div class="author-top">
-                <div class="author-name">
-                  <h3>{{ book.author }}</h3>
-                  <button class="btn-follow" onclick="toggleFollow(this)">
-                    Follow
-                  </button>
-                </div>
-              </div>
-
-              <p>
-                {{ author.followers if author else 0 }} followers
-              </p>
-
-              <p id="author-desc" class="{% if author and author.bio and author.bio|length > 250 %}description-collapsed{% endif %}">
-                {{ author.bio if author else "Author bio coming soon." }}
-              </p>
-
-              {% if author and author.bio and author.bio|length > 250 %}
-
-                <button
-                  class="show-more-btn"
-                  onclick="toggleSection('author-desc', this)"
-                >
-                  Show More
-                </button>
-              {% endif %}
-
+              <div
+              class="rating"
+              id="rating"
+              data-current-rating="{{ user_rating }}"
+            >
+              <span data-value="1"
+                >{% if user_rating >= 1 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="2"
+                >{% if user_rating >= 2 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="3"
+                >{% if user_rating >= 3 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="4"
+                >{% if user_rating >= 4 %}★{% else %}☆{% endif %}</span
+              >
+              <span data-value="5"
+                >{% if user_rating >= 5 %}★{% else %}☆{% endif %}</span
+              >
             </div>
+            <div>
+              <form
+                method="POST"
+                action="{{ url_for('rate_book', book_id=book.id) }}"
+                id="rating-form"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <input type="hidden" name="stars" id="rating-stars" />
+
+                <button type="submit" class="btn btn-sm btn-secondary save-rating-btn">
+                  Save Rating
+                </button>
+              </form>
+              </div>
+          </div>
+
+          <!-- REVIEW SECTION -->
+          <div class="interaction-section review-section">
+            <p class="section-label">Write your review</p>
+
+            <form
+              method="POST"
+              action="{{ url_for('post_review', book_id=book.id) }}"
+              id="review-form"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <input type="hidden" name="stars" id="review-stars" />
+
+              <textarea
+                name="text"
+                id="review-input"
+                class="review-textarea"
+                placeholder="Write your review..."
+                required
+              ></textarea>
+
+              <button type="submit" class="btn-sm btn-secondary post-review-btn">
+                Post Review
+              </button>
+            </form>
           </div>
         </div>
+
 
         <!-- COMMUNITY REVIEWS -->
         <div class="section-card">
@@ -221,134 +297,6 @@
           </div>
         </div>
       </div>
-
-      <!-- RIGHT SIDEBAR -->
-      <div class="sidebar">
-        <div class="sidebar-card">
-          {% if book.cover_url %}
-          <img src="{{ book.cover_url }}" class="book-cover-sm mb-3"/>
-          {% else %}
-          <div class="book-cover-sm-placeholder">
-              Cover Unavailable
-          </div>
-          {% endif %}
-          
-          <h3 class="mt-3">{{ book.title }}</h3>
-          <p>by {{ book.author }}</p>
-
-          <div class="rating mb-0">
-            {% for i in range(rating_summary.average | int) %}★{% endfor %} {%
-            for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
-            {{ rating_summary.average }}
-          </div>
-
-          <button 
-            type="button"
-            id="openShelfModal"
-            class="primary-btn {% if shelf_status %}active{% endif %}"
-          >
-            {% if shelf_status %}
-              ✓ {{ shelf_status }}
-            {% else %}
-              Add to Shelf
-            {% endif %}
-          </button>
-
-
-          <div class="shelf-modal-overlay" id="shelfModal">
-            <div class="shelf-modal">
-              <div class="shelf-modal-header">
-                <h3>Choose reading status</h3>
-                <button type="button" id="closeShelfModal" class="shelf-close-btn">×</button>
-              </div>
-
-              <form method="POST" action="{{ url_for('update_shelf_status', book_id=book.id) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                <button type="submit" name="status" value="Read" class="shelf-option">Read</button>
-                <button type="submit" name="status" value="Currently Reading" class="shelf-option">Currently Reading</button>
-                <button type="submit" name="status" value="To Be Read" class="shelf-option">To Be Read</button>
-                <button type="submit" name="status" value="Did Not Finish" class="shelf-option">Did Not Finish</button>
-
-                <button type="submit" name="status" value="remove" id="removeShelf" class="remove-shelf-btn">Remove from my shelf</button>
-              </form>
-            </div>
-          </div>
-
-          <!-- RATING SECTION -->
-          <div class="interaction-section">
-            
-              <p class="section-label">Rate this book</p>
-
-              <div
-              class="rating"
-              id="rating"
-              data-current-rating="{{ user_rating }}"
-            >
-              <span data-value="1"
-                >{% if user_rating >= 1 %}★{% else %}☆{% endif %}</span
-              >
-              <span data-value="2"
-                >{% if user_rating >= 2 %}★{% else %}☆{% endif %}</span
-              >
-              <span data-value="3"
-                >{% if user_rating >= 3 %}★{% else %}☆{% endif %}</span
-              >
-              <span data-value="4"
-                >{% if user_rating >= 4 %}★{% else %}☆{% endif %}</span
-              >
-              <span data-value="5"
-                >{% if user_rating >= 5 %}★{% else %}☆{% endif %}</span
-              >
-            </div>
-
-              <form
-                method="POST"
-                action="{{ url_for('rate_book', book_id=book.id) }}"
-                id="rating-form"
-              >
-                <input
-                  type="hidden"
-                  name="csrf_token"
-                  value="{{ csrf_token() }}"
-                />
-                <input type="hidden" name="stars" id="rating-stars" />
-
-                <button type="submit" class="secondary-btn save-rating-btn">
-                  Save Rating
-                </button>
-              </form>
-          </div>
-
-          <!-- REVIEW SECTION -->
-          <div class="interaction-section review-section">
-            <p class="section-label">Write your review</p>
-
-            <form
-              method="POST"
-              action="{{ url_for('post_review', book_id=book.id) }}"
-              id="review-form"
-            >
-              <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-              />
-              <input type="hidden" name="stars" id="review-stars" />
-
-              <textarea
-                name="text"
-                id="review-input"
-                class="review-textarea"
-                placeholder="Write your review..."
-                required
-              ></textarea>
-
-              <button type="submit" class="secondary-btn post-review-btn">
-                Post Review
-              </button>
-            </form>
-          </div>
-        </div>
       </div>
     </div>
 
