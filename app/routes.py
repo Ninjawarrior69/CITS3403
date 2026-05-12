@@ -152,21 +152,21 @@ def seed_follow_data():
 
     stella = User(
         name="Stella",
-        username="Stella",
+        username="stella",
         email="stella@gmail.com"
     )
     stella.set_password("test123")
 
     oliver = User(
         name="Oliver",
-        username="Oliver",
+        username="oliver",
         email="oliver@gmail.com"
     )
     oliver.set_password("test123")
 
     valentine = User(
         name="Valentine",
-        username="Valentine",
+        username="valentine",
         email="valentine@gmail.com"
     )
     valentine.set_password("test123")
