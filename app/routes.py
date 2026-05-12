@@ -471,7 +471,7 @@ def register_routes(app: Flask) -> None:
             counts = get_shelf_counts(session_id)
 
         shelf_rows = chunked(items, 6)
-        return render_template("read.html", shelf_rows=shelf_rows, counts=counts)
+        return render_template("read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
     @app.route("/currently-reading")
     @app.route("/currently-reading.html")
@@ -484,7 +484,7 @@ def register_routes(app: Flask) -> None:
             items = ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").all()
             counts = get_shelf_counts(session_id)
 
-        return render_template("currently-reading.html", items=items, counts=counts)
+        return render_template("currently-reading.html", items=items, counts=counts, is_public_shelf=False)
 
     @app.route("/to-be-read")
     @app.route("/to-be-read.html")
@@ -498,7 +498,7 @@ def register_routes(app: Flask) -> None:
             counts = get_shelf_counts(session_id)
 
         shelf_rows = chunked(items, 6)
-        return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts)
+        return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
     @app.route("/did-not-finish")
     @app.route("/did-not-finish.html")
@@ -512,7 +512,70 @@ def register_routes(app: Flask) -> None:
             counts = get_shelf_counts(session_id)
 
         shelf_rows = chunked(items, 6)
-        return render_template("did-not-finish.html", shelf_rows=shelf_rows, counts=counts)
+        return render_template("did-not-finish.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
+    
+    @app.route("/user/<username>/read")
+    def public_user_read(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        items = ShelfItem.query.filter_by(user_id=user.id, status="Read").all()
+        counts = get_user_shelf_counts(user.id)
+        shelf_rows = chunked(items, 6)
+
+        return render_template(
+           "read.html",
+            shelf_rows=shelf_rows,
+            counts=counts,
+            profile_user=user,
+            is_public_shelf=True,
+            shelf_owner_name=user.name or user.username
+        )
+    
+    @app.route("/user/<username>/currently-reading")
+    def public_user_currently_reading(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        items = ShelfItem.query.filter_by(user_id=user.id, status="Currently Reading").all()
+        counts = get_user_shelf_counts(user.id)
+
+        return render_template(
+            "currently-reading.html",
+            items=items,
+            counts=counts,
+            profile_user=user,
+            is_public_shelf=True,
+            shelf_owner_name=user.name or user.username
+        )
+    
+    @app.route("/user/<username>/to-be-read")
+    def public_user_to_be_read(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        items = ShelfItem.query.filter_by(user_id=user.id, status="To Be Read").all()
+        counts = get_user_shelf_counts(user.id)
+        shelf_rows = chunked(items, 6)
+
+        return render_template(
+            "to-be-read.html",
+            shelf_rows=shelf_rows,
+            counts=counts,
+            profile_user=user,
+            is_public_shelf=True,
+            shelf_owner_name=user.name or user.username
+        )
+    
+    @app.route("/user/<username>/did-not-finish")
+    def public_user_did_not_finish(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        items = ShelfItem.query.filter_by(user_id=user.id, status="Did Not Finish").all()
+        counts = get_user_shelf_counts(user.id)
+        shelf_rows = chunked(items, 6)
+
+        return render_template(
+            "did-not-finish.html",
+            shelf_rows=shelf_rows,
+            counts=counts,
+            profile_user=user,
+            is_public_shelf=True,
+            shelf_owner_name=user.name or user.username
+        )
 
     @app.route("/my-reviews")
     @app.route("/my-reviews.html")
