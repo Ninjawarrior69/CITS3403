@@ -47,9 +47,17 @@
         <div class="col-md-9">
           <h2 class="mb-0">
             {{ profile_name }}
-            <a href="{{ url_for('edit_profile') }}">
-              <i class="bi bi-pencil-square edit-icon"></i>
-            </a>
+
+            {% if is_own_profile %}
+              <a href="{{ url_for('edit_profile') }}">
+                <i class="bi bi-pencil-square edit-icon"></i>
+              </a>
+            {% else %}
+              <button class="user-follow" onclick="toggleFollow(this)">
+                Follow
+              </button>
+            {% endif %}
+              
           </h2>
           <p class="text-muted">@{{ profile_username }}</p>
           <p 

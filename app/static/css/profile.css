@@ -367,3 +367,17 @@
     align-items: center;
     gap: 12px;
 }
+
+.user-follow {
+    background: none;
+    border: 1px solid var(--darkbrown);
+    color: var(--darkbrown);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.user-follow:hover {
+    background-color: var(--secondary-green);
+    color: white;
+}

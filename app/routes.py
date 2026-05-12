@@ -13,6 +13,7 @@ import requests
 from app.helpers.profile_helpers import (
     save_avatar,
     get_profile_data,
+    get_public_profile_data,
     update_authenticated_profile,
     update_anonymous_profile
 )
@@ -366,8 +367,23 @@ def register_routes(app: Flask) -> None:
 
         profile_data["followers_count"] = current_user.followers.count() if current_user.is_authenticated else 0
         profile_data["following_count"] = current_user.following.count() if current_user.is_authenticated else 0
+        profile_data["is_own_profile"] = True
 
         return render_template("profile.html", **profile_data)
+    
+    @app.route("/user/<username>")
+    def public_profile(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        profile_data = get_public_profile_data(
+            user,
+            get_user_shelf_counts
+        )
+
+        profile_data["followers_count"] = user.followers.count()
+        profile_data["following_count"] = user.following.count()
+
+        return render_template("profile.html", **profile_data)  
+
 
     @app.route("/login", methods=["GET", "POST"])
     @app.route("/login.html", methods=["GET", "POST"])
