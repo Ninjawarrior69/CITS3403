@@ -314,3 +314,14 @@
     padding: 16px;
   }
 }
+
+.home-reviewer-link {
+    display: inline-block;
+    cursor: pointer;
+    font-weight: 700;
+    color: inherit;
+}
+
+.home-reviewer-link:hover {
+    text-decoration: underline;
+}

@@ -70,3 +70,13 @@ window.addEventListener("click", (e) => {
         modal.style.display = "none";
     }
 });
+
+function toggleFollow(btn) {
+    if (btn.innerText == "Follow") {
+        btn.innerText = "Following";
+        btn.classList.add("following");
+    } else {
+        btn.innerText = "Follow";
+        btn.classList.remove("following");
+    }
+}

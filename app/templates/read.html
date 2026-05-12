@@ -17,13 +17,24 @@
         {% include "navbar.html" %}
 
         <div class="page-container py-5">
-            <h2>My Books</h2>
+            {% if is_public_shelf %}
+                <h2>{{ shelf_owner_name }}'s Books</h2>
+            {% else %}
+                <h2>My Books</h2>
+            {% endif %}
             <hr>
             <div class="col-md-12 d-flex gap-4">
-                <a class="current-page" href="{{ url_for('read') }}">Read ({{ counts.read }})</a>
-                <a href="{{ url_for('currently_reading') }}">Currently Reading ({{ counts.currently_reading }})</a>
-                <a href="{{ url_for('to_be_read') }}">To Be Read ({{ counts.to_be_read }})</a>
-                <a href="{{ url_for('did_not_finish') }}">Did Not Finish ({{ counts.did_not_finish }})</a>
+                {% if is_public_shelf %}
+                    <a class="current-page" href="{{ url_for('public_user_read', username=profile_user.username) }}">Read ({{ counts.read }})</a>
+                    <a href="{{ url_for('public_user_currently_reading', username=profile_user.username) }}">Currently Reading ({{ counts.currently_reading }})</a>
+                    <a href="{{ url_for('public_user_to_be_read', username=profile_user.username) }}">To Be Read ({{ counts.to_be_read }})</a>
+                    <a href="{{ url_for('public_user_did_not_finish', username=profile_user.username) }}">Did Not Finish ({{ counts.did_not_finish }})</a>
+                {% else %}
+                    <a class="current-page" href="{{ url_for('read') }}">Read ({{ counts.read }})</a>
+                    <a href="{{ url_for('currently_reading') }}">Currently Reading ({{ counts.currently_reading }})</a>
+                    <a href="{{ url_for('to_be_read') }}">To Be Read ({{ counts.to_be_read }})</a>
+                    <a href="{{ url_for('did_not_finish') }}">Did Not Finish ({{ counts.did_not_finish }})</a>
+                {% endif %}
             </div>
             <hr><br>
             {% for row in shelf_rows %}

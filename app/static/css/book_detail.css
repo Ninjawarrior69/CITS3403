@@ -515,7 +515,17 @@
     word-break: break-word;
 }
 
-@media (max-width: 768px) {
+.reviewer-link,
+.review-avatar-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.reviewer-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
 
     .book-detail-container,
     .page-container {
@@ -600,5 +610,23 @@
 
     #rating {
         flex-wrap: wrap;
+    }
+
+    .section-card,
+    .sidebar-card {
+        padding: 14px;
+    }
+
+    .book-info h1 {
+        font-size: 1.6rem;
+    }
+
+    .dist-value {
+        width: 70px;
+        font-size: 0.75rem;
+    }
+
+    .reviews-top {
+        gap: 20px;
     }
 }
