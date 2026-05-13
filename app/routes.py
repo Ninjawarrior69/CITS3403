@@ -20,6 +20,7 @@ from app.helpers.profile_helpers import (
 from app.helpers.search_helpers import (
     normalise_page,
     normalise_search_type,
+    search_books,
     search_book_suggestions,
     search_users,
     user_to_suggestion,
@@ -829,7 +830,12 @@ def register_routes(app: Flask) -> None:
             if search_type == "users":
                 users = search_users(query, limit=10)
             else:
-                books = search_open_library(query, page=page)
+                books = search_books(
+                   query,
+                   open_library_search_func=search_open_library,
+                   page=page,
+                   limit=10
+                )
 
         return render_template(
             "search-result.html",
@@ -877,7 +883,7 @@ def register_routes(app: Flask) -> None:
         if not title or not author:
             return redirect(url_for("search"))
 
-        if openlibrary_id:
+        if openlibrary_id is not None:
             existing_book = Book.query.filter_by(
                 openlibrary_id=openlibrary_id
             ).first()

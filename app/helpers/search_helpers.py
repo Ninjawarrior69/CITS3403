@@ -89,6 +89,75 @@ def get_book_key(title, author):
         (author or "").strip().lower(),
     )
 
+def search_books(query, open_library_search_func=None, page=1, limit=10):
+    if not query:
+        return []
+
+    results = []
+    seen_books = set()
+
+    local_books = (
+        Book.query.filter(
+            or_(
+                Book.title.ilike(f"%{query}%"),
+                Book.author.ilike(f"%{query}%"),
+            )
+        )
+        .order_by(Book.title.asc())
+        .limit(limit)
+        .all()
+    )
+
+    for book in local_books:
+        book_key = get_book_key(book.title, book.author)
+
+        if book_key in seen_books:
+            continue
+
+        seen_books.add(book_key)
+
+        results.append({
+            "source": "local",
+            "id": book.id,
+            "title": book.title,
+            "author": book.author,
+            "cover_url": book.cover_url,
+            "openlibrary_id": book.openlibrary_id,
+            "edition_key": None,
+            "publish_year": book.publish_year,
+        })
+
+    if len(results) >= limit or open_library_search_func is None:
+        return results
+
+    try:
+        open_library_books = open_library_search_func(
+            query,
+            page=page,
+            limit=limit - len(results)
+        )
+    except Exception as error:
+        print("Open Library search error:", error)
+        open_library_books = []
+
+    for book in open_library_books:
+        if len(results) >= limit:
+            break
+
+        title = book.get("title")
+        author = book.get("author")
+        book_key = get_book_key(title, author)
+
+        if book_key in seen_books:
+            continue
+
+        seen_books.add(book_key)
+
+        book["source"] = "open_library"
+        book["id"] = None
+        results.append(book)
+
+    return results
 
 def search_book_suggestions(query, open_library_search_func=None, limit=5):
     suggestions = []

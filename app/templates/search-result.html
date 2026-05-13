@@ -100,11 +100,11 @@
               {% if user.avatar %}
               <img
                 src="{{ url_for('static', filename=user.avatar) }}"
-                class="search-cover"
+                class="search-cover search-user-avatar"
                 alt="{{ user.username }}"
               />
               {% else %}
-              <div class="search-cover-placeholder">
+              <div class="search-cover-placeholder search-user-avatar-placeholder">
                 {{ (user.name or user.username or 'U')[0]|upper }}
               </div>
               {% endif %}

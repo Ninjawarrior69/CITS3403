@@ -250,6 +250,14 @@
     background-color: #768e7826;
 }
 
+/* User avatar in search results */
+
+.search-user-avatar,
+.search-user-avatar-placeholder {
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
 /* Responsive */
 
 @media (max-width: 768px) {
