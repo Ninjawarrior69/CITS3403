@@ -851,9 +851,3 @@ def register_routes(app: Flask) -> None:
         ]
 
         return jsonify(following)
-    
-    # Remove later
-    @app.route("/seed-follows")
-    def seed_follows():
-        seed_follow_data()
-        return "Seeded!"
