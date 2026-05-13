@@ -48,19 +48,24 @@
         </div>
         <!-- Name, Username, Bio -->
         <div class="col-md-9">
-          <h2 class="mb-0">
-            {{ profile_name }}
+          <div class="profile-header-name">
+          <span class="profile-name">{{ profile_name }}</span>
 
             {% if is_own_profile %}
               <a href="{{ url_for('edit_profile') }}">
                 <i class="bi bi-pencil-square edit-icon"></i>
               </a>
             {% else %}
-              <button class="user-follow" onclick="toggleFollow(this)">
-                Follow
+            {% set already_following = current_user.is_following(profile_user) %}
+              <button 
+                class="user-follow {% if already_following %}is-following{% endif %}" 
+                data-user-id="{{ profile_user.id }}" 
+                onclick="toggleFollow(this)"
+              >
+                <i class="bi {{ 'bi-person-dash' if already_following else 'bi-person-plus' }}"></i>
               </button>
             {% endif %}
-              
+            </div>
           </h2>
           <p class="text-muted">@{{ profile_username }}</p>
           <p 

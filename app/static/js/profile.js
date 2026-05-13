@@ -23,13 +23,15 @@ function openModal(title, users) {
         const li = document.createElement("li");
 
         li.innerHTML = `
-            <div class="user-row">
+            <a href="/user/${encodeURIComponent(user.username)}" class="user-row">
                 ${user.avatar
                     ? `<img src="/static/${user.avatar}" class="avatar">`
-                    : `<div class="avatar avatar-placeholder"></div>`
+                    : `<div class="avatar avatar-placeholder">
+                        ${user.username.charAt(0).toUpperCase()}
+                        </div>`
                 }
                 <span>${user.username}</span>
-            </div>
+            </a>
         `;
 
         modalList.appendChild(li);
@@ -41,18 +43,16 @@ function openModal(title, users) {
 
 // Fetch followers
 async function loadFollowers() {
-    const response = await fetch(`/profile/followers`); //`/users/${username}/followers`
+    const response = await fetch(`/profile/${username}/followers`);
     const data = await response.json();
-
     openModal("Followers", data);
 }
 
 
 // Fetch following
 async function loadFollowing() {
-    const response = await fetch(`/profile/following`);
+    const response = await fetch(`/profile/${username}/following`);
     const data = await response.json();
-
     openModal("Following", data);
 }
 
@@ -71,12 +71,24 @@ window.addEventListener("click", (e) => {
     }
 });
 
-function toggleFollow(btn) {
-    if (btn.innerText == "Follow") {
-        btn.innerText = "Following";
-        btn.classList.add("following");
-    } else {
-        btn.innerText = "Follow";
-        btn.classList.remove("following");
-    }
+async function toggleFollow(btn) {
+  const userId = btn.dataset.userId;
+  const icon = btn.querySelector("i");
+
+  const isFollowing = icon.classList.contains("bi-person-dash");
+
+  const url = isFollowing
+    ? `/unfollow/${userId}`
+    : `/follow/${userId}`;
+
+  const response = await fetch(url, { method: "POST"});
+
+  if (response.ok) {
+    const newState = !isFollowing;
+
+    btn.classList.toggle("is-following", newState);
+
+    icon.classList.toggle("bi-person-plus", !newState);
+    icon.classList.toggle("bi-person-dash", newState);
+  }
 }
