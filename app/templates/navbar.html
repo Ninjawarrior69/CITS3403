@@ -119,9 +119,21 @@
           </li>
           <li class="nav-item">
             <a
-              class="nav-link nav-profile profile-pic"
+              class="nav-link nav-profile"
               href="{{ url_for('profile') }}"
-            ></a>
+            >
+            {% if current_user.avatar %}
+              <img
+                src="{{ url_for('static', filename=current_user.avatar) }}"
+                alt="Profile Picture"
+                class="profile-pic"
+              />
+            {% else %}
+              <div class="profile-pic profile-pic-default">
+              {{ (current_user.username or current_user.name or "U")[0]|upper }}
+              </div>
+              {% endif %}
+            </a>
           </li>
           {% else %}
           <li class="nav-item">
