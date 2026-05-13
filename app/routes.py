@@ -17,7 +17,7 @@ from app.helpers.profile_helpers import (
     update_authenticated_profile,
     update_anonymous_profile
 )
-from app.search_helpers import (
+from app.helpers.search_helpers import (
     normalise_page,
     normalise_search_type,
     search_book_suggestions,
@@ -187,33 +187,82 @@ def get_display_rating(book):
 def search_open_library(query, page=1, limit=10):
     url = "https://openlibrary.org/search.json"
 
-    params = {
-        "q": query,
-        "page": page,
-        "limit": limit
-    }
-
-    response = requests.get(url, params=params)
-
-    try:
-        data = response.json()
-    except requests.exceptions.JSONDecodeError:
+    if not query:
         return []
 
-    books = []
+    def fetch_results(params):
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                timeout=8,
+                headers={"User-Agent": "BookWorm/1.0"}
+            )
 
-    for doc in data.get("docs", []):
+            response.raise_for_status()
+            return response.json().get("docs", [])
+
+        except requests.exceptions.RequestException as error:
+            print("Open Library request error:", error)
+            return []
+
+        except ValueError as error:
+            print("Open Library JSON error:", error)
+            return []
+
+    def format_book(doc):
         cover_id = doc.get("cover_i")
-        edition_key = doc.get("edition_key", [])
+        edition_keys = doc.get("edition_key") or []
 
-        books.append({
+        return {
             "title": doc.get("title", "Unknown Title"),
             "author": ", ".join(doc.get("author_name", ["Unknown"])),
-            "cover_url": f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg" if cover_id else None,
+            "cover_url": (
+                f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+                if cover_id
+                else None
+            ),
             "openlibrary_id": doc.get("key"),
-            "edition_key": doc.get("edition_key", [None])[0] if doc.get("edition_key") else None,
-            "publish_year": doc.get("first_publish_year")
-        })
+            "edition_key": edition_keys[0] if edition_keys else None,
+            "publish_year": doc.get("first_publish_year"),
+        }
+
+    fields = "key,title,author_name,cover_i,edition_key,first_publish_year"
+
+    title_docs = fetch_results({
+        "title": query,
+        "page": page,
+        "limit": limit,
+        "fields": fields,
+    })
+
+    author_docs = fetch_results({
+        "author": query,
+        "page": page,
+        "limit": limit,
+        "fields": fields,
+    })
+
+    books = []
+    seen_books = set()
+
+    for doc in title_docs + author_docs:
+        book = format_book(doc)
+
+        book_key = (
+            (book["title"] or "").strip().lower(),
+            (book["author"] or "").strip().lower(),
+        )
+
+        if book_key in seen_books:
+            continue
+
+        seen_books.add(book_key)
+        books.append(book)
+
+        if len(books) >= limit:
+            break
+
     return books
 
 
@@ -332,7 +381,6 @@ def register_routes(app: Flask) -> None:
             get_user_shelf_counts
         )
 
-        profile_data["followers_count"] = user.followers.count()
         profile_data["followers_count"] = user.followers.count()
         profile_data["following_count"] = user.following.count()
         return render_template("profile.html", **profile_data)  
@@ -761,6 +809,7 @@ def register_routes(app: Flask) -> None:
             suggestions = [user_to_suggestion(user) for user in users]
 
             return jsonify(suggestions)
+        
         suggestions = search_book_suggestions(
             query,
             open_library_search_func=search_open_library,

@@ -120,7 +120,8 @@ def search_book_suggestions(query, open_library_search_func=None, limit=5):
 
     try:
         open_library_books = open_library_search_func(query, page=1)
-    except Exception:
+    except Exception as error:
+        print("Open Library suggestion error:", error)
         open_library_books = []
 
     for book in open_library_books:

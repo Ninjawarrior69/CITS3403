@@ -190,6 +190,50 @@
     border-color: #3D2F2A;
 }
 
+.search-results-wrapper {
+    position: relative;
+}
+
+.search-type-select {
+    max-width: 120px;
+    height: 35px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
+    background-color: #f6efd8;
+    border: 1px solid #3D2F2A33;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.search-suggestions:empty {
+    display: none;
+}
+
+.suggestion-item {
+    display: block;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #3D2F2A;
+    border-bottom: 1px solid #3D2F2A1A;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background-color: #768e7826;
+}
+
 /* Responsive */
 
 @media (max-width: 768px) {
@@ -212,6 +256,20 @@
 
     .search-book-author {
         font-size: 0.92rem;
+    }
+
+        .search-bar-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-type-select {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .search-button {
+        width: 100%;
     }
 
 }

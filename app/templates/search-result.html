@@ -42,21 +42,31 @@
           method="GET"
           class="search-results-form mt-4"
         >
-          <input type="hidden" name="type" value="{{ search_type }}" />
+          <div class="search-wrapper search-results-wrapper">
+            <div class="search-bar-wrapper">
+              <select
+                name="type"
+                class="form-select search-type-input search-type-select"
+              >
+                <option value="books" {% if search_type == "books" %}selected{% endif %}>Books</option>
+                <option value="users" {% if search_type == "users" %}selected{% endif %}>Users</option>
+              </select>
+       
+              <input
+                type="text"
+                name="q"
+                class="form-control search-input"
+                placeholder="{% if search_type == 'users' %}Search users...{% else %}Search books or authors...{% endif %}"
+                value="{{ query }}"
+                autocomplete="off"
+              />
 
-          <div class="search-bar-wrapper">
-            <input
-              type="text"
-              name="q"
-              class="form-control search-input"
-              placeholder="{% if search_type == 'users' %}Search users...{% else %}Search books or authors...{% endif %}"
-              value="{{ query }}"
-            />
-
-            <button type="submit" class="btn btn-primary search-button">
-              Search
-            </button>
-          </div>
+              <button type="submit" class="btn btn-primary search-button">
+                Search
+              </button>
+            </div>
+            <div class="search-suggestions"></div>
+          </div>  
         </form>
       </div>
 
@@ -101,7 +111,7 @@
             </div>
 
             <div class="search-book-info">
-              <h3 class="search-book-title">{{ user.name }}</h3>
+              <h3 class="search-book-title">{{ user.name or user.username }}</h3>
 
               <p class="search-book-author">@{{ user.username }}</p>
 
@@ -172,6 +182,8 @@
       </div>
 
       {% endif %}
+
+      {% if search_type == "books" and books %}
       <br />
       <div class="pagination">
         {% if page > 1 %}
@@ -203,6 +215,7 @@
         </a>
         {% endif %}
       </div>
+      {% endif %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
