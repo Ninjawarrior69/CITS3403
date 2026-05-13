@@ -892,9 +892,9 @@ def register_routes(app: Flask) -> None:
             url_for("book_detail", book_id=new_book.id)
         )
     
-    @app.route("/profile/followers") #"/users/<username>/followers"
-    def get_followers():
-        user = current_user
+    @app.route("/profile/<username>/followers")
+    def get_followers(username):
+        user = User.query.filter_by(username=username).first_or_404()
 
         followers = [
             {
@@ -906,9 +906,9 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(followers)
     
-    @app.route("/profile/following")
-    def get_following():
-        user = current_user
+    @app.route("/profile/<username>/following")
+    def get_following(username):
+        user = User.query.filter_by(username=username).first_or_404()
 
         following = [
             {
@@ -919,6 +919,31 @@ def register_routes(app: Flask) -> None:
         ]
 
         return jsonify(following)
+    
+    @app.route("/follow/<int:user_id>", methods=["POST"])
+    @login_required
+    def follow(user_id):
+        user = User.query.get_or_404(user_id)
+
+        if user == current_user:
+            return "", 400
+
+        if not current_user.following.filter_by(id=user.id).first():
+            current_user.following.append(user)
+            db.session.commit()
+
+        return jsonify({"status": "followed"})
+    
+    @app.route("/unfollow/<int:user_id>", methods=["POST"])
+    @login_required
+    def unfollow(user_id):
+        user = User.query.get_or_404(user_id)
+
+        if current_user.following.filter_by(id=user.id).first():
+            current_user.following.remove(user)
+            db.session.commit()
+
+        return jsonify({"status": "unfollowed"})
     
     # Remove later
     @app.route("/seed-follows")

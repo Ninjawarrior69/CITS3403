@@ -41,18 +41,16 @@ function openModal(title, users) {
 
 // Fetch followers
 async function loadFollowers() {
-    const response = await fetch(`/profile/followers`); //`/users/${username}/followers`
+    const response = await fetch(`/profile/${username}/followers`);
     const data = await response.json();
-
     openModal("Followers", data);
 }
 
 
 // Fetch following
 async function loadFollowing() {
-    const response = await fetch(`/profile/following`);
+    const response = await fetch(`/profile/${username}/following`);
     const data = await response.json();
-
     openModal("Following", data);
 }
 
@@ -71,12 +69,28 @@ window.addEventListener("click", (e) => {
     }
 });
 
-function toggleFollow(btn) {
-    if (btn.innerText == "Follow") {
-        btn.innerText = "Following";
-        btn.classList.add("following");
-    } else {
-        btn.innerText = "Follow";
-        btn.classList.remove("following");
+async function toggleFollow(btn) {
+  const userId = btn.dataset.userId;
+  const isFollowing = btn.innerText.trim() === "Unfollow";
+
+  const url = isFollowing
+    ? `/unfollow/${userId}`
+    : `/follow/${userId}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
     }
+  });
+
+  if (response.ok) {
+    if (isFollowing) {
+      btn.innerText = "Follow";
+      btn.classList.remove("following");
+    } else {
+      btn.innerText = "Unfollow";
+      btn.classList.add("following");
+    }
+  }
 }

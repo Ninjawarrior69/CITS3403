@@ -56,8 +56,13 @@
                 <i class="bi bi-pencil-square edit-icon"></i>
               </a>
             {% else %}
-              <button class="user-follow" onclick="toggleFollow(this)">
-                Follow
+            {% set already_following = current_user.following.filter_by(id=profile_user.id).first() %}
+              <button 
+                class="user-follow" 
+                data-user-id="{{ profile_user.id }}" 
+                onclick="toggleFollow(this)"
+              >
+                {{ "Unfollow" if already_following else "Follow" }}
               </button>
             {% endif %}
               
