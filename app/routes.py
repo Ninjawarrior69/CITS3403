@@ -710,13 +710,18 @@ def register_routes(app: Flask) -> None:
 
         db.session.commit()
 
+        next_page = request.form.get("next")
+        if next_page:
+            return redirect(next_page)
+
         return redirect(url_for("book_detail", book_id=book_id))
     
     @app.route("/review/<int:review_id>/delete", methods=["POST"])
     @login_required
     def delete_review(review_id):
         comment = Comment.query.get_or_404(review_id)
-        if comment.user_id != current_user.id:abort(403)
+        if comment.user_id != current_user.id:
+            abort(403)
 
         book_id = comment.book_id
         book = Book.query.get_or_404(book_id)
@@ -728,6 +733,10 @@ def register_routes(app: Flask) -> None:
         book.rating = rating_summary["average"]
 
         db.session.commit()
+
+        next_page = request.form.get("next")
+        if next_page:
+            return redirect(next_page)
 
         return redirect(url_for("book_detail", book_id=book_id))
 
