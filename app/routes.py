@@ -17,6 +17,7 @@ from app.helpers.profile_helpers import (
     update_authenticated_profile,
     update_anonymous_profile
 )
+from app.helpers.review_helpers import create_or_update_review
 
 def chunked(iterable, size):
     iterator = iter(iterable)
@@ -131,6 +132,9 @@ def format_review(comment):
     review_user = comment.user
 
     return {
+        "id": comment.id,
+        "user_id": comment.user_id,
+        "session_id": comment.session_id,
         "username": review_user.username if review_user else comment.username,
         "profile_username": review_user.username if review_user else None,
         "avatar": review_user.avatar if review_user else None,
@@ -578,13 +582,17 @@ def register_routes(app: Flask) -> None:
         reviews = [format_review(comment) for comment in comments]
 
         user_rating = 0
+        my_review = None
+
         if current_user.is_authenticated:
             rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
             shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+            my_review = Comment.query.filter_by(user_id=current_user.id, book_id=book_id).first()
         else:
             session_id = get_session_id()
             rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
             shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+            my_review = Comment.query.filter_by(session_id=session_id, book_id=book_id).first()
 
         if rating:
             user_rating = rating.stars
@@ -600,6 +608,7 @@ def register_routes(app: Flask) -> None:
             reviews=reviews,
             user_rating=user_rating,
             shelf_status=shelf_status,
+            my_review=my_review,
         )
 
     @app.route("/book/<int:book_id>/shelf", methods=["POST"])
@@ -686,32 +695,48 @@ def register_routes(app: Flask) -> None:
             abort(400)
 
         if current_user.is_authenticated:
-            existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-            if existing_rating:
-                existing_rating.stars = stars
-            else:
-                rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
-                db.session.add(rating)
-
-            comment = Comment(user_id=current_user.id, username=current_user.username, book_id=book_id, text=text, stars=stars)
+            create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
         else:
             session_id = get_session_id()
-            existing_rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
-            if existing_rating:
-                existing_rating.stars = stars
-            else:
-                rating = Rating(session_id=session_id, book_id=book_id, stars=stars, username=session.get("profile_username", "Anonymous"))
-                db.session.add(rating)
+            username = session.get("profile_username", "Anonymous")
 
-            comment = Comment(session_id=session_id, username=session.get("profile_username", "Anonymous"), book_id=book_id, text=text, stars=stars)
+            create_or_update_review(book_id=book_id, stars=stars, text=text, session_id=session_id, username=username)
 
-        db.session.add(comment)
-        db.session.commit()
+
+        db.session.flush()
 
         rating_summary = build_rating_summary(book)
         book.rating = rating_summary["average"]
 
         db.session.commit()
+
+        next_page = request.form.get("next")
+        if next_page:
+            return redirect(next_page)
+
+        return redirect(url_for("book_detail", book_id=book_id))
+    
+    @app.route("/review/<int:review_id>/delete", methods=["POST"])
+    @login_required
+    def delete_review(review_id):
+        comment = Comment.query.get_or_404(review_id)
+        if comment.user_id != current_user.id:
+            abort(403)
+
+        book_id = comment.book_id
+        book = Book.query.get_or_404(book_id)
+
+        db.session.delete(comment)
+        db.session.flush()
+
+        rating_summary = build_rating_summary(book)
+        book.rating = rating_summary["average"]
+
+        db.session.commit()
+
+        next_page = request.form.get("next")
+        if next_page:
+            return redirect(next_page)
 
         return redirect(url_for("book_detail", book_id=book_id))
 

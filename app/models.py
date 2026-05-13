@@ -173,11 +173,15 @@ class Comment(db.Model):
     username = db.Column(db.String(80), nullable=False, default="Anonymous")
     text = db.Column(db.Text, nullable=False)
     stars = db.Column(db.Integer, nullable=False, default=0)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     session_id = db.Column(db.String(120), nullable=True)
+
+    __table_args__ = (db.UniqueConstraint("user_id", "book_id", name="unique_user_book_review"),)
 
     def __repr__(self) -> str:
         return f"<Comment {self.id}>"

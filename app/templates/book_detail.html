@@ -144,7 +144,14 @@
                   </div>
                 </div>
 
-                {% if review.profile_username %}
+                {% if current_user.is_authenticated and review.user_id == current_user.id %}
+                  <div class="review-actions">
+                    <form method="POST" action="{{ url_for('delete_review', review_id=review.id) }}" class="delete-review-form">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                      <button type="submit" class="btn-follow">Delete</button>
+                    </form>
+                  </div>
+                {% elif review.profile_username %}
                   <button class="btn-follow" onclick="toggleFollow(this)">
                     Follow
                   </button>
@@ -267,7 +274,7 @@
 
           <!-- REVIEW SECTION -->
           <div class="interaction-section review-section">
-            <p class="section-label">Write your review</p>
+            <p class="section-label">{{ "Edit your review" if my_review else "Write your review" }}</p>
 
             <form
               method="POST"
@@ -279,7 +286,12 @@
                 name="csrf_token"
                 value="{{ csrf_token() }}"
               />
-              <input type="hidden" name="stars" id="review-stars" />
+              <input 
+                type="hidden" 
+                name="stars" 
+                id="review-stars" 
+                value="{{ my_review.stars if my_review else '' }}"
+              />
 
               <textarea
                 name="text"
@@ -287,10 +299,10 @@
                 class="review-textarea"
                 placeholder="Write your review..."
                 required
-              ></textarea>
+              >{{ my_review.text if my_review else "" }}</textarea>
 
               <button type="submit" class="secondary-btn post-review-btn">
-                Post Review
+                {{ "Update Review" if my_review else "Post Review" }}
               </button>
             </form>
           </div>
