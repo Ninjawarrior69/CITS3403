@@ -138,53 +138,6 @@ def seed_books_if_empty():
     db.session.add_all(comments)
     db.session.commit()
 
-def seed_follow_data():
-
-    if User.query.filter_by(username="leoleo").first():
-        return
-
-    leo = User(
-        name="Leo",
-        username="leoleo",
-        email="leo@gmail.com",
-    )
-    leo.set_password("test123")
-
-    stella = User(
-        name="Stella",
-        username="stella",
-        email="stella@gmail.com"
-    )
-    stella.set_password("test123")
-
-    oliver = User(
-        name="Oliver",
-        username="oliver",
-        email="oliver@gmail.com"
-    )
-    oliver.set_password("test123")
-
-    valentine = User(
-        name="Valentine",
-        username="valentine",
-        email="valentine@gmail.com"
-    )
-    valentine.set_password("test123")
-
-    db.session.add_all([leo, stella, oliver, valentine])
-    db.session.commit()
-
-    leo.following.append(stella)
-    leo.following.append(oliver)
-
-    stella.following.append(leo)
-
-    oliver.following.append(valentine)
-
-    valentine.following.append(leo)
-
-    db.session.commit()
-
 def format_review(comment):
     review_user = comment.user
 
