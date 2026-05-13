@@ -73,26 +73,22 @@ window.addEventListener("click", (e) => {
 
 async function toggleFollow(btn) {
   const userId = btn.dataset.userId;
-  const isFollowing = btn.innerText.trim() === "Unfollow";
+  const icon = btn.querySelector("i");
+
+  const isFollowing = icon.classList.contains("bi-person-dash");
 
   const url = isFollowing
     ? `/unfollow/${userId}`
     : `/follow/${userId}`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
+  const response = await fetch(url, { method: "POST"});
 
   if (response.ok) {
-    if (isFollowing) {
-      btn.innerText = "Follow";
-      btn.classList.remove("following");
-    } else {
-      btn.innerText = "Unfollow";
-      btn.classList.add("following");
-    }
+    const newState = !isFollowing;
+
+    btn.classList.toggle("is-following", newState);
+
+    icon.classList.toggle("bi-person-plus", !newState);
+    icon.classList.toggle("bi-person-dash", newState);
   }
 }
