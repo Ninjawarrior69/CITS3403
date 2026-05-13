@@ -127,53 +127,6 @@ def seed_books_if_empty():
     db.session.add_all(comments)
     db.session.commit()
 
-def seed_follow_data():
-
-    if User.query.filter_by(username="leoleo").first():
-        return
-
-    leo = User(
-        name="Leo",
-        username="leoleo",
-        email="leo@gmail.com",
-    )
-    leo.set_password("test123")
-
-    stella = User(
-        name="Stella",
-        username="Stella",
-        email="stella@gmail.com"
-    )
-    stella.set_password("test123")
-
-    oliver = User(
-        name="Oliver",
-        username="Oliver",
-        email="oliver@gmail.com"
-    )
-    oliver.set_password("test123")
-
-    valentine = User(
-        name="Valentine",
-        username="Valentine",
-        email="valentine@gmail.com"
-    )
-    valentine.set_password("test123")
-
-    db.session.add_all([leo, stella, oliver, valentine])
-    db.session.commit()
-
-    leo.following.append(stella)
-    leo.following.append(oliver)
-
-    stella.following.append(leo)
-
-    oliver.following.append(valentine)
-
-    valentine.following.append(leo)
-
-    db.session.commit()
-
 def format_review(comment):
     review_user = comment.user
 
@@ -386,7 +339,7 @@ def register_routes(app: Flask) -> None:
 
         form = LoginForm()
         if form.validate_on_submit():
-            identifier = form.username_or_email.data.strip()
+            identifier = form.username_or_email.data.strip().lower()
             user = User.query.filter(
                 or_(
                     User.username == identifier,
@@ -411,8 +364,8 @@ def register_routes(app: Flask) -> None:
         form = SignupForm()
         if form.validate_on_submit():
             user = User(
-                name=form.username.data.strip(),
-                username=form.username.data.strip(),
+                name=form.username.data.strip().lower(),
+                username=form.username.data.strip().lower(),
                 email=form.email.data.strip().lower(),
             )
             user.set_password(form.password.data)
@@ -919,9 +872,3 @@ def register_routes(app: Flask) -> None:
         ]
 
         return jsonify(following)
-    
-    # Remove later
-    @app.route("/seed-follows")
-    def seed_follows():
-        seed_follow_data()
-        return "Seeded!"
