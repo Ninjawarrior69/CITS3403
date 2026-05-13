@@ -22,7 +22,7 @@
   border-radius: 10px;
   background-color: #f6efd8;
   border: 1px solid #3d2f2a !important;
-  padding: 0 12px;
+  padding: 0 8px;
   height: 35px;
 }
 
@@ -35,6 +35,7 @@
 .search-type-button {
   background-color: transparent;
   border: none;
+  border-right: 1px solid #3D2F2A4D;
   color: #3d2f2a;
   padding: 0 8px;
   height: 100%;
