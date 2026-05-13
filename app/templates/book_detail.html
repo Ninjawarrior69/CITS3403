@@ -146,7 +146,6 @@
 
                 {% if current_user.is_authenticated and review.user_id == current_user.id %}
                   <div class="review-actions">
-                    <a href="#review-form" class="btn-follow">Edit</a>
                     <form method="POST" action="{{ url_for('delete_review', review_id=review.id) }}" class="delete-review-form">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                       <button type="submit" class="btn-follow">Delete</button>
