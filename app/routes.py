@@ -190,12 +190,14 @@ def search_open_library(query, page=1, limit=10):
     if not query:
         return []
 
-    def fetch_results(params):
+    fields = "key,title,author_name,cover_i,edition_key,first_publish_year"
+
+    def fetch_docs(params):
         try:
             response = requests.get(
                 url,
                 params=params,
-                timeout=8,
+                timeout=6,
                 headers={"User-Agent": "BookWorm/1.0"}
             )
 
@@ -227,43 +229,86 @@ def search_open_library(query, page=1, limit=10):
             "publish_year": doc.get("first_publish_year"),
         }
 
-    fields = "key,title,author_name,cover_i,edition_key,first_publish_year"
+    def relevance_score(book):
+        query_lower = query.strip().lower()
+        title_lower = (book["title"] or "").lower()
+        author_lower = (book["author"] or "").lower()
 
-    title_docs = fetch_results({
+        score = 0
+
+        if title_lower == query_lower:
+            score += 100
+        elif title_lower.startswith(query_lower):
+            score += 70
+        elif query_lower in title_lower:
+            score += 50
+
+        if author_lower == query_lower:
+            score += 80
+        elif author_lower.startswith(query_lower):
+            score += 45
+        elif query_lower in author_lower:
+            score += 30
+
+        if book.get("cover_url"):
+            score += 5
+
+        if book.get("publish_year"):
+            score += 2
+
+        return score
+
+    def collect_books(docs):
+        books = []
+        seen_books = set()
+
+        for doc in docs:
+            book = format_book(doc)
+
+            book_key = (
+                (book["title"] or "").strip().lower(),
+                (book["author"] or "").strip().lower(),
+            )
+
+            if book_key in seen_books:
+                continue
+
+            seen_books.add(book_key)
+            books.append(book)
+
+        books.sort(key=relevance_score, reverse=True)
+
+        return books[:limit]
+
+    # Main search: use Open Library's general search first.
+    general_docs = fetch_docs({
+        "q": query,
+        "page": page,
+        "limit": 30,
+        "fields": fields,
+    })
+
+    books = collect_books(general_docs)
+
+    if books:
+        return books
+
+    # Fallback search: only used when general search fails or returns nothing.
+    title_docs = fetch_docs({
         "title": query,
         "page": page,
-        "limit": limit,
+        "limit": 15,
         "fields": fields,
     })
 
-    author_docs = fetch_results({
+    author_docs = fetch_docs({
         "author": query,
         "page": page,
-        "limit": limit,
+        "limit": 15,
         "fields": fields,
     })
 
-    books = []
-    seen_books = set()
-
-    for doc in title_docs + author_docs:
-        book = format_book(doc)
-
-        book_key = (
-            (book["title"] or "").strip().lower(),
-            (book["author"] or "").strip().lower(),
-        )
-
-        if book_key in seen_books:
-            continue
-
-        seen_books.add(book_key)
-        books.append(book)
-
-        if len(books) >= limit:
-            break
-
-    return books
+    return collect_books(title_docs + author_docs)
 
 
 def fetch_openlibrary_description(olid):
