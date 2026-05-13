@@ -17,6 +17,7 @@ from app.helpers.profile_helpers import (
     update_authenticated_profile,
     update_anonymous_profile
 )
+from app.helpers.review_helpers import create_or_update_review
 
 def chunked(iterable, size):
     iterator = iter(iterable)
@@ -686,27 +687,15 @@ def register_routes(app: Flask) -> None:
             abort(400)
 
         if current_user.is_authenticated:
-            existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-            if existing_rating:
-                existing_rating.stars = stars
-            else:
-                rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
-                db.session.add(rating)
-
-            comment = Comment(user_id=current_user.id, username=current_user.username, book_id=book_id, text=text, stars=stars)
+            create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
         else:
             session_id = get_session_id()
-            existing_rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
-            if existing_rating:
-                existing_rating.stars = stars
-            else:
-                rating = Rating(session_id=session_id, book_id=book_id, stars=stars, username=session.get("profile_username", "Anonymous"))
-                db.session.add(rating)
+            username = session.get("profile_username", "Anonymous")
 
-            comment = Comment(session_id=session_id, username=session.get("profile_username", "Anonymous"), book_id=book_id, text=text, stars=stars)
+            create_or_update_review(book_id=book_id, stars=stars, text=text, session_id=session_id, username=username)
 
-        db.session.add(comment)
-        db.session.commit()
+
+        db.session.flush()
 
         rating_summary = build_rating_summary(book)
         book.rating = rating_summary["average"]
