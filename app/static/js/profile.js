@@ -23,13 +23,15 @@ function openModal(title, users) {
         const li = document.createElement("li");
 
         li.innerHTML = `
-            <div class="user-row">
+            <a href="/user/${encodeURIComponent(user.username)}" class="user-row">
                 ${user.avatar
                     ? `<img src="/static/${user.avatar}" class="avatar">`
-                    : `<div class="avatar avatar-placeholder"></div>`
+                    : `<div class="avatar avatar-placeholder">
+                        ${user.username.charAt(0).toUpperCase()}
+                        </div>`
                 }
                 <span>${user.username}</span>
-            </div>
+            </a>
         `;
 
         modalList.appendChild(li);

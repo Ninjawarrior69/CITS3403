@@ -854,7 +854,7 @@ def register_routes(app: Flask) -> None:
                 "username": follower.username,
                 "avatar": follower.avatar
             }
-            for follower in user.followers
+            for follower in user.followers.all()
         ]
 
         return jsonify(followers)
@@ -868,7 +868,7 @@ def register_routes(app: Flask) -> None:
                 "username": followed.username,
                 "avatar": followed.avatar
             }
-            for followed in user.following
+            for followed in user.following.all()
         ]
 
         return jsonify(following)
