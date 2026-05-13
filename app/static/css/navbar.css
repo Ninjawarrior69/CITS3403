@@ -235,6 +235,15 @@
   margin-right: 8px;
 }
 
+/* Fixed navbar */
+.global-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1050;
+}
+
 @media (max-width: 991px) {
   .search-wrapper {
     width: 100%;

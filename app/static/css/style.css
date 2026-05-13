@@ -101,3 +101,12 @@ hr {
 input[type="search"]::-webkit-search-cancel-button {
     -webkit-appearance: none;
 }
+
+/* Space for fixed navbar */
+body:not(.auth-page) {
+  padding-top: 68px;
+}
+
+html {
+  scroll-padding-top: 68px;
+}
