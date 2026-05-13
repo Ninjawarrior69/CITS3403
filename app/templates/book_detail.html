@@ -73,45 +73,6 @@
           </div>
         </div>
 
-        <!-- AUTHOR -->
-        <div class="section-card">
-          <h2>About the Author</h2><br>
-
-          <div class="author-box">
-            <div class="avatar">{{ book.author[0] }}</div>
-
-            <div class="author-info">
-              <div class="author-top">
-                <div class="author-name">
-                  <h3>{{ book.author }}</h3>
-                  <button class="btn-follow" onclick="toggleFollow(this)">
-                    Follow
-                  </button>
-                </div>
-              </div>
-
-              <p>
-                {{ author.followers if author else 0 }} followers
-              </p>
-
-              <p id="author-desc" class="{% if author and author.bio and author.bio|length > 250 %}description-collapsed{% endif %}">
-                {{ author.bio if author else "Author bio coming soon." }}
-              </p>
-
-              {% if author and author.bio and author.bio|length > 250 %}
-
-                <button
-                  class="show-more-btn"
-                  onclick="toggleSection('author-desc', this)"
-                >
-                  Show More
-                </button>
-              {% endif %}
-
-            </div>
-          </div>
-        </div>
-
         <!-- COMMUNITY REVIEWS -->
         <div class="section-card">
           <h2>Community Reviews</h2>
@@ -225,27 +186,12 @@
       <!-- RIGHT SIDEBAR -->
       <div class="sidebar">
         <div class="sidebar-card">
-          {% if book.cover_url %}
-          <img src="{{ book.cover_url }}" class="book-cover-sm mb-3"/>
-          {% else %}
-          <div class="book-cover-sm-placeholder">
-              Cover Unavailable
-          </div>
-          {% endif %}
-          
-          <h3 class="mt-3">{{ book.title }}</h3>
-          <p>by {{ book.author }}</p>
-
-          <div class="rating mb-0">
-            {% for i in range(rating_summary.average | int) %}★{% endfor %} {%
-            for i in range(5 - (rating_summary.average | int)) %}☆{% endfor %}
-            {{ rating_summary.average }}
-          </div>
+          <h2 class="mb-0" style="font-size: x-large;">My Activity</h2>
 
           <button 
             type="button"
             id="openShelfModal"
-            class="primary-btn {% if shelf_status %}active{% endif %}"
+            class="primary-btn mb-0 {% if shelf_status %}active{% endif %}"
           >
             {% if shelf_status %}
               ✓ {{ shelf_status }}
