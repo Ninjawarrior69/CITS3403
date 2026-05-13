@@ -17,6 +17,13 @@ from app.helpers.profile_helpers import (
     update_authenticated_profile,
     update_anonymous_profile
 )
+from app.search_helpers import (
+    normalise_page,
+    normalise_search_type,
+    search_book_suggestions,
+    search_users,
+    user_to_suggestion,
+)
 
 def chunked(iterable, size):
     iterator = iter(iterable)
@@ -718,29 +725,18 @@ def register_routes(app: Flask) -> None:
     @app.route("/search")
     def search():
         query = request.args.get("q", "").strip()
-        search_type = request.args.get("type", "books").strip()
-
-        try:
-            page = int(request.args.get("page", 1))
-        except ValueError:
-            page = 1
+        search_type = normalise_search_type(request.args.get("type", "books"))
+        page = normalise_page(request.args.get("page", 1))
 
         books = []
         users = []
-        empty_query = False
+        empty_query = not bool(query)
 
         if query:
             if search_type == "users":
-                users = User.query.filter(
-                    or_(
-                        User.username.ilike(f"%{query}%"),
-                        User.name.ilike(f"%{query}%"),
-                    )
-                ).order_by(User.username.asc()).limit(10).all()
+                users = search_users(query, limit=10)
             else:
                 books = search_open_library(query, page=page)
-        else:
-            empty_query = True
 
         return render_template(
             "search-result.html",
@@ -755,44 +751,21 @@ def register_routes(app: Flask) -> None:
     @app.route("/search-suggestions")
     def search_suggestions():
         query = request.args.get("q", "").strip()
-        search_type = request.args.get("type", "books").strip()
+        search_type = normalise_search_type(request.args.get("type", "books"))
 
         if not query:
             return jsonify([])
 
         if search_type == "users":
-            users = User.query.filter(
-                or_(
-                    User.username.ilike(f"%{query}%"),
-                    User.name.ilike(f"%{query}%"),
-                )
-            ).limit(5).all()
-
-            suggestions = []
-            for user in users:
-                suggestions.append({
-                    "id": user.id,
-                    "username": user.username,
-                    "name": user.name,
-                })
+            users = search_users(query, limit=5)
+            suggestions = [user_to_suggestion(user) for user in users]
 
             return jsonify(suggestions)
-
-        books = Book.query.filter(
-            or_(
-                Book.title.ilike(f"%{query}%"),
-                Book.author.ilike(f"%{query}%"),
-            )
-        ).limit(5).all()
-
-        suggestions = []
-        for book in books:
-            suggestions.append({
-                "id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "cover_url": book.cover_url
-            })
+        suggestions = search_book_suggestions(
+            query,
+            open_library_search_func=search_open_library,
+            limit=5,
+        )
 
         return jsonify(suggestions)
 
