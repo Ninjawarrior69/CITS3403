@@ -73,7 +73,12 @@
   gap: 24px;
 }
 
+.trending-books-grid > * {
+  min-width: 0;
+}
+
 .trending-book-card {
+  width: 100%;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -117,6 +122,7 @@
 
 .book-meta {
   padding: 0 2px;
+  min-width: 0;
 }
 
 .book-title {
@@ -125,12 +131,18 @@
   color: #000000;
   margin: 0 0 6px;
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .book-author {
   font-size: 0.82rem;
   color: #6b5d56;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Bottom two-column layout */
