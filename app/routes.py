@@ -289,6 +289,7 @@ def register_routes(app: Flask) -> None:
         "search",
         "search_suggestions",
         "book_detail",
+        "import_book",
         "static"
     }
 
