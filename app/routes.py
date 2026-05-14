@@ -30,24 +30,6 @@ def get_session_id():
     return session["session_id"]
 
 
-def get_shelf_counts(session_id):
-    return {
-        "read": ShelfItem.query.filter_by(session_id=session_id, status="Read").count(),
-        "currently_reading": ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").count(),
-        "to_be_read": ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").count(),
-        "did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count(),
-    }
-
-
-def get_shelf_counts_for_user(user_id):
-    return {
-        "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
-        "currently_reading": ShelfItem.query.filter_by(user_id=user_id, status="Currently Reading").count(),
-        "to_be_read": ShelfItem.query.filter_by(user_id=user_id, status="To Be Read").count(),
-        "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count(),
-    }
-
-
 def get_user_shelf_counts(user_id):
     return {
         "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
@@ -431,7 +413,7 @@ def register_routes(app: Flask) -> None:
     def read():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
-            counts = get_shelf_counts_for_user(current_user.id)
+            counts = get_user_shelf_counts(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="Read").all()
@@ -445,7 +427,7 @@ def register_routes(app: Flask) -> None:
     def currently_reading():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="Currently Reading").all()
-            counts = get_shelf_counts_for_user(current_user.id)
+            counts = get_user_shelf_counts(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").all()
@@ -458,7 +440,7 @@ def register_routes(app: Flask) -> None:
     def to_be_read():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="To Be Read").all()
-            counts = get_shelf_counts_for_user(current_user.id)
+            counts = get_user_shelf_counts(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").all()
@@ -472,7 +454,7 @@ def register_routes(app: Flask) -> None:
     def did_not_finish():
         if current_user.is_authenticated:
             items = ShelfItem.query.filter_by(user_id=current_user.id, status="Did Not Finish").all()
-            counts = get_shelf_counts_for_user(current_user.id)
+            counts = get_user_shelf_counts(current_user.id)
         else:
             session_id = get_session_id()
             items = ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").all()
