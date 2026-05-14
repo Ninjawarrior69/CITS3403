@@ -500,6 +500,10 @@
   margin-top: 10px;
 }
 
+.reviews-title:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 576px) {
   .my-review-title-row {
     flex-direction: column;

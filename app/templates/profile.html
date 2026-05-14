@@ -188,9 +188,9 @@
         <!-- Reviews -->
         <div class="mb-5 mt-4">
           {% if is_own_profile %}
-          <a href="{{ url_for('my_reviews') }}"><h4 class="section-title mb-4">Recent Reviews</h4></a>
+          <a href="{{ url_for('my_reviews') }}"><h4 class="section-title reviews-title mb-4">Recent Reviews</h4></a>
           {% else %}
-          <a href="{{ url_for('public_user_reviews', username=profile_username) }}"><h4 class="section-title mb-4">Recent Reviews</h4></a>
+          <a href="{{ url_for('public_user_reviews', username=profile_username) }}"><h4 class="section-title reviews-title mb-4">Recent Reviews</h4></a>
           {% endif %}
           {% for review in recent_reviews %}
           <div class="row align-items-start mb-4">
