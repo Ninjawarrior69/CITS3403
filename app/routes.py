@@ -2,7 +2,7 @@ from uuid import uuid4
 from itertools import islice
 
 from flask import Flask, render_template, abort, request, redirect, url_for, session, flash, jsonify
-from flask_login import current_user, login_user, login_required, logout_user
+from flask_login import current_user, login_user, logout_user
 from sqlalchemy import or_
 import requests
 
@@ -295,8 +295,26 @@ def normalize_openlibrary_id(raw_openlibrary_id):
 
     return normalized
 
-
 def register_routes(app: Flask) -> None:
+
+    # Define routes which do not require login
+    PUBLIC_ROUTES = {
+        "home",
+        "login",
+        "signup",
+        "search",
+        "search_suggestions",
+        "static"
+    }
+
+    @app.before_request
+    def require_login():
+        if request.endpoint in PUBLIC_ROUTES:
+            return
+        
+        if not current_user.is_authenticated:
+            return redirect(url_for("login"))
+
     @app.route("/")
     def home():
         seed_books_if_empty()
@@ -382,7 +400,6 @@ def register_routes(app: Flask) -> None:
         return render_template("signup.html", form=form)
 
     @app.route("/logout")
-    @login_required
     def logout():
         logout_user()
         flash("You have been logged out.", "info")
@@ -717,7 +734,6 @@ def register_routes(app: Flask) -> None:
         return redirect(url_for("book_detail", book_id=book_id))
     
     @app.route("/review/<int:review_id>/delete", methods=["POST"])
-    @login_required
     def delete_review(review_id):
         comment = Comment.query.get_or_404(review_id)
         if comment.user_id != current_user.id:
@@ -899,7 +915,6 @@ def register_routes(app: Flask) -> None:
         return jsonify(following)
     
     @app.route("/follow/<int:user_id>", methods=["POST"])
-    @login_required
     def follow(user_id):
         user = User.query.get_or_404(user_id)
 
@@ -913,7 +928,6 @@ def register_routes(app: Flask) -> None:
         return jsonify({"status": "followed"})
     
     @app.route("/unfollow/<int:user_id>", methods=["POST"])
-    @login_required
     def unfollow(user_id):
         user = User.query.get_or_404(user_id)
 
