@@ -504,6 +504,17 @@
     text-decoration: underline;
 }
 
+#modal-list li {
+    padding: 10px 14px;
+    border-bottom: 1px solid #3D2F2A4D;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+#modal-list li:hover {
+    background-color: #768e784D;
+}
+
 @media (max-width: 576px) {
   .my-review-title-row {
     flex-direction: column;
