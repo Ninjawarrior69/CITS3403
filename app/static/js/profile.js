@@ -43,7 +43,7 @@ function openModal(title, users) {
 
 // Fetch followers
 async function loadFollowers() {
-    const response = await fetch(`/profile/${username}/followers`);
+    const response = await fetch(`/user/${username}/followers`);
     const data = await response.json();
     openModal("Followers", data);
 }
@@ -51,7 +51,7 @@ async function loadFollowers() {
 
 // Fetch following
 async function loadFollowing() {
-    const response = await fetch(`/profile/${username}/following`);
+    const response = await fetch(`/user/${username}/following`);
     const data = await response.json();
     openModal("Following", data);
 }

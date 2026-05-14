@@ -2,7 +2,7 @@ from uuid import uuid4
 from itertools import islice
 
 from flask import Flask, render_template, abort, request, redirect, url_for, session, flash, jsonify
-from flask_login import current_user, login_user, login_required, logout_user
+from flask_login import current_user, login_user, logout_user
 from sqlalchemy import or_
 import requests
 
@@ -14,40 +14,22 @@ from app.helpers.profile_helpers import (
     save_avatar,
     get_profile_data,
     get_public_profile_data,
-    update_authenticated_profile,
-    update_anonymous_profile
+    update_profile
 )
 from app.helpers.review_helpers import create_or_update_review
 
+# Used for creating My Books shelves
 def chunked(iterable, size):
     iterator = iter(iterable)
     return iter(lambda: list(islice(iterator, size)), [])
 
-
+# Session ID
 def get_session_id():
     if "session_id" not in session:
         session["session_id"] = str(uuid4())
     return session["session_id"]
 
-
-def get_shelf_counts(session_id):
-    return {
-        "read": ShelfItem.query.filter_by(session_id=session_id, status="Read").count(),
-        "currently_reading": ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").count(),
-        "to_be_read": ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").count(),
-        "did_not_finish": ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").count(),
-    }
-
-
-def get_shelf_counts_for_user(user_id):
-    return {
-        "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
-        "currently_reading": ShelfItem.query.filter_by(user_id=user_id, status="Currently Reading").count(),
-        "to_be_read": ShelfItem.query.filter_by(user_id=user_id, status="To Be Read").count(),
-        "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count(),
-    }
-
-
+# Shelf counts to display on profile
 def get_user_shelf_counts(user_id):
     return {
         "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
@@ -56,7 +38,7 @@ def get_user_shelf_counts(user_id):
         "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count()
     }
 
-
+# Seed books
 def seed_books_if_empty():
     if Book.query.first():
         return
@@ -128,6 +110,7 @@ def seed_books_if_empty():
     db.session.add_all(comments)
     db.session.commit()
 
+# Review formatting
 def format_review(comment):
     review_user = comment.user
 
@@ -147,7 +130,7 @@ def format_review(comment):
         "time": comment.created_at.strftime("%Y-%m-%d"),
     }
 
-
+# Rating summary
 def build_rating_summary(book):
     all_stars = [rating.stars for rating in book.ratings]
     total = len(all_stars)
@@ -175,12 +158,12 @@ def build_rating_summary(book):
         "counts": counts,
     }
 
-
+# Display rating
 def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
-
+# Search Open Library API
 def search_open_library(query, page=1, limit=10):
     url = "https://openlibrary.org/search.json"
 
@@ -213,7 +196,7 @@ def search_open_library(query, page=1, limit=10):
         })
     return books
 
-
+# Fetch description from Open Library API
 def fetch_openlibrary_description(olid):
     if not olid:
         return "Not available for this title."
@@ -237,7 +220,7 @@ def fetch_openlibrary_description(olid):
 
     return description or "Not available for this title."
 
-
+# Fetch edition page count from Open Library API
 def fetch_page_count(openlibrary_id, edition_key=None):
     if edition_key:
         url = f"https://openlibrary.org/books/{edition_key}.json"
@@ -297,6 +280,28 @@ def normalize_openlibrary_id(raw_openlibrary_id):
 
 
 def register_routes(app: Flask) -> None:
+
+    # Define routes which do not require login
+    PUBLIC_ROUTES = {
+        "home",
+        "login",
+        "signup",
+        "search",
+        "search_suggestions",
+        "book_detail",
+        "import_book",
+        "static"
+    }
+
+    @app.before_request
+    def require_login():
+        if request.endpoint in PUBLIC_ROUTES:
+            return
+        
+        if not current_user.is_authenticated:
+            return redirect(url_for("login"))
+
+    # Home
     @app.route("/")
     def home():
         seed_books_if_empty()
@@ -306,21 +311,18 @@ def register_routes(app: Flask) -> None:
         reviews = [format_review(comment) for comment in comments]
         return render_template("home.html", trending_books=trending_books, most_read_books=most_read_books, reviews=reviews)
 
+    # Current user profile
     @app.route("/profile")
-    @app.route("/profile.html")
     def profile():
-        profile_data = get_profile_data(
-            get_session_id,
-            get_shelf_counts,
-            get_user_shelf_counts
-        )
+        profile_data = get_profile_data(get_user_shelf_counts)
 
-        profile_data["followers_count"] = current_user.followers.count() if current_user.is_authenticated else 0
-        profile_data["following_count"] = current_user.following.count() if current_user.is_authenticated else 0
+        profile_data["followers_count"] = current_user.followers.count()
+        profile_data["following_count"] = current_user.following.count()
         profile_data["is_own_profile"] = True
 
         return render_template("profile.html", **profile_data)
     
+    # View other users profiles
     @app.route("/user/<username>")
     def public_profile(username):
         user = User.query.filter_by(username=username).first_or_404()
@@ -334,9 +336,8 @@ def register_routes(app: Flask) -> None:
         profile_data["following_count"] = user.following.count()
         return render_template("profile.html", **profile_data)  
 
-
+    # Login
     @app.route("/login", methods=["GET", "POST"])
-    @app.route("/login.html", methods=["GET", "POST"])
     def login():
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
@@ -359,8 +360,8 @@ def register_routes(app: Flask) -> None:
 
         return render_template("login.html", form=form)
 
+    # Sign Up
     @app.route("/signup", methods=["GET", "POST"])
-    @app.route("/signup.html", methods=["GET", "POST"])
     def signup():
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
@@ -381,89 +382,62 @@ def register_routes(app: Flask) -> None:
 
         return render_template("signup.html", form=form)
 
+    # Logout
     @app.route("/logout")
-    @login_required
     def logout():
         logout_user()
         flash("You have been logged out.", "info")
         return redirect(url_for("home"))
 
     @app.route("/edit-profile", methods=["GET", "POST"])
-    @app.route("/edit-profile.html", methods=["GET", "POST"])
     def edit_profile():
         if request.method == "POST":
             avatar_file = request.files.get("avatar")
 
-            if current_user.is_authenticated:
-                update_authenticated_profile(request, avatar_file)
-            else:
-                update_anonymous_profile(request, avatar_file)
+            update_profile(request, avatar_file)
 
             return redirect(url_for("profile"))
 
-        profile_data = get_profile_data(
-            get_session_id,
-            get_shelf_counts,
-            get_user_shelf_counts
-        )
+        profile_data = get_profile_data(get_user_shelf_counts)
 
         return render_template("edit-profile.html", **profile_data)
 
-    @app.route("/read")
-    @app.route("/read.html")
+    # My Books - Read
+    @app.route("/my-books/read")
     def read():
-        if current_user.is_authenticated:
-            items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
-            counts = get_shelf_counts_for_user(current_user.id)
-        else:
-            session_id = get_session_id()
-            items = ShelfItem.query.filter_by(session_id=session_id, status="Read").all()
-            counts = get_shelf_counts(session_id)
+        items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
+        counts = get_user_shelf_counts(current_user.id)
 
         shelf_rows = chunked(items, 6)
         return render_template("read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
-    @app.route("/currently-reading")
-    @app.route("/currently-reading.html")
+    # My Books - Currently Reading
+    @app.route("/my-books/currently-reading")
     def currently_reading():
-        if current_user.is_authenticated:
-            items = ShelfItem.query.filter_by(user_id=current_user.id, status="Currently Reading").all()
-            counts = get_shelf_counts_for_user(current_user.id)
-        else:
-            session_id = get_session_id()
-            items = ShelfItem.query.filter_by(session_id=session_id, status="Currently Reading").all()
-            counts = get_shelf_counts(session_id)
+        items = ShelfItem.query.filter_by(user_id=current_user.id, status="Currently Reading").all()
+        counts = get_user_shelf_counts(current_user.id)
 
         return render_template("currently-reading.html", items=items, counts=counts, is_public_shelf=False)
 
-    @app.route("/to-be-read")
-    @app.route("/to-be-read.html")
+    # My Books - To Be Read
+    @app.route("/my-books/to-be-read")
     def to_be_read():
-        if current_user.is_authenticated:
-            items = ShelfItem.query.filter_by(user_id=current_user.id, status="To Be Read").all()
-            counts = get_shelf_counts_for_user(current_user.id)
-        else:
-            session_id = get_session_id()
-            items = ShelfItem.query.filter_by(session_id=session_id, status="To Be Read").all()
-            counts = get_shelf_counts(session_id)
+        items = ShelfItem.query.filter_by(user_id=current_user.id, status="To Be Read").all()
+        counts = get_user_shelf_counts(current_user.id)
 
         shelf_rows = chunked(items, 6)
         return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
-    @app.route("/did-not-finish")
-    @app.route("/did-not-finish.html")
+    # My Books - Did Not Finish
+    @app.route("/my-books/did-not-finish")
     def did_not_finish():
-        if current_user.is_authenticated:
-            items = ShelfItem.query.filter_by(user_id=current_user.id, status="Did Not Finish").all()
-            counts = get_shelf_counts_for_user(current_user.id)
-        else:
-            session_id = get_session_id()
-            items = ShelfItem.query.filter_by(session_id=session_id, status="Did Not Finish").all()
-            counts = get_shelf_counts(session_id)
+        items = ShelfItem.query.filter_by(user_id=current_user.id, status="Did Not Finish").all()
+        counts = get_user_shelf_counts(current_user.id)
 
         shelf_rows = chunked(items, 6)
         return render_template("did-not-finish.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
     
+    # Other users - Read
     @app.route("/user/<username>/read")
     def public_user_read(username):
         user = User.query.filter_by(username=username).first_or_404()
@@ -480,6 +454,7 @@ def register_routes(app: Flask) -> None:
             shelf_owner_name=user.name or user.username
         )
     
+    # Other users - Currently Reading
     @app.route("/user/<username>/currently-reading")
     def public_user_currently_reading(username):
         user = User.query.filter_by(username=username).first_or_404()
@@ -495,6 +470,7 @@ def register_routes(app: Flask) -> None:
             shelf_owner_name=user.name or user.username
         )
     
+    # Other users - To Be Read
     @app.route("/user/<username>/to-be-read")
     def public_user_to_be_read(username):
         user = User.query.filter_by(username=username).first_or_404()
@@ -511,6 +487,7 @@ def register_routes(app: Flask) -> None:
             shelf_owner_name=user.name or user.username
         )
     
+    # Other users - Did Not Finish
     @app.route("/user/<username>/did-not-finish")
     def public_user_did_not_finish(username):
         user = User.query.filter_by(username=username).first_or_404()
@@ -527,18 +504,12 @@ def register_routes(app: Flask) -> None:
             shelf_owner_name=user.name or user.username
         )
 
+    # My Reviews
     @app.route("/my-reviews")
-    @app.route("/my-reviews.html")
     def my_reviews():
-        if current_user.is_authenticated:
-            comments = Comment.query.filter_by(
-                user_id=current_user.id
-            ).order_by(Comment.created_at.desc()).all()
-        else:
-            session_id = get_session_id()
-            comments = Comment.query.filter_by(
-                session_id=session_id
-            ).order_by(Comment.created_at.desc()).all()
+        comments = Comment.query.filter_by(
+            user_id=current_user.id
+        ).order_by(Comment.created_at.desc()).all()
 
         reviews = [format_review(comment) for comment in comments]
         return render_template("my-reviews.html", reviews=reviews)
@@ -557,6 +528,7 @@ def register_routes(app: Flask) -> None:
             review_owner_name=user.name or user.username
         )
 
+    # Update Currently Reading progress
     @app.route("/shelf/<int:item_id>/progress", methods=["POST"])
     def update_progress(item_id):
         item = ShelfItem.query.get_or_404(item_id)
@@ -578,6 +550,7 @@ def register_routes(app: Flask) -> None:
         db.session.commit()
         return redirect(url_for("currently_reading"))
 
+    # Book detail
     @app.route("/book/<int:book_id>")
     def book_detail(book_id):
         book = Book.query.get_or_404(book_id)
@@ -625,6 +598,7 @@ def register_routes(app: Flask) -> None:
             my_review=my_review,
         )
 
+    # Book Detail - Add to Shelf status
     @app.route("/book/<int:book_id>/shelf", methods=["POST"])
     def update_shelf_status(book_id):
         Book.query.get_or_404(book_id)
@@ -634,11 +608,7 @@ def register_routes(app: Flask) -> None:
         if status not in allowed_status:
             abort(400)
 
-        if current_user.is_authenticated:
-            shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-        else:
-            session_id = get_session_id()
-            shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+        shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 
         if status == "remove":
             if shelf_item:
@@ -647,15 +617,13 @@ def register_routes(app: Flask) -> None:
             if shelf_item:
                 shelf_item.status = status
             else:
-                if current_user.is_authenticated:
-                    shelf_item = ShelfItem(user_id=current_user.id, book_id=book_id, status=status)
-                else:
-                    shelf_item = ShelfItem(session_id=session_id, book_id=book_id, status=status)
+                shelf_item = ShelfItem(user_id=current_user.id, book_id=book_id, status=status)
                 db.session.add(shelf_item)
 
         db.session.commit()
         return redirect(url_for("book_detail", book_id=book_id))
 
+    # Book Detail - Rate book
     @app.route("/book/<int:book_id>/rate", methods=["POST"])
     def rate_book(book_id):
         book = Book.query.get_or_404(book_id)
@@ -664,27 +632,15 @@ def register_routes(app: Flask) -> None:
         if stars is None or stars < 0 or stars > 5:
             abort(400)
 
-        if current_user.is_authenticated:
-            existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-            if existing_rating:
-                if stars == 0:
-                    db.session.delete(existing_rating)
-                else:
-                    existing_rating.stars = stars
-            elif stars > 0:
-                rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
-                db.session.add(rating)
-        else:
-            session_id = get_session_id()
-            existing_rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
-            if existing_rating:
-                if stars == 0:
-                    db.session.delete(existing_rating)
-                else:
-                    existing_rating.stars = stars
-            elif stars > 0:
-                rating = Rating(session_id=session_id, book_id=book_id, stars=stars)
-                db.session.add(rating)
+        existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        if existing_rating:
+            if stars == 0:
+                db.session.delete(existing_rating)
+            else:
+                existing_rating.stars = stars
+        elif stars > 0:
+            rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
+            db.session.add(rating)
 
         db.session.commit()
 
@@ -695,6 +651,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
 
+    # Book Detail - Post review for book
     @app.route("/book/<int:book_id>/review", methods=["POST"])
     def post_review(book_id):
         book = Book.query.get_or_404(book_id)
@@ -708,14 +665,7 @@ def register_routes(app: Flask) -> None:
         if stars is None or stars < 1 or stars > 5:
             abort(400)
 
-        if current_user.is_authenticated:
-            create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
-        else:
-            session_id = get_session_id()
-            username = session.get("profile_username", "Anonymous")
-
-            create_or_update_review(book_id=book_id, stars=stars, text=text, session_id=session_id, username=username)
-
+        create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
 
         db.session.flush()
 
@@ -730,8 +680,8 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
     
+    # Book Detail - Delete review
     @app.route("/review/<int:review_id>/delete", methods=["POST"])
-    @login_required
     def delete_review(review_id):
         comment = Comment.query.get_or_404(review_id)
         if comment.user_id != current_user.id:
@@ -754,6 +704,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
 
+    # Search
     @app.route("/search")
     def search():
         query = request.args.get("q", "").strip()
@@ -791,6 +742,7 @@ def register_routes(app: Flask) -> None:
             empty_query=empty_query
         )
 
+    # Search Suggestions
     @app.route("/search-suggestions")
     def search_suggestions():
         query = request.args.get("q", "").strip()
@@ -835,6 +787,7 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(suggestions)
 
+    # Import book from Open Library API
     @app.route("/import-book")
     def import_book():
         openlibrary_id = normalize_openlibrary_id(request.args.get("olid"))
@@ -884,7 +837,8 @@ def register_routes(app: Flask) -> None:
             url_for("book_detail", book_id=new_book.id)
         )
     
-    @app.route("/profile/<username>/followers")
+    # Get a users follower list
+    @app.route("/user/<username>/followers")
     def get_followers(username):
         user = User.query.filter_by(username=username).first_or_404()
 
@@ -898,7 +852,8 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(followers)
     
-    @app.route("/profile/<username>/following")
+    # Get a users following list
+    @app.route("/user/<username>/following")
     def get_following(username):
         user = User.query.filter_by(username=username).first_or_404()
 
@@ -912,8 +867,8 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(following)
     
+    # Follow other users
     @app.route("/follow/<int:user_id>", methods=["POST"])
-    @login_required
     def follow(user_id):
         user = User.query.get_or_404(user_id)
 
@@ -926,8 +881,8 @@ def register_routes(app: Flask) -> None:
 
         return jsonify({"status": "followed"})
     
+    # Unfollow users
     @app.route("/unfollow/<int:user_id>", methods=["POST"])
-    @login_required
     def unfollow(user_id):
         user = User.query.get_or_404(user_id)
 
