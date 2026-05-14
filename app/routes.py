@@ -23,7 +23,7 @@ def chunked(iterable, size):
     iterator = iter(iterable)
     return iter(lambda: list(islice(iterator, size)), [])
 
-# Session id
+# Session ID
 def get_session_id():
     if "session_id" not in session:
         session["session_id"] = str(uuid4())
@@ -38,7 +38,7 @@ def get_user_shelf_counts(user_id):
         "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count()
     }
 
-
+# Seed books
 def seed_books_if_empty():
     if Book.query.first():
         return
@@ -110,6 +110,7 @@ def seed_books_if_empty():
     db.session.add_all(comments)
     db.session.commit()
 
+# Review formatting
 def format_review(comment):
     review_user = comment.user
 
@@ -129,7 +130,7 @@ def format_review(comment):
         "time": comment.created_at.strftime("%Y-%m-%d"),
     }
 
-
+# Rating summary
 def build_rating_summary(book):
     all_stars = [rating.stars for rating in book.ratings]
     total = len(all_stars)
@@ -157,12 +158,12 @@ def build_rating_summary(book):
         "counts": counts,
     }
 
-
+# Display rating
 def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
-
+# Search Open Library API
 def search_open_library(query, page=1, limit=10):
     url = "https://openlibrary.org/search.json"
 
@@ -195,7 +196,7 @@ def search_open_library(query, page=1, limit=10):
         })
     return books
 
-
+# Fetch description from Open Library API
 def fetch_openlibrary_description(olid):
     if not olid:
         return "Not available for this title."
@@ -219,7 +220,7 @@ def fetch_openlibrary_description(olid):
 
     return description or "Not available for this title."
 
-
+# Fetch edition page count from Open Library API
 def fetch_page_count(openlibrary_id, edition_key=None):
     if edition_key:
         url = f"https://openlibrary.org/books/{edition_key}.json"
@@ -277,6 +278,7 @@ def normalize_openlibrary_id(raw_openlibrary_id):
 
     return normalized
 
+
 def register_routes(app: Flask) -> None:
 
     # Define routes which do not require login
@@ -313,8 +315,8 @@ def register_routes(app: Flask) -> None:
     def profile():
         profile_data = get_profile_data(get_user_shelf_counts)
 
-        profile_data["followers_count"] = current_user.followers.count() if current_user.is_authenticated else 0
-        profile_data["following_count"] = current_user.following.count() if current_user.is_authenticated else 0
+        profile_data["followers_count"] = current_user.followers.count()
+        profile_data["following_count"] = current_user.following.count()
         profile_data["is_own_profile"] = True
 
         return render_template("profile.html", **profile_data)
@@ -771,7 +773,7 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(suggestions)
 
-    # Import book
+    # Import book from Open Library API
     @app.route("/import-book")
     def import_book():
         openlibrary_id = normalize_openlibrary_id(request.args.get("olid"))
@@ -821,7 +823,8 @@ def register_routes(app: Flask) -> None:
             url_for("book_detail", book_id=new_book.id)
         )
     
-    @app.route("/profile/<username>/followers")
+    # Get a users follower list
+    @app.route("/user/<username>/followers")
     def get_followers(username):
         user = User.query.filter_by(username=username).first_or_404()
 
@@ -835,7 +838,8 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(followers)
     
-    @app.route("/profile/<username>/following")
+    # Get a users following list
+    @app.route("/user/<username>/following")
     def get_following(username):
         user = User.query.filter_by(username=username).first_or_404()
 
@@ -849,6 +853,7 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(following)
     
+    # Follow other users
     @app.route("/follow/<int:user_id>", methods=["POST"])
     def follow(user_id):
         user = User.query.get_or_404(user_id)
@@ -862,6 +867,7 @@ def register_routes(app: Flask) -> None:
 
         return jsonify({"status": "followed"})
     
+    # Unfollow users
     @app.route("/unfollow/<int:user_id>", methods=["POST"])
     def unfollow(user_id):
         user = User.query.get_or_404(user_id)

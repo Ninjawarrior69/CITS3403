@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from app.extensions import db
 from app.models import Book, Comment
 
-
+# Save profile pic
 def save_avatar(avatar_file):
 
     filename = secure_filename(
@@ -26,7 +26,7 @@ def save_avatar(avatar_file):
 
     return f"uploads/avatars/{filename}"
 
-
+# Profile data to display
 def get_profile_data(get_user_shelf_counts):
 
     favorite_books = current_user.favorite_books
@@ -52,10 +52,8 @@ def get_profile_data(get_user_shelf_counts):
         "recent_reviews": recent_reviews,
     }
 
-def update_favorite_books(
-    user,
-    favorite_book_ids
-):
+# Favourite books
+def update_favorite_books(user, favorite_book_ids):
 
     user.favorite_books.clear()
 
@@ -80,20 +78,12 @@ def update_favorite_books(
             sorted_books
         )
 
-
-def update_profile(
-    request,
-    avatar_file
-):
+# Update profile
+def update_profile(request, avatar_file):
 
     current_user.name = request.form.get("name")
-
-    current_user.username = request.form.get(
-        "username"
-    )
-
+    current_user.username = request.form.get("username")
     current_user.bio = request.form.get("bio")
-
     current_user.email = request.form.get("email")
 
     if request.form.get("remove_avatar") == "1":
@@ -117,15 +107,10 @@ def update_profile(
     
     db.session.commit()
 
+# Get other user profiles
+def get_public_profile_data(user, get_user_shelf_counts):
 
-def get_public_profile_data(
-    user,
-    get_user_shelf_counts
-):
-
-    counts = get_user_shelf_counts(
-        user.id
-    )
+    counts = get_user_shelf_counts(user.id)
 
     favorite_books = user.favorite_books
 
