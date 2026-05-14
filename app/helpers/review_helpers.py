@@ -1,7 +1,7 @@
 from app.extensions import db
 from app.models import Comment, Rating
 
-
+# Create or update reviews
 def create_or_update_review(book_id, stars, text, user=None, session_id=None, username="Anonymous"):
     """
     Create or update rating and review for one book.
