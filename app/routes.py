@@ -561,15 +561,9 @@ def register_routes(app: Flask) -> None:
         user_rating = 0
         my_review = None
 
-        if current_user.is_authenticated:
-            rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-            shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-            my_review = Comment.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-        else:
-            session_id = get_session_id()
-            rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
-            shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
-            my_review = Comment.query.filter_by(session_id=session_id, book_id=book_id).first()
+        rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        my_review = Comment.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 
         if rating:
             user_rating = rating.stars
@@ -588,6 +582,7 @@ def register_routes(app: Flask) -> None:
             my_review=my_review,
         )
 
+    # Book Detail - Add to Shelf status
     @app.route("/book/<int:book_id>/shelf", methods=["POST"])
     def update_shelf_status(book_id):
         Book.query.get_or_404(book_id)
@@ -597,11 +592,7 @@ def register_routes(app: Flask) -> None:
         if status not in allowed_status:
             abort(400)
 
-        if current_user.is_authenticated:
-            shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-        else:
-            session_id = get_session_id()
-            shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+        shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 
         if status == "remove":
             if shelf_item:
@@ -610,15 +601,13 @@ def register_routes(app: Flask) -> None:
             if shelf_item:
                 shelf_item.status = status
             else:
-                if current_user.is_authenticated:
-                    shelf_item = ShelfItem(user_id=current_user.id, book_id=book_id, status=status)
-                else:
-                    shelf_item = ShelfItem(session_id=session_id, book_id=book_id, status=status)
+                shelf_item = ShelfItem(user_id=current_user.id, book_id=book_id, status=status)
                 db.session.add(shelf_item)
 
         db.session.commit()
         return redirect(url_for("book_detail", book_id=book_id))
 
+    # Book Detail - Rate book
     @app.route("/book/<int:book_id>/rate", methods=["POST"])
     def rate_book(book_id):
         book = Book.query.get_or_404(book_id)
@@ -627,27 +616,15 @@ def register_routes(app: Flask) -> None:
         if stars is None or stars < 0 or stars > 5:
             abort(400)
 
-        if current_user.is_authenticated:
-            existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-            if existing_rating:
-                if stars == 0:
-                    db.session.delete(existing_rating)
-                else:
-                    existing_rating.stars = stars
-            elif stars > 0:
-                rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
-                db.session.add(rating)
-        else:
-            session_id = get_session_id()
-            existing_rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
-            if existing_rating:
-                if stars == 0:
-                    db.session.delete(existing_rating)
-                else:
-                    existing_rating.stars = stars
-            elif stars > 0:
-                rating = Rating(session_id=session_id, book_id=book_id, stars=stars)
-                db.session.add(rating)
+        existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        if existing_rating:
+            if stars == 0:
+                db.session.delete(existing_rating)
+            else:
+                existing_rating.stars = stars
+        elif stars > 0:
+            rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
+            db.session.add(rating)
 
         db.session.commit()
 
@@ -658,6 +635,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
 
+    # Book Detail - Post review for book
     @app.route("/book/<int:book_id>/review", methods=["POST"])
     def post_review(book_id):
         book = Book.query.get_or_404(book_id)
@@ -671,14 +649,7 @@ def register_routes(app: Flask) -> None:
         if stars is None or stars < 1 or stars > 5:
             abort(400)
 
-        if current_user.is_authenticated:
-            create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
-        else:
-            session_id = get_session_id()
-            username = session.get("profile_username", "Anonymous")
-
-            create_or_update_review(book_id=book_id, stars=stars, text=text, session_id=session_id, username=username)
-
+        create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
 
         db.session.flush()
 
@@ -693,6 +664,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
     
+    # Book Detail - Delete review
     @app.route("/review/<int:review_id>/delete", methods=["POST"])
     def delete_review(review_id):
         comment = Comment.query.get_or_404(review_id)
@@ -716,6 +688,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
 
+    # Search
     @app.route("/search")
     def search():
         query = request.args.get("q", "").strip()
@@ -753,6 +726,7 @@ def register_routes(app: Flask) -> None:
             empty_query=empty_query
         )
 
+    # Search Suggestions
     @app.route("/search-suggestions")
     def search_suggestions():
         query = request.args.get("q", "").strip()
@@ -797,6 +771,7 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(suggestions)
 
+    # Import book
     @app.route("/import-book")
     def import_book():
         openlibrary_id = normalize_openlibrary_id(request.args.get("olid"))
