@@ -16,6 +16,14 @@ from app.helpers.profile_helpers import (
     get_public_profile_data,
     update_profile
 )
+from app.helpers.search_helpers import (
+    normalise_page,
+    normalise_search_type,
+    search_books,
+    search_book_suggestions,
+    search_users,
+    user_to_suggestion,
+)
 from app.helpers.review_helpers import create_or_update_review
 
 # Used for creating My Books shelves
@@ -167,34 +175,128 @@ def get_display_rating(book):
 def search_open_library(query, page=1, limit=10):
     url = "https://openlibrary.org/search.json"
 
-    params = {
-        "q": query,
-        "page": page,
-        "limit": limit
-    }
-
-    response = requests.get(url, params=params)
-
-    try:
-        data = response.json()
-    except requests.exceptions.JSONDecodeError:
+    if not query:
         return []
 
-    books = []
+    fields = "key,title,author_name,cover_i,edition_key,first_publish_year"
 
-    for doc in data.get("docs", []):
+    def fetch_docs(params):
+        try:
+            response = requests.get(
+                url,
+                params=params,
+                timeout=6,
+                headers={"User-Agent": "BookWorm/1.0"}
+            )
+
+            response.raise_for_status()
+            return response.json().get("docs", [])
+
+        except requests.exceptions.RequestException as error:
+            print("Open Library request error:", error)
+            return []
+
+        except ValueError as error:
+            print("Open Library JSON error:", error)
+            return []
+
+    def format_book(doc):
         cover_id = doc.get("cover_i")
-        edition_key = doc.get("edition_key", [])
+        edition_keys = doc.get("edition_key") or []
 
-        books.append({
+        return {
             "title": doc.get("title", "Unknown Title"),
             "author": ", ".join(doc.get("author_name", ["Unknown"])),
-            "cover_url": f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg" if cover_id else None,
+            "cover_url": (
+                f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+                if cover_id
+                else None
+            ),
             "openlibrary_id": doc.get("key"),
-            "edition_key": doc.get("edition_key", [None])[0] if doc.get("edition_key") else None,
-            "publish_year": doc.get("first_publish_year")
-        })
-    return books
+            "edition_key": edition_keys[0] if edition_keys else None,
+            "publish_year": doc.get("first_publish_year"),
+        }
+
+    def relevance_score(book):
+        query_lower = query.strip().lower()
+        title_lower = (book["title"] or "").lower()
+        author_lower = (book["author"] or "").lower()
+
+        score = 0
+
+        if title_lower == query_lower:
+            score += 100
+        elif title_lower.startswith(query_lower):
+            score += 70
+        elif query_lower in title_lower:
+            score += 50
+
+        if author_lower == query_lower:
+            score += 80
+        elif author_lower.startswith(query_lower):
+            score += 45
+        elif query_lower in author_lower:
+            score += 30
+
+        if book.get("cover_url"):
+            score += 5
+
+        if book.get("publish_year"):
+            score += 2
+
+        return score
+
+    def collect_books(docs):
+        books = []
+        seen_books = set()
+
+        for doc in docs:
+            book = format_book(doc)
+
+            book_key = (
+                (book["title"] or "").strip().lower(),
+                (book["author"] or "").strip().lower(),
+            )
+
+            if book_key in seen_books:
+                continue
+
+            seen_books.add(book_key)
+            books.append(book)
+
+        books.sort(key=relevance_score, reverse=True)
+
+        return books[:limit]
+
+    # Main search: use Open Library's general search first.
+    general_docs = fetch_docs({
+        "q": query,
+        "page": page,
+        "limit": 30,
+        "fields": fields,
+    })
+
+    books = collect_books(general_docs)
+
+    if books:
+        return books
+
+    # Fallback search: only used when general search fails or returns nothing.
+    title_docs = fetch_docs({
+        "title": query,
+        "page": page,
+        "limit": 15,
+        "fields": fields,
+    })
+
+    author_docs = fetch_docs({
+        "author": query,
+        "page": page,
+        "limit": 15,
+        "fields": fields,
+    })
+
+    return collect_books(title_docs + author_docs)
 
 # Fetch description from Open Library API
 def fetch_openlibrary_description(olid):
@@ -331,7 +433,6 @@ def register_routes(app: Flask) -> None:
             get_user_shelf_counts
         )
 
-        profile_data["followers_count"] = user.followers.count()
         profile_data["followers_count"] = user.followers.count()
         profile_data["following_count"] = user.following.count()
         return render_template("profile.html", **profile_data)  
@@ -708,29 +809,23 @@ def register_routes(app: Flask) -> None:
     @app.route("/search")
     def search():
         query = request.args.get("q", "").strip()
-        search_type = request.args.get("type", "books").strip()
-
-        try:
-            page = int(request.args.get("page", 1))
-        except ValueError:
-            page = 1
+        search_type = normalise_search_type(request.args.get("type", "books"))
+        page = normalise_page(request.args.get("page", 1))
 
         books = []
         users = []
-        empty_query = False
+        empty_query = not bool(query)
 
         if query:
             if search_type == "users":
-                users = User.query.filter(
-                    or_(
-                        User.username.ilike(f"%{query}%"),
-                        User.name.ilike(f"%{query}%"),
-                    )
-                ).order_by(User.username.asc()).limit(10).all()
+                users = search_users(query, limit=10)
             else:
-                books = search_open_library(query, page=page)
-        else:
-            empty_query = True
+                books = search_books(
+                   query,
+                   open_library_search_func=search_open_library,
+                   page=page,
+                   limit=10
+                )
 
         return render_template(
             "search-result.html",
@@ -746,44 +841,22 @@ def register_routes(app: Flask) -> None:
     @app.route("/search-suggestions")
     def search_suggestions():
         query = request.args.get("q", "").strip()
-        search_type = request.args.get("type", "books").strip()
+        search_type = normalise_search_type(request.args.get("type", "books"))
 
         if not query:
             return jsonify([])
 
         if search_type == "users":
-            users = User.query.filter(
-                or_(
-                    User.username.ilike(f"%{query}%"),
-                    User.name.ilike(f"%{query}%"),
-                )
-            ).limit(5).all()
-
-            suggestions = []
-            for user in users:
-                suggestions.append({
-                    "id": user.id,
-                    "username": user.username,
-                    "name": user.name,
-                })
+            users = search_users(query, limit=5)
+            suggestions = [user_to_suggestion(user) for user in users]
 
             return jsonify(suggestions)
-
-        books = Book.query.filter(
-            or_(
-                Book.title.ilike(f"%{query}%"),
-                Book.author.ilike(f"%{query}%"),
-            )
-        ).limit(5).all()
-
-        suggestions = []
-        for book in books:
-            suggestions.append({
-                "id": book.id,
-                "title": book.title,
-                "author": book.author,
-                "cover_url": book.cover_url
-            })
+        
+        suggestions = search_book_suggestions(
+            query,
+            open_library_search_func=search_open_library,
+            limit=5,
+        )
 
         return jsonify(suggestions)
 
@@ -802,7 +875,7 @@ def register_routes(app: Flask) -> None:
         if not title or not author:
             return redirect(url_for("search"))
 
-        if openlibrary_id:
+        if openlibrary_id is not None:
             existing_book = Book.query.filter_by(
                 openlibrary_id=openlibrary_id
             ).first()
