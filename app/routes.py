@@ -402,9 +402,6 @@ def register_routes(app: Flask) -> None:
     @app.route("/book/<int:book_id>")
     def book_detail(book_id):
         book = Book.query.get_or_404(book_id)
-        print("VIEWED BOOKS:", viewed_books)
-        print("CURRENT BOOK:", book_id)
-        print("READS BEFORE:", book.reads)
 
         viewed_books = session.get("viewed_books", [])
 
