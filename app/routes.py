@@ -311,7 +311,6 @@ def register_routes(app: Flask) -> None:
 
     # Current user profile
     @app.route("/profile")
-    @app.route("/profile.html")
     def profile():
         profile_data = get_profile_data(get_user_shelf_counts)
 
@@ -337,7 +336,6 @@ def register_routes(app: Flask) -> None:
 
     # Login
     @app.route("/login", methods=["GET", "POST"])
-    @app.route("/login.html", methods=["GET", "POST"])
     def login():
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
@@ -362,7 +360,6 @@ def register_routes(app: Flask) -> None:
 
     # Sign Up
     @app.route("/signup", methods=["GET", "POST"])
-    @app.route("/signup.html", methods=["GET", "POST"])
     def signup():
         if current_user.is_authenticated:
             return redirect(url_for("profile"))
@@ -391,7 +388,6 @@ def register_routes(app: Flask) -> None:
         return redirect(url_for("home"))
 
     @app.route("/edit-profile", methods=["GET", "POST"])
-    @app.route("/edit-profile.html", methods=["GET", "POST"])
     def edit_profile():
         if request.method == "POST":
             avatar_file = request.files.get("avatar")
@@ -405,8 +401,7 @@ def register_routes(app: Flask) -> None:
         return render_template("edit-profile.html", **profile_data)
 
     # My Books - Read
-    @app.route("/read")
-    @app.route("/read.html")
+    @app.route("/my-books/read")
     def read():
         items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
         counts = get_user_shelf_counts(current_user.id)
@@ -415,8 +410,7 @@ def register_routes(app: Flask) -> None:
         return render_template("read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
     # My Books - Currently Reading
-    @app.route("/currently-reading")
-    @app.route("/currently-reading.html")
+    @app.route("/my-books/currently-reading")
     def currently_reading():
         items = ShelfItem.query.filter_by(user_id=current_user.id, status="Currently Reading").all()
         counts = get_user_shelf_counts(current_user.id)
@@ -424,8 +418,7 @@ def register_routes(app: Flask) -> None:
         return render_template("currently-reading.html", items=items, counts=counts, is_public_shelf=False)
 
     # My Books - To Be Read
-    @app.route("/to-be-read")
-    @app.route("/to-be-read.html")
+    @app.route("/my-books/to-be-read")
     def to_be_read():
         items = ShelfItem.query.filter_by(user_id=current_user.id, status="To Be Read").all()
         counts = get_user_shelf_counts(current_user.id)
@@ -434,8 +427,7 @@ def register_routes(app: Flask) -> None:
         return render_template("to-be-read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
     # My Books - Did Not Finish
-    @app.route("/did-not-finish")
-    @app.route("/did-not-finish.html")
+    @app.route("/my-books/did-not-finish")
     def did_not_finish():
         items = ShelfItem.query.filter_by(user_id=current_user.id, status="Did Not Finish").all()
         counts = get_user_shelf_counts(current_user.id)
