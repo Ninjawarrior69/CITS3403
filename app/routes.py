@@ -288,6 +288,7 @@ def register_routes(app: Flask) -> None:
         "signup",
         "search",
         "search_suggestions",
+        "book_detail",
         "static"
     }
 
@@ -555,9 +556,15 @@ def register_routes(app: Flask) -> None:
         user_rating = 0
         my_review = None
 
-        rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-        shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
-        my_review = Comment.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        if current_user.is_authenticated:
+            rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+            shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+            my_review = Comment.query.filter_by(user_id=current_user.id, book_id=book_id).first()
+        else:
+            session_id = get_session_id()
+            rating = Rating.query.filter_by(session_id=session_id, book_id=book_id).first()
+            shelf_item = ShelfItem.query.filter_by(session_id=session_id, book_id=book_id).first()
+            my_review = Comment.query.filter_by(session_id=session_id, book_id=book_id).first()
 
         if rating:
             user_rating = rating.stars
