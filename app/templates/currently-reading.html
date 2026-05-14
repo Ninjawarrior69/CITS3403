@@ -72,6 +72,7 @@
                             Page {{ item.current_page }}
                             of {{ item.book.page_count }}
                         </p>
+                        {% if not is_public_shelf %}
                         <button 
                         class="btn btn-primary btn-sm"
                         data-bs-toggle="modal"
@@ -79,6 +80,7 @@
                         data-item-id="{{ item.id }}"
                         >Update Progress
                     </button>
+                    {% endif %}
                     </div>
                 </div>
             </div>
