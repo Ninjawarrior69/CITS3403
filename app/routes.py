@@ -542,6 +542,20 @@ def register_routes(app: Flask) -> None:
 
         reviews = [format_review(comment) for comment in comments]
         return render_template("my-reviews.html", reviews=reviews)
+    
+    @app.route("/user/<username>/reviews")
+    def public_user_reviews(username):
+        user = User.query.filter_by(username=username).first_or_404()
+        comments = Comment.query.filter_by(user_id=user.id).order_by(Comment.created_at.desc()).all()
+        reviews = [format_review(comment) for comment in comments]
+
+        return render_template(
+            "my-reviews.html",
+            reviews=reviews,
+            profile_user=user,
+            is_public_review=True,
+            review_owner_name=user.name or user.username
+        )
 
     @app.route("/shelf/<int:item_id>/progress", methods=["POST"])
     def update_progress(item_id):

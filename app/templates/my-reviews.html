@@ -20,8 +20,11 @@
     {% include "navbar.html" %}
 
       <div class="page-container py-5">
-        
-        <h2>My Reviews</h2>
+        {% if is_public_review %}
+          <h2>{{ review_owner_name }}'s Reviews</h2>
+        {% else %}
+          <h2>My Reviews</h2>
+        {% endif %}
         <hr><br>
 
         {% if reviews %}
@@ -51,7 +54,7 @@
                     >
                       <h5 class="mb-1">{{ review.book_title }}</h5>
                     </a>
-
+                    {% if not is_public_review %}
                     <div class="my-review-actions">
                       <button
                         type="button"
@@ -60,7 +63,7 @@
                       >
                         Edit
                       </button>
-
+                      
                       <form
                         method="POST"
                         action="{{ url_for('delete_review', review_id=review.id) }}"
@@ -71,7 +74,9 @@
 
                         <button type="submit" class="my-review-action-btn">Delete</button>
                       </form>
+                      
                     </div>
+                    {% endif %}
                   </div>
 
                   <p class="text-muted mb-1">{{ review.author }}</p>
