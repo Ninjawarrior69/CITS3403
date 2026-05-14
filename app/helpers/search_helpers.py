@@ -83,11 +83,19 @@ def open_library_book_to_suggestion(book):
     }
 
 
-def get_book_key(title, author):
+def get_book_key(title, author, openlibrary_id=None):
+    if openlibrary_id:
+        return (
+            "openlibrary",
+            str(openlibrary_id).strip().lower()
+        )
+
     return (
+        "title_author",
         (title or "").strip().lower(),
         (author or "").strip().lower(),
     )
+
 
 def search_books(query, open_library_search_func=None, page=1, limit=10):
     if not query:
@@ -109,32 +117,39 @@ def search_books(query, open_library_search_func=None, page=1, limit=10):
     )
 
     for book in local_books:
-        book_key = get_book_key(book.title, book.author)
-
-        if book_key in seen_books:
-            continue
+        book_key = get_book_key(
+            book.title,
+            book.author,
+            book.openlibrary_id
+        )
 
         seen_books.add(book_key)
 
-        results.append({
-            "source": "local",
-            "id": book.id,
-            "title": book.title,
-            "author": book.author,
-            "cover_url": book.cover_url,
-            "openlibrary_id": book.openlibrary_id,
-            "edition_key": None,
-            "publish_year": book.publish_year,
-        })
+        if page == 1:
+            results.append({
+                "source": "local",
+                "id": book.id,
+                "title": book.title,
+                "author": book.author,
+                "cover_url": book.cover_url,
+                "openlibrary_id": book.openlibrary_id,
+                "edition_key": None,
+                "publish_year": book.publish_year,
+            })
 
-    if len(results) >= limit or open_library_search_func is None:
+    if open_library_search_func is None:
+        return results
+
+    remaining_limit = limit - len(results)
+
+    if remaining_limit <= 0:
         return results
 
     try:
         open_library_books = open_library_search_func(
             query,
             page=page,
-            limit=limit - len(results)
+            limit=remaining_limit
         )
     except Exception as error:
         print("Open Library search error:", error)
@@ -146,7 +161,12 @@ def search_books(query, open_library_search_func=None, page=1, limit=10):
 
         title = book.get("title")
         author = book.get("author")
-        book_key = get_book_key(title, author)
+
+        book_key = get_book_key(
+            title,
+            author,
+            book.get("openlibrary_id")
+        )
 
         if book_key in seen_books:
             continue
