@@ -72,4 +72,10 @@ python3 run.py
 
 ## Run Tests
 
-Tests are not configured yet.
+### Running Unit Tests
+
+To run the backend unit tests:
+
+```bash
+python -m unittest tests.unit_tests -v
+```
