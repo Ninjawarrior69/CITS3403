@@ -213,9 +213,9 @@ def register_routes(app: Flask) -> None:
     @app.route("/logout")
     def logout():
         logout_user()
-        flash("You have been logged out.", "info")
         return redirect(url_for("home"))
 
+    # Edit Profile
     @app.route("/edit-profile", methods=["GET", "POST"])
     def edit_profile():
         if request.method == "POST":
@@ -359,6 +359,10 @@ def register_routes(app: Flask) -> None:
     @app.route("/shelf/<int:item_id>/progress", methods=["POST"])
     def update_progress(item_id):
         item = ShelfItem.query.get_or_404(item_id)
+
+        if item.user_id != current_user.id:
+            abort(403)
+
         current_page = request.form.get("current_page", type=int)
 
         if current_page is None or current_page < 0:
