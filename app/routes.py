@@ -32,6 +32,11 @@ from app.helpers.search_helpers import (
 )
 from app.helpers.review_helpers import create_or_update_review
 from app.helpers.seed_data import seed_books_if_empty
+from app.helpers.validation_helpers import (
+    is_valid_shelf_status,
+    is_valid_rating,
+    is_valid_review_text,
+)
 
 # Used for creating My Books shelves
 def chunked(iterable, size):
@@ -434,9 +439,8 @@ def register_routes(app: Flask) -> None:
     def update_shelf_status(book_id):
         Book.query.get_or_404(book_id)
         status = request.form.get("status")
-        allowed_status = ["Read", "Currently Reading", "To Be Read", "Did Not Finish", "remove"]
 
-        if status not in allowed_status:
+        if not is_valid_shelf_status(status):
             abort(400)
 
         shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
@@ -460,7 +464,7 @@ def register_routes(app: Flask) -> None:
         book = Book.query.get_or_404(book_id)
         stars = request.form.get("stars", type=int)
 
-        if stars is None or stars < 0 or stars > 5:
+        if not is_valid_rating(stars, allow_zero=True):
             abort(400)
 
         existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
@@ -490,10 +494,10 @@ def register_routes(app: Flask) -> None:
         text = request.form.get("text", "").strip()
         stars = request.form.get("stars", type=int)
 
-        if not text:
+        if not is_valid_review_text(text):
             abort(400)
 
-        if stars is None or stars < 1 or stars > 5:
+        if not is_valid_rating(stars):
             abort(400)
 
         create_or_update_review(book_id=book_id, stars=stars, text=text, user=current_user)
