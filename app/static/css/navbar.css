@@ -241,6 +241,42 @@
   z-index: 1050;
 }
 
+/* Profile dropdown */
+
+.profile-dropdown-menu {
+  background-color: #f6efd8;
+  border: 1px solid #3d2f2a;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0;
+  margin-top: 8px;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.profile-dropdown-menu .dropdown-item {
+  color: #3d2f2a;
+  padding: 10px 16px;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.profile-dropdown-menu .dropdown-item:hover,
+.profile-dropdown-menu .dropdown-item:focus {
+  background-color: rgba(118, 142, 120, 0.12);
+  color: #3d2f2a;
+}
+
+.profile-dropdown-menu .dropdown-divider {
+  margin: 0;
+  border-top: 1px solid rgba(61, 47, 42, 0.12);
+}
+
+.nav-link:focus-visible {
+  outline: none;
+  box-shadow: none !important;
+}
+
 @media (max-width: 991px) {
   .search-wrapper {
     width: 100%;
