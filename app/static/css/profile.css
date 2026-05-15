@@ -519,3 +519,10 @@
     flex-wrap: wrap;
   }
 }
+
+@media (max-width: 768px) {
+    .mini-book-card {
+        width: 70%;
+        margin: 0 auto;
+    }
+}

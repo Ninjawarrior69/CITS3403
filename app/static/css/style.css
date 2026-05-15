@@ -85,7 +85,7 @@ hr {
     border-color: #3D2F2A4D;
     padding: 10px;
     height: 35px;
-    width: 350px;
+    width: 100%;
 }
 
 .form-control:focus {

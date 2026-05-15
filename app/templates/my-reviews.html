@@ -40,7 +40,7 @@
                     <img
                       src="{{ review.cover_url }}"
                       alt="{{ review.book_title }}"
-                      class="mini-book-card"
+                      class="mini-book-card mb-4 mb-md-0"
                     />
                   </a>
 
@@ -54,7 +54,7 @@
                       <h5 class="book-title mb-1">{{ review.book_title }}</h5>
                     </a>
                     {% if not is_public_review %}
-                    <div class="my-review-actions">
+                    <div class="my-review-actions mb-3 mb-md-0">
                       <button
                         type="button"
                         class="my-review-action-btn"
