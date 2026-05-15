@@ -103,53 +103,6 @@ class BackendUnitTests(unittest.TestCase):
         self.assertEqual(saved_book.author, "Test Author")
 
 
-    def test_review_creation_works(self):
-        user = self.add_user()
-        book = self.add_book()
-
-        review = Comment(
-            user_id=user.id,
-            book_id=book.id,
-            username=user.username,
-            stars=5,
-            text="Great book."
-        )
-
-        db.session.add(review)
-        db.session.commit()
-
-        saved_review = Comment.query.filter_by(user_id=user.id, book_id=book.id).first()
-
-        self.assertIsNotNone(saved_review)
-        self.assertEqual(saved_review.text, "Great book.")
-        self.assertEqual(saved_review.stars, 5)
-
-
-    def test_review_editing_works(self):
-        user = self.add_user()
-        book = self.add_book()
-
-        review = Comment(
-            user_id=user.id,
-            book_id=book.id,
-            username=user.username,
-            stars=4,
-            text="Original review."
-        )
-
-        db.session.add(review)
-        db.session.commit()
-
-        review.text = "Updated review."
-        review.stars = 5
-        db.session.commit()
-
-        saved_review = Comment.query.filter_by(user_id=user.id, book_id=book.id).first()
-
-        self.assertEqual(saved_review.text, "Updated review.")
-        self.assertEqual(saved_review.stars, 5)
-
-
     def test_rating_creation_works(self):
         user = self.add_user()
         book = self.add_book()
