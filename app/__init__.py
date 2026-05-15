@@ -4,11 +4,9 @@ from app.config import Config
 from app.extensions import csrf, db, login_manager, migrate
 
 
-def create_app() -> Flask:
+def create_app(config_class=Config) -> Flask:
 	app = Flask(__name__)
-	app.config.from_object(Config)
-
-	app.config["WTF_CSRF_ENABLED"] = False
+	app.config.from_object(config_class)
 
 	db.init_app(app)
 	migrate.init_app(app, db)
