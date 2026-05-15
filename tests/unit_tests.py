@@ -3,6 +3,12 @@ import unittest
 from app import create_app, db
 from app.config import TestingConfig
 from app.models import User, Book, Comment, Rating, ShelfItem
+from app.helpers.validation_helpers import (
+    is_valid_rating,
+    is_valid_review_text,
+    is_valid_shelf_status,
+)
+from app.helpers.review_helpers import create_or_update_review
 
 
 class BackendUnitTests(unittest.TestCase):
@@ -226,6 +232,85 @@ class BackendUnitTests(unittest.TestCase):
         saved_item = ShelfItem.query.filter_by(user_id=user.id, book_id=book.id).first()
 
         self.assertEqual(saved_item.status, "Read")
+    
+    def test_rating_validation_accepts_valid_values(self):
+        self.assertTrue(is_valid_rating(1))
+        self.assertTrue(is_valid_rating(5))
+        self.assertTrue(is_valid_rating(0, allow_zero=True))
+
+
+    def test_rating_validation_rejects_invalid_values(self):
+        self.assertFalse(is_valid_rating(None))
+        self.assertFalse(is_valid_rating(0))
+        self.assertFalse(is_valid_rating(6))
+        self.assertFalse(is_valid_rating(-1))
+
+
+    def test_review_text_validation(self):
+        self.assertTrue(is_valid_review_text("Good book."))
+        self.assertFalse(is_valid_review_text(""))
+        self.assertFalse(is_valid_review_text("   "))
+        self.assertFalse(is_valid_review_text(None))
+
+
+    def test_shelf_status_validation(self):
+        self.assertTrue(is_valid_shelf_status("Read"))
+        self.assertTrue(is_valid_shelf_status("Currently Reading"))
+        self.assertTrue(is_valid_shelf_status("To Be Read"))
+        self.assertTrue(is_valid_shelf_status("Did Not Finish"))
+        self.assertTrue(is_valid_shelf_status("remove"))
+        self.assertFalse(is_valid_shelf_status("Invalid Status"))
+
+    def test_create_or_update_review_creates_review(self):
+        user = self.add_user()
+        book = self.add_book()
+
+        create_or_update_review(
+            book_id=book.id,
+            stars=5,
+            text="Great book.",
+            user=user
+        )
+
+        db.session.commit()
+
+        saved_review = Comment.query.filter_by(
+            user_id=user.id,
+            book_id=book.id
+        ).first()
+
+        self.assertIsNotNone(saved_review)
+        self.assertEqual(saved_review.text, "Great book.")
+        self.assertEqual(saved_review.stars, 5)
+
+    def test_create_or_update_review_updates_existing_review(self):
+        user = self.add_user()
+        book = self.add_book()
+
+        create_or_update_review(
+            book_id=book.id,
+            stars=4,
+            text="Original review.",
+            user=user
+        )
+        db.session.commit()
+
+        create_or_update_review(
+            book_id=book.id,
+            stars=5,
+            text="Updated review.",
+            user=user
+        )
+        db.session.commit()
+
+        reviews = Comment.query.filter_by(
+            user_id=user.id,
+            book_id=book.id
+        ).all()
+
+        self.assertEqual(len(reviews), 1)
+        self.assertEqual(reviews[0].text, "Updated review.")
+        self.assertEqual(reviews[0].stars, 5)
 
     def tearDown(self):
         db.session.remove()
