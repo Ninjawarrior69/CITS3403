@@ -10,6 +10,12 @@ from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
 from app.models import Book, Comment, Rating, User, ShelfItem
 
+from app.helpers.openlibrary_helpers import (
+    search_open_library,
+    fetch_openlibrary_description,
+    fetch_page_count,
+    normalize_openlibrary_id,
+)
 from app.helpers.profile_helpers import (
     save_avatar,
     get_profile_data,
@@ -25,6 +31,7 @@ from app.helpers.search_helpers import (
     user_to_suggestion,
 )
 from app.helpers.review_helpers import create_or_update_review
+from app.helpers.seed_data import seed_books_if_empty
 
 # Used for creating My Books shelves
 def chunked(iterable, size):
@@ -46,79 +53,7 @@ def get_user_shelf_counts(user_id):
         "did_not_finish": ShelfItem.query.filter_by(user_id=user_id, status="Did Not Finish").count()
     }
 
-# Seed books
-def seed_books_if_empty():
-    if Book.query.first():
-        return
 
-    books = [
-        Book(
-            title="The Midnight Library",
-            author="Matt Haig",
-            description="A novel about choices, regrets, and the different lives a person could have lived.",
-            page_count=304,
-            cover_url="https://m.media-amazon.com/images/I/71qsovx-x6L._AC_UF1000,1000_QL80_.jpg",
-        ),
-        Book(
-            title="Project Hail Mary",
-            author="Andy Weir",
-            description="A science fiction story about survival, problem solving, and saving humanity.",
-            page_count=496,
-            cover_url="https://m.media-amazon.com/images/I/91ENQs2KLAL._AC_UF1000,1000_QL80_.jpg",
-            rating=4.5,
-            reads=1680
-        ),
-        Book(
-            title="Normal People",
-            author="Sally Rooney",
-            description="A story about friendship, love, communication, and growing up.",
-            page_count=288,
-            cover_url="https://m.media-amazon.com/images/I/61nFGO425OL.jpg",
-            rating=4.0,
-            reads=980
-        ),
-        Book(
-            title="Dune",
-            author="Frank Herbert",
-            description="A classic science fiction novel about politics, power, religion, and survival on a desert planet.",
-            page_count=489,
-            cover_url="https://m.media-amazon.com/images/I/71oO1E-XPuL.jpg",
-            rating=4.4,
-            reads=1900
-        ),
-        Book(
-            title="Before the Coffee Gets Cold",
-            author="Toshikazu Kawaguchi",
-            description="A gentle story about time travel, memory, regret, and human connection.",
-            page_count=208,
-            cover_url="https://m.media-amazon.com/images/I/71kW0ESYl5L.jpg",
-            rating=4.1,
-            reads=870
-        ),
-        Book(
-            title="Sunrise on the Reaping",
-            author="Suzanne Collins",
-            description="The newest book in The Hunger Games series",
-            page_count=400,
-            cover_url="https://m.media-amazon.com/images/I/81RUJzM+wvL._UF894,1000_QL80_.jpg",
-            rating=4.6,
-            reads=2300
-        )
-    ]
-
-    db.session.add_all(books)
-    db.session.commit()
-
-    comments = [
-        Comment(username="Reader1", book_id=books[0].id, stars=4, text="Great book! The idea was simple but really interesting."),
-        Comment(username="Alice", book_id=books[0].id, stars=5, text="I loved the message of this book."),
-        Comment(username="Tom", book_id=books[1].id, stars=5, text="Very useful and easy to understand."),
-    ]
-
-    db.session.add_all(comments)
-    db.session.commit()
-
-# Review formatting
 def format_review(comment):
     review_user = comment.user
 
@@ -170,215 +105,6 @@ def build_rating_summary(book):
 def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
-
-# Search Open Library API
-def search_open_library(query, page=1, limit=10):
-    url = "https://openlibrary.org/search.json"
-
-    if not query:
-        return []
-
-    fields = "key,title,author_name,cover_i,edition_key,first_publish_year"
-
-    def fetch_docs(params):
-        try:
-            response = requests.get(
-                url,
-                params=params,
-                timeout=6,
-                headers={"User-Agent": "BookWorm/1.0"}
-            )
-
-            response.raise_for_status()
-            return response.json().get("docs", [])
-
-        except requests.exceptions.RequestException as error:
-            print("Open Library request error:", error)
-            return []
-
-        except ValueError as error:
-            print("Open Library JSON error:", error)
-            return []
-
-    def format_book(doc):
-        cover_id = doc.get("cover_i")
-        edition_keys = doc.get("edition_key") or []
-
-        return {
-            "title": doc.get("title", "Unknown Title"),
-            "author": ", ".join(doc.get("author_name", ["Unknown"])),
-            "cover_url": (
-                f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
-                if cover_id
-                else None
-            ),
-            "openlibrary_id": doc.get("key"),
-            "edition_key": edition_keys[0] if edition_keys else None,
-            "publish_year": doc.get("first_publish_year"),
-        }
-
-    def relevance_score(book):
-        query_lower = query.strip().lower()
-        title_lower = (book["title"] or "").lower()
-        author_lower = (book["author"] or "").lower()
-
-        score = 0
-
-        if title_lower == query_lower:
-            score += 100
-        elif title_lower.startswith(query_lower):
-            score += 70
-        elif query_lower in title_lower:
-            score += 50
-
-        if author_lower == query_lower:
-            score += 80
-        elif author_lower.startswith(query_lower):
-            score += 45
-        elif query_lower in author_lower:
-            score += 30
-
-        if book.get("cover_url"):
-            score += 5
-
-        if book.get("publish_year"):
-            score += 2
-
-        return score
-
-    def collect_books(docs):
-        books = []
-        seen_books = set()
-
-        for doc in docs:
-            book = format_book(doc)
-
-            book_key = (
-                (book["title"] or "").strip().lower(),
-                (book["author"] or "").strip().lower(),
-            )
-
-            if book_key in seen_books:
-                continue
-
-            seen_books.add(book_key)
-            books.append(book)
-
-        books.sort(key=relevance_score, reverse=True)
-
-        return books[:limit]
-
-    # Main search: use Open Library's general search first.
-    general_docs = fetch_docs({
-        "q": query,
-        "page": page,
-        "limit": 30,
-        "fields": fields,
-    })
-
-    books = collect_books(general_docs)
-
-    if books:
-        return books
-
-    # Fallback search: only used when general search fails or returns nothing.
-    title_docs = fetch_docs({
-        "title": query,
-        "page": page,
-        "limit": 15,
-        "fields": fields,
-    })
-
-    author_docs = fetch_docs({
-        "author": query,
-        "page": page,
-        "limit": 15,
-        "fields": fields,
-    })
-
-    return collect_books(title_docs + author_docs)
-
-# Fetch description from Open Library API
-def fetch_openlibrary_description(olid):
-    if not olid:
-        return "Not available for this title."
-
-    url = f"https://openlibrary.org{olid}.json"
-
-    try:
-        res = requests.get(url, timeout=8)
-    except requests.RequestException:
-        return "Not available for this title."
-
-    if res.status_code != 200:
-        return "Not available for this title."
-
-    data = res.json()
-
-    description = data.get("description")
-
-    if isinstance(description, dict):
-        return description.get("value")
-
-    return description or "Not available for this title."
-
-# Fetch edition page count from Open Library API
-def fetch_page_count(openlibrary_id, edition_key=None):
-    if edition_key:
-        url = f"https://openlibrary.org/books/{edition_key}.json"
-        try:
-            res = requests.get(url, timeout=8)
-        except requests.RequestException:
-            res = None
-
-        if res and res.status_code == 200:
-            data = res.json()
-            if data.get("number_of_pages"):
-                return data["number_of_pages"]
-
-    if openlibrary_id:
-        url = f"https://openlibrary.org{openlibrary_id}.json"
-        try:
-            res = requests.get(url, timeout=8)
-        except requests.RequestException:
-            res = None
-
-        if res and res.status_code == 200:
-            data = res.json()
-
-            if "latest_revision" in data:
-                editions_url = f"https://openlibrary.org{openlibrary_id}/editions.json"
-                try:
-                    r = requests.get(editions_url, timeout=8)
-                except requests.RequestException:
-                    r = None
-
-                if r and r.status_code == 200:
-                    ed_data = r.json()
-                    entries = ed_data.get("entries", [])
-
-                    for e in entries:
-                        if e.get("number_of_pages"):
-                            return e["number_of_pages"]
-    return None
-
-
-def normalize_openlibrary_id(raw_openlibrary_id):
-    if not raw_openlibrary_id:
-        return None
-
-    normalized = raw_openlibrary_id.strip()
-
-    if normalized.lower() in {"undefined", "null", "none", ""}:
-        return None
-
-    if normalized.startswith("http://") or normalized.startswith("https://"):
-        normalized = normalized.replace("https://openlibrary.org", "").replace("http://openlibrary.org", "")
-
-    if not normalized.startswith("/"):
-        normalized = f"/{normalized}"
-
-    return normalized
 
 
 def register_routes(app: Flask) -> None:
@@ -659,7 +385,7 @@ def register_routes(app: Flask) -> None:
         viewed_books = session.get("viewed_books", [])
 
         if book_id not in viewed_books:
-            book.reads += 1
+            book.reads = (book.reads or 0) + 1
             db.session.commit()
 
             viewed_books.append(book_id)
