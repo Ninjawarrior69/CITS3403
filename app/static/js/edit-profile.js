@@ -1,5 +1,3 @@
-console.log("EDIT PROFILE JS LOADED");
-
 document.addEventListener("DOMContentLoaded", () => {
 
     const searchInput = document.getElementById("favorite-search");
