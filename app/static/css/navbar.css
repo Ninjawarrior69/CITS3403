@@ -126,14 +126,11 @@
 .search-wrapper {
   position: relative;
   width: 100%;
-  max-width: 60vw;
 }
 
 .search-box:focus-within {
   box-shadow: 0 0 0 2px rgba(61, 47, 42, 0.2);
 }
-
-
 
 .navbar-nav {
   gap: 16px;
