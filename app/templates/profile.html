@@ -209,7 +209,7 @@
             </div>
             <div class="col-md-10">
               <a href="{{ url_for('book_detail', book_id=review.book.id) }}" class="profile-review-link">
-                <h5 class="mb-1">{{ review.book.title }}</h5>
+                <h5 class="book-title mb-1">{{ review.book.title }}</h5>
               </a>
               <p class="text-muted mb-1">{{ review.book.author }}</p>
               <p class="mb-2 star">
