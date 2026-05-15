@@ -19,6 +19,8 @@ class BackendUnitTests(unittest.TestCase):
         self.app_ctx = self.app.app_context()
         self.app_ctx.push()
 
+        self.client = self.app.test_client()
+
         db.create_all()
 
     def add_user(
@@ -264,6 +266,60 @@ class BackendUnitTests(unittest.TestCase):
         self.assertEqual(len(reviews), 1)
         self.assertEqual(reviews[0].text, "Updated review.")
         self.assertEqual(reviews[0].stars, 5)
+
+    def test_book_view_count_increases_first_time(self):
+        book = self.add_book()
+
+        response = self.client.get(f"/book/{book.id}")
+
+        self.assertEqual(response.status_code, 200)
+
+        db.session.expire_all()
+        saved_book = Book.query.get(book.id)
+
+        self.assertEqual(saved_book.reads, 1)
+
+
+    def test_same_book_only_counts_once_per_session(self):
+        book = self.add_book()
+
+        self.client.get(f"/book/{book.id}")
+        self.client.get(f"/book/{book.id}")
+        self.client.get(f"/book/{book.id}")
+
+        db.session.expire_all()
+        saved_book = Book.query.get(book.id)
+
+        self.assertEqual(saved_book.reads, 1)
+
+
+    def test_different_books_each_increase_once(self):
+        book1 = self.add_book(title="Test Book One", author="Author One")
+        book2 = self.add_book(title="Test Book Two", author="Author Two")
+
+        self.client.get(f"/book/{book1.id}")
+        self.client.get(f"/book/{book2.id}")
+
+        db.session.expire_all()
+        saved_book1 = Book.query.get(book1.id)
+        saved_book2 = Book.query.get(book2.id)
+
+        self.assertEqual(saved_book1.reads, 1)
+        self.assertEqual(saved_book2.reads, 1)
+
+
+    def test_new_session_can_count_same_book_again(self):
+        book = self.add_book()
+
+        self.client.get(f"/book/{book.id}")
+
+        new_client = self.app.test_client()
+        new_client.get(f"/book/{book.id}")
+
+        db.session.expire_all()
+        saved_book = Book.query.get(book.id)
+
+        self.assertEqual(saved_book.reads, 2)
 
     def tearDown(self):
         db.session.remove()
