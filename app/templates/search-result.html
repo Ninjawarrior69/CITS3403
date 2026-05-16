@@ -111,9 +111,9 @@
             </div>
 
             <div class="search-book-info">
-              <h3 class="search-book-title">{{ user.name or user.username }}</h3>
+              <h3 class="search-book-title mb-0">{{ user.name or user.username }}</h3>
 
-              <p class="search-book-author">@{{ user.username }}</p>
+              <p class="search-book-author mb-1">@{{ user.username }}</p>
 
               {% if user.bio %}
               <p class="mb-0 text-muted">{{ user.bio }}</p>

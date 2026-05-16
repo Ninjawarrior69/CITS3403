@@ -221,15 +221,6 @@
     word-break: break-word;
 }
 
-.text-decoration-none.text-reset {
-    display: block;
-    transition: transform 0.2s ease;
-}
-
-.text-decoration-none.text-reset:hover {
-    transform: translateY(-2px);
-}
-
 .my-review-text.collapsed {
     max-height: 120px;
     overflow: hidden;
@@ -349,6 +340,7 @@
     cursor: pointer;
 }
 
+.mini-book-card:hover,
 .profile-pic-placeholder:hover,
 .stats:hover,
 .favorite-slot:hover {
@@ -500,6 +492,7 @@
   margin-top: 10px;
 }
 
+.book-title:hover,
 .reviews-title:hover {
     text-decoration: underline;
 }

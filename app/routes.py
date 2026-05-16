@@ -218,9 +218,9 @@ def register_routes(app: Flask) -> None:
     @app.route("/logout")
     def logout():
         logout_user()
-        flash("You have been logged out.", "info")
         return redirect(url_for("home"))
 
+    # Edit Profile
     @app.route("/edit-profile", methods=["GET", "POST"])
     def edit_profile():
         if request.method == "POST":
