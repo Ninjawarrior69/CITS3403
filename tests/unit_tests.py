@@ -55,6 +55,11 @@ class BackendUnitTests(unittest.TestCase):
         db.session.commit()
 
         return book
+    
+    def login_as(self, user):
+        with self.client.session_transaction() as sess:
+            sess["_user_id"] = str(user.id)
+            sess["_fresh"] = True
 
     def test_app_is_created(self):
         self.assertIsNotNone(self.app)
@@ -266,6 +271,123 @@ class BackendUnitTests(unittest.TestCase):
         self.assertEqual(len(reviews), 1)
         self.assertEqual(reviews[0].text, "Updated review.")
         self.assertEqual(reviews[0].stars, 5)
+
+    def test_user_cannot_update_another_users_review(self):
+        user_a = self.add_user(
+            name="User A",
+            username="usera",
+            email="usera@example.com"
+        )
+        user_b = self.add_user(
+            name="User B",
+            username="userb",
+            email="userb@example.com"
+        )
+        book = self.add_book()
+
+        # User B already has a review
+        review = Comment(
+            user_id=user_b.id,
+            book_id=book.id,
+            username=user_b.username,
+            stars=4,
+            text="User B original review."
+        )
+        db.session.add(review)
+        db.session.commit()
+
+        # User A tries to update User B's review
+        create_or_update_review(
+            book_id=book.id,
+            stars=1,
+            text="User A should not be able to change this.",
+            user=user_a
+        )
+        db.session.commit()
+
+        user_b_review = Comment.query.filter_by(
+            user_id=user_b.id,
+            book_id=book.id
+        ).first()
+
+        self.assertEqual(user_b_review.text, "User B original review.")
+        self.assertEqual(user_b_review.stars, 4)
+
+    def test_user_cannot_update_another_users_progress(self):
+        user_a = self.add_user(
+            name="User A",
+            username="usera",
+            email="usera@example.com"
+        )
+        user_b = self.add_user(
+            name="User B",
+            username="userb",
+            email="userb@example.com"
+        )
+        book = self.add_book()
+
+        shelf_item = ShelfItem(
+            user_id=user_b.id,
+            book_id=book.id,
+            status="Currently Reading",
+            current_page=10
+        )
+
+        db.session.add(shelf_item)
+        db.session.commit()
+
+        self.login_as(user_a)
+
+        response = self.client.post(
+            f"/shelf/{shelf_item.id}/progress",
+            data={"current_page": 50},
+            follow_redirects=False
+        )
+
+        db.session.expire_all()
+        saved_item = ShelfItem.query.get(shelf_item.id)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(saved_item.current_page, 10)
+        self.assertEqual(saved_item.status, "Currently Reading")
+
+    def test_user_cannot_delete_another_users_review(self):
+        user_a = self.add_user(
+            name="User A",
+            username="usera",
+            email="usera@example.com"
+        )
+        user_b = self.add_user(
+            name="User B",
+            username="userb",
+            email="userb@example.com"
+        )
+        book = self.add_book()
+
+        review = Comment(
+            user_id=user_b.id,
+            book_id=book.id,
+            username=user_b.username,
+            stars=4,
+            text="User B review."
+        )
+
+        db.session.add(review)
+        db.session.commit()
+
+        self.login_as(user_a)
+
+        response = self.client.post(
+            f"/review/{review.id}/delete",
+            follow_redirects=False
+        )
+
+        db.session.expire_all()
+        saved_review = Comment.query.get(review.id)
+
+        self.assertEqual(response.status_code, 403)
+        self.assertIsNotNone(saved_review)
+        self.assertEqual(saved_review.text, "User B review.")
 
     def test_book_view_count_increases_first_time(self):
         book = self.add_book()

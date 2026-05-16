@@ -364,6 +364,10 @@ def register_routes(app: Flask) -> None:
     @app.route("/shelf/<int:item_id>/progress", methods=["POST"])
     def update_progress(item_id):
         item = ShelfItem.query.get_or_404(item_id)
+
+        if item.user_id != current_user.id:
+            abort(403)
+            
         current_page = request.form.get("current_page", type=int)
 
         if current_page is None or current_page < 0:
