@@ -337,3 +337,22 @@
 .home-reviewer-link:hover {
     text-decoration: underline;
 }
+
+.most-read-card .book-title {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  line-height: 1.4;
+  max-height: calc(1.4em * 2);
+}
+
+.most-read-card .book-author {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

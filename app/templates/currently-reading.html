@@ -47,7 +47,7 @@
                     <div class="col-12 col-md-4">
                         <a href="{{ url_for('book_detail', book_id=item.book.id) }}" class="d-block text-center text-md-start">
                             {% if item.book.cover_url %}
-                            <img src="{{ item.book.cover_url }}" class="book-cover"/>
+                            <img src="{{ item.book.cover_url }}" class="book-cover mb-4 mb-md-0"/>
                             {% else %} 
                             <div class="book-cover-placeholder">
                                 {{ item.book.title }}

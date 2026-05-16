@@ -62,3 +62,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Responsive - phones */
+@media (max-width: 768px) {
+    .book-cover {
+        width: 70%;
+        margin: 0 auto;
+    }
+}
