@@ -223,7 +223,12 @@ def register_routes(app: Flask) -> None:
     # Edit Profile
     @app.route("/edit-profile", methods=["GET", "POST"])
     def edit_profile():
-        if request.method == "POST":
+        form = EditProfileForm(
+            original_username=current_user.username,
+            original_email=current_user.email,
+        )
+
+        if form.validate_on_submit():
             avatar_file = request.files.get("avatar")
 
             update_profile(request, avatar_file)
@@ -232,7 +237,7 @@ def register_routes(app: Flask) -> None:
 
         profile_data = get_profile_data(get_user_shelf_counts)
 
-        return render_template("edit-profile.html", **profile_data)
+        return render_template("edit-profile.html", form=form, **profile_data)
 
     # My Books - Read
     @app.route("/my-books/read")

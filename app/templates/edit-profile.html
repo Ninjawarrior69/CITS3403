@@ -57,6 +57,8 @@
             enctype="multipart/form-data"
             class="profile-form mt-4 text-start"
           >
+            {{ form.hidden_tag() }}
+
             <input
               type="file"
               id="avatar-upload"
