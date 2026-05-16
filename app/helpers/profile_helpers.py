@@ -81,10 +81,10 @@ def update_favorite_books(user, favorite_book_ids):
 # Update profile
 def update_profile(request, avatar_file):
 
-    current_user.name = request.form.get("name")
-    current_user.username = request.form.get("username")
+    current_user.name = request.form.get("name", "").strip()
+    current_user.username = request.form.get("username", "").strip().lower()
     current_user.bio = request.form.get("bio")
-    current_user.email = request.form.get("email")
+    current_user.email = request.form.get("email", "").strip().lower()
 
     if request.form.get("remove_avatar") == "1":
         current_user.avatar = None
