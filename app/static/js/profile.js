@@ -9,22 +9,25 @@ const modalTitle = document.getElementById("modal-title");
 const modalList = document.getElementById("modal-list");
 
 // Get username from page
-const username = document
-    .getElementById("profile-data")
-    .dataset.username;
+const username = document.getElementById("profile-data").dataset.username;
 
+// CSRF token from meta tag
+const csrfToken = document
+  .querySelector('meta[name="csrf-token"]')
+  ?.getAttribute("content");
 
 // Open modal
 function openModal(title, users) {
-    modalTitle.textContent = title;
-    modalList.innerHTML = "";
+  modalTitle.textContent = title;
+  modalList.innerHTML = "";
 
-    users.forEach(user => {
-        const li = document.createElement("li");
+  users.forEach((user) => {
+    const li = document.createElement("li");
 
-        li.innerHTML = `
+    li.innerHTML = `
             <a href="/user/${encodeURIComponent(user.username)}" class="user-row">
-                ${user.avatar
+                ${
+                  user.avatar
                     ? `<img src="/static/${user.avatar}" class="avatar">`
                     : `<div class="avatar avatar-placeholder">
                         ${user.username.charAt(0).toUpperCase()}
@@ -34,41 +37,38 @@ function openModal(title, users) {
             </a>
         `;
 
-        modalList.appendChild(li);
-    });
+    modalList.appendChild(li);
+  });
 
-    modal.style.display = "block";
+  modal.style.display = "block";
 }
-
 
 // Fetch followers
 async function loadFollowers() {
-    const response = await fetch(`/user/${username}/followers`);
-    const data = await response.json();
-    openModal("Followers", data);
+  const response = await fetch(`/user/${username}/followers`);
+  const data = await response.json();
+  openModal("Followers", data);
 }
-
 
 // Fetch following
 async function loadFollowing() {
-    const response = await fetch(`/user/${username}/following`);
-    const data = await response.json();
-    openModal("Following", data);
+  const response = await fetch(`/user/${username}/following`);
+  const data = await response.json();
+  openModal("Following", data);
 }
-
 
 // Event listeners
 followersBtn.addEventListener("click", loadFollowers);
 followingBtn.addEventListener("click", loadFollowing);
 
 closeModal.addEventListener("click", () => {
-    modal.style.display = "none";
+  modal.style.display = "none";
 });
 
 window.addEventListener("click", (e) => {
-    if (e.target === modal) {
-        modal.style.display = "none";
-    }
+  if (e.target === modal) {
+    modal.style.display = "none";
+  }
 });
 
 async function toggleFollow(btn) {
@@ -77,11 +77,16 @@ async function toggleFollow(btn) {
 
   const isFollowing = icon.classList.contains("bi-person-dash");
 
-  const url = isFollowing
-    ? `/unfollow/${userId}`
-    : `/follow/${userId}`;
+  const url = isFollowing ? `/unfollow/${userId}` : `/follow/${userId}`;
 
-  const response = await fetch(url, { method: "POST"});
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrfToken,
+      "X-Requested-With": "XMLHttpRequest",
+    },
+    credentials: "same-origin",
+  });
 
   if (response.ok) {
     const newState = !isFollowing;
