@@ -55,28 +55,38 @@ def get_profile_data(get_user_shelf_counts):
 # Favourite books
 def update_favorite_books(user, favorite_book_ids):
 
+    if not favorite_book_ids:
+        user.favorite_books.clear()
+        return
+
+    ids = []
+    for book_id in favorite_book_ids.split(","):
+        book_id = book_id.strip()
+        if not book_id:
+            continue
+
+        try:
+            ids.append(int(book_id))
+        except ValueError:
+            continue
+
+    if not ids:
+        return
+
     user.favorite_books.clear()
 
-    if favorite_book_ids:
+    books = Book.query.filter(
+        Book.id.in_(ids)
+    ).all()
 
-        ids = [
-            int(book_id)
-            for book_id in favorite_book_ids.split(",")
-            if book_id
-        ]
+    sorted_books = sorted(
+        books,
+        key=lambda book: ids.index(book.id)
+    )
 
-        books = Book.query.filter(
-            Book.id.in_(ids)
-        ).all()
-
-        sorted_books = sorted(
-            books,
-            key=lambda book: ids.index(book.id)
-        )
-
-        user.favorite_books.extend(
-            sorted_books
-        )
+    user.favorite_books.extend(
+        sorted_books
+    )
 
 # Update profile
 def update_profile(request, avatar_file):
