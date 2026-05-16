@@ -81,7 +81,14 @@ async function toggleFollow(btn) {
     ? `/unfollow/${userId}`
     : `/follow/${userId}`;
 
-  const response = await fetch(url, { method: "POST"});
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrfToken
+    }
+  });
 
   if (response.ok) {
     const newState = !isFollowing;
