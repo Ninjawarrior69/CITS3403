@@ -8,6 +8,7 @@ from werkzeug.serving import make_server
 from app import create_app
 from app.config import TestingConfig
 from app.extensions import db
+import os
 
 try:
     from selenium import webdriver
@@ -70,7 +71,9 @@ class SeleniumTestCase(unittest.TestCase):
             )
 
         options = ChromeOptions()
-        options.add_argument("--headless=new")
+        # Allow running with visible browser when SHOW_BROWSER env var is set
+        if not os.environ.get("SHOW_BROWSER"):
+            options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
         options.add_argument("--window-size=1440,1200")
 
@@ -97,7 +100,11 @@ class SeleniumTestCase(unittest.TestCase):
             cls.server = None
 
         if cls._db_file is not None and cls._db_file.exists():
-            cls._db_file.unlink()
+            try:
+                cls._db_file.unlink()
+            except PermissionError:
+                # On Windows the DB file may still be held by a subprocess; ignore cleanup error
+                pass
             cls._db_file = None
 
         cls.server_thread = None
