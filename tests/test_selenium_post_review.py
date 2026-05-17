@@ -15,9 +15,11 @@ class PostReviewSeleniumTests(SeleniumFixturesMixin, SeleniumTestCase):
 
     def login_via_ui(self, username, password):
         self.open_path("/login")
-        self.driver.find_element(By.ID, "login-identifier").send_keys(username)
-        self.driver.find_element(By.ID, "login-password").send_keys(password)
-        self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+        form = self.driver.find_element(By.CSS_SELECTOR, "form[action='/login']")
+        form.find_element(By.ID, "login-identifier").send_keys(username)
+        form.find_element(By.ID, "login-password").send_keys(password)
+        submit = form.find_elements(By.CSS_SELECTOR, "input[type='submit'], button[type='submit']")
+        submit[0].click()
         WebDriverWait(self.driver, 5).until(lambda d: "/profile" in d.current_url)
 
     def test_post_review_is_displayed(self):

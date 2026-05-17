@@ -14,6 +14,8 @@ try:
     from selenium import webdriver
     from selenium.common.exceptions import WebDriverException
     from selenium.webdriver.chrome.options import Options as ChromeOptions
+    from selenium.webdriver.chrome.service import Service
+    from webdriver_manager.chrome import ChromeDriverManager
 except ImportError as exc:  # pragma: no cover - handled by test environment
     webdriver = None
     WebDriverException = Exception
@@ -78,7 +80,9 @@ class SeleniumTestCase(unittest.TestCase):
         options.add_argument("--window-size=1440,1200")
 
         try:
-            return webdriver.Chrome(options=options)
+                # Use webdriver-manager to fetch a matching chromedriver in CI
+                service = Service(ChromeDriverManager().install())
+                return webdriver.Chrome(service=service, options=options)
         except WebDriverException as exc:
             raise unittest.SkipTest(f"Chrome WebDriver is not available: {exc}") from exc
 

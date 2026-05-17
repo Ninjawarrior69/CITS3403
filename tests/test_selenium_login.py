@@ -22,9 +22,12 @@ class LoginSeleniumTests(SeleniumFixturesMixin, SeleniumTestCase):
     def test_login_success_redirects_to_profile(self):
         self.open_path("/login")
 
-        self.driver.find_element(By.ID, "login-identifier").send_keys("loginuser")
-        self.driver.find_element(By.ID, "login-password").send_keys("password123")
-        self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+        form = self.driver.find_element(By.CSS_SELECTOR, "form[action='/login']")
+        form.find_element(By.ID, "login-identifier").send_keys("loginuser")
+        form.find_element(By.ID, "login-password").send_keys("password123")
+        # submit via the form's submit control (input or button)
+        submit = form.find_elements(By.CSS_SELECTOR, "input[type='submit'], button[type='submit']")
+        submit[0].click()
 
         try:
             WebDriverWait(self.driver, 5).until(lambda d: "/profile" in d.current_url)
@@ -53,9 +56,11 @@ class LoginSeleniumTests(SeleniumFixturesMixin, SeleniumTestCase):
 
         self.open_path("/login")
 
-        self.driver.find_element(By.ID, "login-identifier").send_keys("failuser")
-        self.driver.find_element(By.ID, "login-password").send_keys("wrongpassword")
-        self.driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+        form = self.driver.find_element(By.CSS_SELECTOR, "form[action='/login']")
+        form.find_element(By.ID, "login-identifier").send_keys("failuser")
+        form.find_element(By.ID, "login-password").send_keys("wrongpassword")
+        submit = form.find_elements(By.CSS_SELECTOR, "input[type='submit'], button[type='submit']")
+        submit[0].click()
 
         # wait for error message to appear on the same page; capture evidence on timeout
         try:
