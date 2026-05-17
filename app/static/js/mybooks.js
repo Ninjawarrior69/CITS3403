@@ -1,12 +1,24 @@
-const progressModal = document.getElementById("progressModal");
+document.addEventListener("DOMContentLoaded", function () {
+    const progressModal = document.getElementById("progressModal");
+    const progressForm = document.getElementById("progressForm");
 
-progressModal.addEventListener("show.bs.modal", function (event) {
+    if (!progressModal || !progressForm) {
+        return;
+    }
 
-    const button = event.relatedTarget;
+    progressModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
 
-    const itemId = button.getAttribute("data-item-id");
+        if (!button) {
+            return;
+        }
 
-    const form = document.getElementById("progressForm");
+        const itemId = button.getAttribute("data-item-id");
 
-    form.action = `/shelf/${itemId}/progress`;
+        if (!itemId) {
+            return;
+        }
+
+        progressForm.action = `/shelf/${itemId}/progress`;
+    });
 });

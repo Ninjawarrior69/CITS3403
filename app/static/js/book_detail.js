@@ -1,5 +1,3 @@
-console.log("JS LOADED");
-
 let selectedRating = 0;
 
 function toggleSection(id, button) {
@@ -26,15 +24,6 @@ function toggleSection(id, button) {
         button.innerText = "Show More";
     }
 }
-
-function toggleFollow(btn) {
-    if (btn.innerText === "Follow") {
-        btn.innerText = "Following";
-    } else {
-        btn.innerText = "Follow";
-    }
-}
-
 
 document.addEventListener("DOMContentLoaded", () => {
     const ratingBox = document.getElementById("rating");
