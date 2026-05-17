@@ -367,7 +367,7 @@ def register_routes(app: Flask) -> None:
 
         if item.user_id != current_user.id:
             abort(403)
-
+            
         current_page = request.form.get("current_page", type=int)
 
         if current_page is None or current_page < 0:
@@ -391,13 +391,16 @@ def register_routes(app: Flask) -> None:
     def book_detail(book_id):
         book = Book.query.get_or_404(book_id)
 
-        viewed_books = session.get("viewed_books", [])
-        
-        if book_id not in viewed_books:
+        viewed_books = set(str(id) for id in session.get("viewed_books", []))
+        book_key = str(book_id)
+
+        if book_key not in viewed_books:
             book.reads = (book.reads or 0) + 1
 
-            viewed_books.append(book_id)
-            session["viewed_books"] = viewed_books
+            viewed_books.add(book_key)
+            session["viewed_books"] = list(viewed_books)
+            session.modified = True
+
             db.session.commit()
 
         rating_summary = build_rating_summary(book)
