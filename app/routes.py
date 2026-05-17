@@ -10,6 +10,8 @@ from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
 from app.models import Book, Comment, Rating, User, ShelfItem
 
+# Helper methods created and stored in different files to improve clarity
+# Import helpers here
 from app.helpers.openlibrary_helpers import (
     search_open_library,
     fetch_openlibrary_description,
@@ -49,7 +51,7 @@ def get_session_id():
         session["session_id"] = str(uuid4())
     return session["session_id"]
 
-# Shelf counts to display on profile
+# Shelf counts to display in profile stats cards
 def get_user_shelf_counts(user_id):
     return {
         "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
@@ -111,7 +113,7 @@ def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
-
+# Routes
 def register_routes(app: Flask) -> None:
 
     # Define routes which do not require login
@@ -126,6 +128,7 @@ def register_routes(app: Flask) -> None:
         "static"
     }
 
+    # Login required for all routes not in PUBLIC_ROUTES
     @app.before_request
     def require_login():
         if request.endpoint in PUBLIC_ROUTES:
@@ -176,6 +179,7 @@ def register_routes(app: Flask) -> None:
 
         form = LoginForm()
         if form.validate_on_submit():
+            # Make email and username lowercase for case insensitivity on login
             identifier = form.username_or_email.data.strip().lower()
             user = User.query.filter(
                 or_(
@@ -184,7 +188,9 @@ def register_routes(app: Flask) -> None:
                 )
             ).first()
 
+            # Check entered password against stored hash password
             if user and user.check_password(form.password.data):
+                session.clear()
                 login_user(user)
                 return redirect(url_for("profile"))
 
@@ -201,6 +207,7 @@ def register_routes(app: Flask) -> None:
         form = SignupForm()
         if form.validate_on_submit():
             user = User(
+                # Make usernames lowercase to prevent usernames like User and user both being accepted
                 name=form.username.data.strip().lower(),
                 username=form.username.data.strip().lower(),
                 email=form.email.data.strip().lower(),
@@ -218,6 +225,7 @@ def register_routes(app: Flask) -> None:
     @app.route("/logout")
     def logout():
         logout_user()
+        session.clear()
         return redirect(url_for("home"))
 
     # Edit Profile
@@ -245,6 +253,7 @@ def register_routes(app: Flask) -> None:
         items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
         counts = get_user_shelf_counts(current_user.id)
 
+        # Make each shelf 6 books
         shelf_rows = chunked(items, 6)
         return render_template("read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
@@ -344,6 +353,7 @@ def register_routes(app: Flask) -> None:
     # My Reviews
     @app.route("/my-reviews")
     def my_reviews():
+        # Sort reviews from newest to oldest
         comments = Comment.query.filter_by(
             user_id=current_user.id
         ).order_by(Comment.created_at.desc()).all()
@@ -370,11 +380,13 @@ def register_routes(app: Flask) -> None:
     def update_progress(item_id):
         item = ShelfItem.query.get_or_404(item_id)
 
+        # Ensure users cannot update other users reading progress
         if item.user_id != current_user.id:
             abort(403)
             
         current_page = request.form.get("current_page", type=int)
 
+        # Check if valid page number
         if current_page is None or current_page < 0:
             abort(400)
 
@@ -383,6 +395,7 @@ def register_routes(app: Flask) -> None:
 
         item.current_page = current_page
         if item.book.page_count and current_page >= item.book.page_count:
+            # Move books to Read shelf when progress is 100%
             item.status = "Read"
             item.current_page = item.book.page_count
         else:
@@ -399,6 +412,7 @@ def register_routes(app: Flask) -> None:
         viewed_books = set(str(id) for id in session.get("viewed_books", []))
         book_key = str(book_id)
 
+        # Only increment book view count once per session
         if book_key not in viewed_books:
             book.reads = (book.reads or 0) + 1
 
@@ -448,9 +462,11 @@ def register_routes(app: Flask) -> None:
         Book.query.get_or_404(book_id)
         status = request.form.get("status")
 
+        # Check shelf status validity
         if not is_valid_shelf_status(status):
             abort(400)
 
+        # Attach to current user
         shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 
         if status == "remove":
@@ -472,15 +488,21 @@ def register_routes(app: Flask) -> None:
         book = Book.query.get_or_404(book_id)
         stars = request.form.get("stars", type=int)
 
+        # Check rating is valid (0-5 stars)
         if not is_valid_rating(stars, allow_zero=True):
             abort(400)
 
+        # User can only rate once per book
+        # Check for existing rating
         existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
         if existing_rating:
             if stars == 0:
+                # Remove rating
                 db.session.delete(existing_rating)
             else:
+                # Update existing rating
                 existing_rating.stars = stars
+        # Create new rating
         elif stars > 0:
             rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
             db.session.add(rating)
@@ -494,7 +516,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
 
-    # Book Detail - Post review for book
+    # Book Detail - Post review for a book
     @app.route("/book/<int:book_id>/review", methods=["POST"])
     def post_review(book_id):
         book = Book.query.get_or_404(book_id)
@@ -558,6 +580,7 @@ def register_routes(app: Flask) -> None:
         users = []
         empty_query = not bool(query)
 
+        # Limit search results to 10
         if query:
             if search_type == "users":
                 users = search_users(query, limit=10)
@@ -588,6 +611,7 @@ def register_routes(app: Flask) -> None:
         if not query:
             return jsonify([])
 
+        # Limit suggestions dropdown to 5
         if search_type == "users":
             users = search_users(query, limit=5)
             suggestions = [user_to_suggestion(user) for user in users]
@@ -687,12 +711,12 @@ def register_routes(app: Flask) -> None:
     def follow(user_id):
         user = User.query.get_or_404(user_id)
 
+        # Prevent users from following themselves
         if user == current_user:
             return "", 400
 
-        if not current_user.following.filter_by(id=user.id).first():
-            current_user.following.append(user)
-            db.session.commit()
+        current_user.follow(user)
+        db.session.commit()
 
         return jsonify({"status": "followed"})
     
@@ -701,8 +725,7 @@ def register_routes(app: Flask) -> None:
     def unfollow(user_id):
         user = User.query.get_or_404(user_id)
 
-        if current_user.following.filter_by(id=user.id).first():
-            current_user.following.remove(user)
-            db.session.commit()
+        current_user.unfollow(user)
+        db.session.commit()
 
         return jsonify({"status": "unfollowed"})

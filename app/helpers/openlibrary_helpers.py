@@ -1,5 +1,6 @@
 import requests
 
+# Show 10 results per page
 def search_open_library(query, page=1, limit=10):
     url = "https://openlibrary.org/search.json"
 
@@ -113,26 +114,3 @@ def normalize_openlibrary_id(raw_openlibrary_id):
         normalized = f"/{normalized}"
 
     return normalized
-
-
-def fetch_openlibrary_cover(openlibrary_id):
-    if not openlibrary_id:
-        return None
-
-    url = f"https://openlibrary.org{openlibrary_id}.json"
-
-    try:
-        res = requests.get(url, timeout=8)
-    except requests.RequestException:
-        return None
-
-    if res.status_code != 200:
-        return None
-
-    data = res.json()
-    covers = data.get("covers", [])
-
-    if covers:
-        return f"https://covers.openlibrary.org/b/id/{covers[0]}-M.jpg"
-
-    return None
