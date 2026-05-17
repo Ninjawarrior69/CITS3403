@@ -10,6 +10,8 @@ from app.forms import LoginForm, SignupForm, EditProfileForm
 from app.extensions import db
 from app.models import Book, Comment, Rating, User, ShelfItem
 
+# Helper methods created and stored in different files to improve clarity
+# Import helpers here
 from app.helpers.openlibrary_helpers import (
     search_open_library,
     fetch_openlibrary_description,
@@ -49,7 +51,7 @@ def get_session_id():
         session["session_id"] = str(uuid4())
     return session["session_id"]
 
-# Shelf counts to display on profile
+# Shelf counts to display in profile stats cards
 def get_user_shelf_counts(user_id):
     return {
         "read": ShelfItem.query.filter_by(user_id=user_id, status="Read").count(),
@@ -111,7 +113,7 @@ def get_display_rating(book):
     rating_summary = build_rating_summary(book)
     return rating_summary["average"]
 
-
+# Routes
 def register_routes(app: Flask) -> None:
 
     # Define routes which do not require login
@@ -126,6 +128,7 @@ def register_routes(app: Flask) -> None:
         "static"
     }
 
+    # Login required for all pages not in PUBLIC_ROUTES
     @app.before_request
     def require_login():
         if request.endpoint in PUBLIC_ROUTES:
@@ -176,6 +179,7 @@ def register_routes(app: Flask) -> None:
 
         form = LoginForm()
         if form.validate_on_submit():
+            # Make email and username lowercase for case insensitivity on login
             identifier = form.username_or_email.data.strip().lower()
             user = User.query.filter(
                 or_(
@@ -184,6 +188,7 @@ def register_routes(app: Flask) -> None:
                 )
             ).first()
 
+            # Check password matches database
             if user and user.check_password(form.password.data):
                 login_user(user)
                 return redirect(url_for("profile"))
@@ -201,6 +206,7 @@ def register_routes(app: Flask) -> None:
         form = SignupForm()
         if form.validate_on_submit():
             user = User(
+                # Make usernames lowercase to prevent usernames like User and user both being accepted
                 name=form.username.data.strip().lower(),
                 username=form.username.data.strip().lower(),
                 email=form.email.data.strip().lower(),
@@ -240,6 +246,7 @@ def register_routes(app: Flask) -> None:
         items = ShelfItem.query.filter_by(user_id=current_user.id, status="Read").all()
         counts = get_user_shelf_counts(current_user.id)
 
+        # Make each shelf 6 books
         shelf_rows = chunked(items, 6)
         return render_template("read.html", shelf_rows=shelf_rows, counts=counts, is_public_shelf=False)
 
