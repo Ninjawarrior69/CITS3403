@@ -190,6 +190,7 @@ def register_routes(app: Flask) -> None:
 
             # Check password matches database
             if user and user.check_password(form.password.data):
+                session.clear()
                 login_user(user)
                 return redirect(url_for("profile"))
 
@@ -224,6 +225,7 @@ def register_routes(app: Flask) -> None:
     @app.route("/logout")
     def logout():
         logout_user()
+        session.clear()
         return redirect(url_for("home"))
 
     # Edit Profile
