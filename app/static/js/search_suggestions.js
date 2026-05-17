@@ -175,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
             suggestionsBox.appendChild(suggestionItem);
           });
         } catch (error) {
+          console.error("Search suggestions error:", error);
           clearSuggestions();
         }
       }, 200);
