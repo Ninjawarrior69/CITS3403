@@ -128,7 +128,7 @@ def register_routes(app: Flask) -> None:
         "static"
     }
 
-    # Login required for all pages not in PUBLIC_ROUTES
+    # Login required for all routes not in PUBLIC_ROUTES
     @app.before_request
     def require_login():
         if request.endpoint in PUBLIC_ROUTES:
