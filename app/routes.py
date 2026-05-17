@@ -353,6 +353,7 @@ def register_routes(app: Flask) -> None:
     # My Reviews
     @app.route("/my-reviews")
     def my_reviews():
+        # Sort reviews from newest to oldest
         comments = Comment.query.filter_by(
             user_id=current_user.id
         ).order_by(Comment.created_at.desc()).all()
@@ -379,11 +380,13 @@ def register_routes(app: Flask) -> None:
     def update_progress(item_id):
         item = ShelfItem.query.get_or_404(item_id)
 
+        # Ensure users cannot update other users reading progress
         if item.user_id != current_user.id:
             abort(403)
             
         current_page = request.form.get("current_page", type=int)
 
+        # Check if valid page number
         if current_page is None or current_page < 0:
             abort(400)
 
@@ -392,6 +395,7 @@ def register_routes(app: Flask) -> None:
 
         item.current_page = current_page
         if item.book.page_count and current_page >= item.book.page_count:
+            # Move books to Read shelf when progress is 100%
             item.status = "Read"
             item.current_page = item.book.page_count
         else:
@@ -408,6 +412,7 @@ def register_routes(app: Flask) -> None:
         viewed_books = set(str(id) for id in session.get("viewed_books", []))
         book_key = str(book_id)
 
+        # Only increment book view count once per session
         if book_key not in viewed_books:
             book.reads = (book.reads or 0) + 1
 
@@ -457,9 +462,11 @@ def register_routes(app: Flask) -> None:
         Book.query.get_or_404(book_id)
         status = request.form.get("status")
 
+        # Check shelf status validity
         if not is_valid_shelf_status(status):
             abort(400)
 
+        # Attach to current user
         shelf_item = ShelfItem.query.filter_by(user_id=current_user.id, book_id=book_id).first()
 
         if status == "remove":
@@ -481,15 +488,21 @@ def register_routes(app: Flask) -> None:
         book = Book.query.get_or_404(book_id)
         stars = request.form.get("stars", type=int)
 
+        # Check rating is valid (0-5 stars)
         if not is_valid_rating(stars, allow_zero=True):
             abort(400)
 
+        # User can only rate once per book
+        # Check for existing rating
         existing_rating = Rating.query.filter_by(user_id=current_user.id, book_id=book_id).first()
         if existing_rating:
             if stars == 0:
+                # Remove rating
                 db.session.delete(existing_rating)
             else:
+                # Update existing rating
                 existing_rating.stars = stars
+        # Create new rating
         elif stars > 0:
             rating = Rating(user_id=current_user.id, book_id=book_id, stars=stars, username=current_user.username)
             db.session.add(rating)
@@ -503,7 +516,7 @@ def register_routes(app: Flask) -> None:
 
         return redirect(url_for("book_detail", book_id=book_id))
 
-    # Book Detail - Post review for book
+    # Book Detail - Post review for a book
     @app.route("/book/<int:book_id>/review", methods=["POST"])
     def post_review(book_id):
         book = Book.query.get_or_404(book_id)
@@ -567,6 +580,7 @@ def register_routes(app: Flask) -> None:
         users = []
         empty_query = not bool(query)
 
+        # Limit search results to 10
         if query:
             if search_type == "users":
                 users = search_users(query, limit=10)
@@ -597,6 +611,7 @@ def register_routes(app: Flask) -> None:
         if not query:
             return jsonify([])
 
+        # Limit suggestions dropdown to 5
         if search_type == "users":
             users = search_users(query, limit=5)
             suggestions = [user_to_suggestion(user) for user in users]
@@ -696,9 +711,11 @@ def register_routes(app: Flask) -> None:
     def follow(user_id):
         user = User.query.get_or_404(user_id)
 
+        # Prevent users from following themselves
         if user == current_user:
             return "", 400
 
+        # Only follow if not already following the user
         if not current_user.following.filter_by(id=user.id).first():
             current_user.following.append(user)
             db.session.commit()
@@ -710,6 +727,7 @@ def register_routes(app: Flask) -> None:
     def unfollow(user_id):
         user = User.query.get_or_404(user_id)
 
+        # Only unfollow if already following the user
         if current_user.following.filter_by(id=user.id).first():
             current_user.following.remove(user)
             db.session.commit()
