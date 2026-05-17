@@ -188,7 +188,7 @@ def register_routes(app: Flask) -> None:
                 )
             ).first()
 
-            # Check password matches database
+            # Check entered password against stored hash password
             if user and user.check_password(form.password.data):
                 session.clear()
                 login_user(user)
@@ -715,10 +715,8 @@ def register_routes(app: Flask) -> None:
         if user == current_user:
             return "", 400
 
-        # Only follow if not already following the user
-        if not current_user.following.filter_by(id=user.id).first():
-            current_user.following.append(user)
-            db.session.commit()
+        current_user.follow(user)
+        db.session.commit()
 
         return jsonify({"status": "followed"})
     
@@ -727,9 +725,7 @@ def register_routes(app: Flask) -> None:
     def unfollow(user_id):
         user = User.query.get_or_404(user_id)
 
-        # Only unfollow if already following the user
-        if current_user.following.filter_by(id=user.id).first():
-            current_user.following.remove(user)
-            db.session.commit()
+        current_user.unfollow(user)
+        db.session.commit()
 
         return jsonify({"status": "unfollowed"})
