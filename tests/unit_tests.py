@@ -61,6 +61,11 @@ class BackendUnitTests(unittest.TestCase):
             sess["_user_id"] = str(user.id)
             sess["_fresh"] = True
 
+    def login_user(self, client, user):
+        with client.session_transaction() as session:
+            session["_user_id"] = str(user.id)
+            session["_fresh"] = True
+
     def test_app_is_created(self):
         self.assertIsNotNone(self.app)
 
@@ -272,6 +277,38 @@ class BackendUnitTests(unittest.TestCase):
         self.assertEqual(reviews[0].text, "Updated review.")
         self.assertEqual(reviews[0].stars, 5)
 
+    def test_edit_profile_rejects_duplicate_username_and_email(self):
+        owner = self.add_user(
+            name="Owner",
+            username="owner",
+            email="owner@example.com"
+        )
+        other_user = self.add_user(
+            name="Other User",
+            username="taken",
+            email="taken@example.com"
+        )
+
+        client = self.app.test_client()
+        self.login_user(client, owner)
+
+        response = client.post(
+            "/edit-profile",
+            data={
+                "name": "Owner",
+                "username": other_user.username,
+                "email": other_user.email,
+                "bio": "Updated bio",
+                "remove_avatar": "0",
+                "favorite_books": "",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        updated_owner = User.query.get(owner.id)
+        self.assertEqual(updated_owner.username, "owner")
+        self.assertEqual(updated_owner.email, "owner@example.com")
     def test_user_cannot_update_another_users_review(self):
         user_a = self.add_user(
             name="User A",
