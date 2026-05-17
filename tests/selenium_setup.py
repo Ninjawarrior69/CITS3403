@@ -1,10 +1,13 @@
 import threading
 import unittest
+import tempfile
+from pathlib import Path
 
 from werkzeug.serving import make_server
 
 from app import create_app
 from app.config import TestingConfig
+from app.extensions import db
 
 try:
     from selenium import webdriver
@@ -24,10 +27,24 @@ class SeleniumTestCase(unittest.TestCase):
     driver = None
     server = None
     server_thread = None
+    app_ctx = None
+    _db_file = None
+
+    class SeleniumTestingConfig(TestingConfig):
+        pass
 
     @classmethod
     def setUpClass(cls):
-        cls.app = create_app(TestingConfig)
+        db_file = tempfile.NamedTemporaryFile(prefix="selenium-test-", suffix=".sqlite", delete=False)
+        db_file.close()
+        cls._db_file = Path(db_file.name)
+        cls.SeleniumTestingConfig.SQLALCHEMY_DATABASE_URI = f"sqlite:///{cls._db_file.as_posix()}"
+
+        cls.app = create_app(cls.SeleniumTestingConfig)
+        cls.app_ctx = cls.app.app_context()
+        cls.app_ctx.push()
+        db.create_all()
+
         cls.server = make_server("127.0.0.1", 0, cls.app)
         cls.base_url = f"http://127.0.0.1:{cls.server.server_port}"
         cls.server_thread = threading.Thread(
@@ -68,10 +85,20 @@ class SeleniumTestCase(unittest.TestCase):
             cls.driver.quit()
             cls.driver = None
 
+        if cls.app_ctx is not None:
+            db.session.remove()
+            db.drop_all()
+            cls.app_ctx.pop()
+            cls.app_ctx = None
+
         if cls.server is not None:
             cls.server.shutdown()
             cls.server.server_close()
             cls.server = None
+
+        if cls._db_file is not None and cls._db_file.exists():
+            cls._db_file.unlink()
+            cls._db_file = None
 
         cls.server_thread = None
 
