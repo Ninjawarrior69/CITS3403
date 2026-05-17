@@ -5,8 +5,9 @@ from app.helpers.review_helpers import create_or_update_review
 
 
 class SeleniumFixturesMixin:
+    @classmethod
     def create_user(
-        self,
+        cls,
         name="Selenium User",
         username="seleniumuser",
         email="selenium@example.com",
@@ -26,8 +27,9 @@ class SeleniumFixturesMixin:
         db.session.commit()
         return user
 
+    @classmethod
     def create_book(
-        self,
+        cls,
         title="Selenium Book",
         author="Selenium Author",
         description="Test description",
@@ -49,7 +51,8 @@ class SeleniumFixturesMixin:
         db.session.commit()
         return book
 
-    def add_shelf_item(self, user, book, status="To Be Read", current_page=0):
+    @classmethod
+    def add_shelf_item(cls, user, book, status="To Be Read", current_page=0):
         item = ShelfItem(
             user_id=user.id,
             book_id=book.id,
@@ -60,6 +63,7 @@ class SeleniumFixturesMixin:
         db.session.commit()
         return item
 
-    def add_review(self, user, book, stars=5, text="Great read"):
+    @classmethod
+    def add_review(cls, user, book, stars=5, text="Great read"):
         create_or_update_review(book_id=book.id, stars=stars, text=text, user=user)
         db.session.commit()
